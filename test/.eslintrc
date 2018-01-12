@@ -1,0 +1,13 @@
+{
+  "env": {
+    "jasmine": true
+  },
+  "rules": {
+    "node/no-unpublished-require": [
+      2,
+      {
+        "allowModules": ["chai", "sinon", "sinon-chai", "chai-as-promised"]
+      }
+    ]
+  }
+}

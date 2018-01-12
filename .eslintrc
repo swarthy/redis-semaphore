@@ -1,0 +1,7 @@
+env:
+  node: true
+plugins:
+- node
+extends:
+- inclusive
+- plugin:node/recommended
