@@ -1,2 +1,2 @@
-exports.Mutex = require('./src/Mutex')
-exports.Semaphore = require('./src/Semaphore')
+exports.mutex = require('./lib/mutex')
+exports.semaphore = require('./lib/semaphore')
