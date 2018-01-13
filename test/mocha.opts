@@ -1,2 +1,5 @@
 --recursive
 --timeout 10s
+
+test/setup.js
+test/**/*.test.js

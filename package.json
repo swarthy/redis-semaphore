@@ -4,11 +4,7 @@
   "description": "Distributed mutex and semaphore based on Redis",
   "main": "index.js",
   "scripts": {
-    "test": "eslint . && npm run mocha",
-    "mocha": "npm run test-unit && npm run test-integration",
-    "test-unit": "mocha \"test/bootstrap.test.js\" \"test/unit/**/*.test.js\"",
-    "test-integration":
-      "mocha \"test/bootstrap.test.js\" \"test/integration/**/*.test.js\"",
+    "test": "eslint . && yarn run mocha",
     "coveralls":
       "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
@@ -20,8 +16,11 @@
   "author": "Alexander Mochalin (horroshow@mail.ru)",
   "license": "MIT",
   "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "benchmark": "^2.1.4",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
+    "debug": "^3.1.0",
     "eslint": "4.14.0",
     "eslint-config-inclusive": "1.0.9",
     "eslint-plugin-node": "5.2.1",
@@ -37,5 +36,9 @@
   },
   "peerDependencies": {
     "redis": "^2.8.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "uuid": "^3.1.0"
   }
 }

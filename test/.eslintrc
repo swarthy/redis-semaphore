@@ -8,6 +8,7 @@
       {
         "allowModules": ["chai", "sinon", "sinon-chai", "chai-as-promised"]
       }
-    ]
+    ],
+    "no-underscore-dangle": 0
   }
 }

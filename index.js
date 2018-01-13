@@ -1,6 +1,2 @@
-function mutex() {}
-
-function sempahore() {}
-
-exports.mutex = mutex
-exports.semaphore = sempahore
+exports.Mutex = require('./src/Mutex')
+exports.Semaphore = require('./src/Semaphore')
