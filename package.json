@@ -33,6 +33,10 @@
     "sinon-chai": "2.14.0",
     "snyk": "1.63.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:swarthy/redis-semaphore.git"
+  },
   "engines": {
     "node": ">= 8.0.0"
   },
