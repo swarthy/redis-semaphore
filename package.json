@@ -1,18 +1,21 @@
 {
   "name": "redis-semaphore",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Distributed mutex and semaphore based on Redis",
   "main": "index.js",
   "scripts": {
     "test": "eslint . && yarn run mocha",
-    "coveralls":
-      "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "coveralls": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
     "url": "github.com/swarthy/redis-semaphore"
   },
-  "keywords": ["redis", "mutex", "semaphore"],
+  "keywords": [
+    "redis",
+    "mutex",
+    "semaphore"
+  ],
   "author": "Alexander Mochalin (horroshow@mail.ru)",
   "license": "MIT",
   "devDependencies": {
