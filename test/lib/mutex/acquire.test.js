@@ -2,7 +2,7 @@
 
 const acquire = require('../../../lib/mutex/acquire')
 
-describe('Mutex acquire', () => {
+describe('mutex acquire', () => {
   it('should return true for success lock', async () => {
     const result = await acquire(client, 'key', '111')
     expect(result).to.be.true
@@ -14,12 +14,12 @@ describe('Mutex acquire', () => {
     expect(result2).to.be.false
   })
   it('should set identifier for key', async () => {
-    await acquire(client, 'key1', '111')
+    await acquire(client, 'key1', '111', 100, 50, 10)
     const value = await client.getAsync('key1')
     expect(value).to.be.eql('111')
   })
   it('should set TTL for key', async () => {
-    await acquire(client, 'key2', '111', 1000)
+    await acquire(client, 'key2', '111', 1000, 50, 10)
     const ttl = await client.pttlAsync('key2')
     expect(ttl).to.be.gte(990)
     expect(ttl).to.be.lte(1000)

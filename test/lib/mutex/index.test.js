@@ -1,20 +1,29 @@
 /* global expect client */
 
-const { lock, unlock } = require('../../../lib/mutex')
+const { acquire, refresh, release } = require('../../../lib/mutex')
 
-describe('Mutex', () => {
-  describe('lock', () => {
-    it('should return identifier on success lock', async () => {
-      const identifier = await lock(client, 'key')
+describe('mutex', () => {
+  describe('acquire', () => {
+    it('should return identifier on success acquire', async () => {
+      const identifier = await acquire(client, 'key', 1000, 50, 10)
       expect(identifier).to.be.ok
       expect(await client.getAsync('mutex:key')).to.be.eql(identifier)
     })
   })
-  describe('unlock', () => {
-    it('should unlock locked resourse', async () => {
-      const identifier = await lock(client, 'key')
+  describe('refresh', () => {
+    it('should refresh ttl', async () => {
+      const identifier = await acquire(client, 'key', 1000)
+      expect(identifier).to.be.ok
       expect(await client.getAsync('mutex:key')).to.be.eql(identifier)
-      await unlock(client, 'key', identifier)
+      await refresh(client, 'key', identifier, 3000)
+      expect(await client.pttlAsync('mutex:key')).to.be.gt(1000)
+    })
+  })
+  describe('release', () => {
+    it('should release acquired resource', async () => {
+      const identifier = await acquire(client, 'key', 1000, 50, 10)
+      expect(await client.getAsync('mutex:key')).to.be.eql(identifier)
+      await release(client, 'key', identifier)
       expect(await client.getAsync('mutex:key')).to.be.eql(null)
     })
   })
