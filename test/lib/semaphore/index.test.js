@@ -39,12 +39,12 @@ describe('semaphore', () => {
       const id1 = await acquire(client, 'key', 2, 50, 50, 10)
       await Promise.delay(5)
       const id2 = await acquire(client, 'key', 2, 50, 50, 10)
-      expect(await client.zrangeAsync('semaphore:key', 0, -1)).to.be.eql([
+      expect(await client.zrangeAsync('semaphore:key', 0, -1)).to.have.members([
         id1,
         id2
       ])
       await refresh(client, 'key', id1)
-      expect(await client.zrangeAsync('semaphore:key', 0, -1)).to.be.eql([
+      expect(await client.zrangeAsync('semaphore:key', 0, -1)).to.have.members([
         id2,
         id1
       ])
