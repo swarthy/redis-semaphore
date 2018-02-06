@@ -1,6 +1,6 @@
 /* global expect client */
 
-const Semaphore = require('../../lib/Semaphore')
+const Semaphore = require('../../lib/RedisSemaphore')
 const Promise = require('bluebird')
 
 describe('Semaphore', () => {

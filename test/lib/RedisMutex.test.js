@@ -1,6 +1,6 @@
 /* global expect client */
 
-const Mutex = require('../../lib/Mutex')
+const Mutex = require('../../lib/RedisMutex')
 const Promise = require('bluebird')
 
 describe('Mutex', () => {
