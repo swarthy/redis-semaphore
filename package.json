@@ -1,6 +1,6 @@
 {
   "name": "redis-semaphore",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Distributed mutex and semaphore based on Redis",
   "main": "index.js",
   "scripts": {
