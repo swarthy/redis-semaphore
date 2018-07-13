@@ -1,2 +1,2 @@
-exports.Mutex = require('./lib/Mutex')
-exports.Semaphore = require('./lib/Semaphore')
+exports.Mutex = require('./lib/RedisMutex')
+exports.Semaphore = require('./lib/RedisSemaphore')
