@@ -6,14 +6,14 @@ chai.use(chaiAsPromised)
 chai.use(sinonChai)
 global.expect = chai.expect
 
-const redis = require('redis')
+const Redis = require('ioredis')
 
 before(() => {
-  global.client = redis.createClient()
+  global.client = new Redis(process.env.REDIS_URL)
 })
 
 beforeEach(async () => {
-  global.client.flushdbAsync()
+  await global.client.flushdb()
 })
 
 after(() => {
