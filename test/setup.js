@@ -16,6 +16,6 @@ beforeEach(async () => {
   await global.client.flushdbAsync()
 })
 
-after(() => {
+after(async () => {
   await global.client.quitAsync()
 })
