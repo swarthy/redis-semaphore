@@ -13,9 +13,9 @@ before(() => {
 })
 
 beforeEach(async () => {
-  global.client.flushdbAsync()
+  await global.client.flushdbAsync()
 })
 
 after(() => {
-  global.client.quit()
+  await global.client.quitAsync()
 })
