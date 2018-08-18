@@ -11,21 +11,23 @@
 
 ## Features
 
-* Fail-safe (all actions performed by LUA scripts (atomic))
+- Fail-safe (all actions performed by LUA scripts (atomic))
 
 ## Usage
 
 ### Mutex
 
+> See [RedisLabs: Locks with timeouts](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-2-distributed-locking/6-2-5-locks-with-timeouts/)
+
 ##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = acquireTimeout * 0.8 }])
 
-* `redisClient` - **required**, configured `redis` client
-* `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
-* `timeouts` _optional_
-  * `lockTimeout` - ms, time after mutex will be auto released (expired)
-  * `acquireTimeout` - ms, max timeout for `.acquire()` call
-  * `retryInterval` - ms, time between acquire attempts if resource locked
-  * `refreshInterval` - ms, auto-refresh interval
+- `redisClient` - **required**, configured `redis` client
+- `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
+- `timeouts` _optional_
+  - `lockTimeout` - ms, time after mutex will be auto released (expired)
+  - `acquireTimeout` - ms, max timeout for `.acquire()` call
+  - `retryInterval` - ms, time between acquire attempts if resource locked
+  - `refreshInterval` - ms, auto-refresh interval
 
 #### Example
 
@@ -45,16 +47,18 @@ async function doSomething() {
 
 ### Semaphore
 
+> See [RedisLabs: Basic counting sempahore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-1-building-a-basic-counting-semaphore/)
+
 ##### new Semaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = acquireTimeout * 0.8 }])
 
-* `redisClient` - **required**, configured `redis` client
-* `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
-* `maxCount` - **required**, maximum simultaneously resource usage count
-* `timeouts` _optional_
-  * `lockTimeout` - ms, time after semaphore will be auto released (expired)
-  * `acquireTimeout` - ms, max timeout for `.acquire()` call
-  * `retryInterval` - ms, time between acquire attempts if resource locked
-  * `refreshInterval` - ms, auto-refresh interval
+- `redisClient` - **required**, configured `redis` client
+- `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
+- `maxCount` - **required**, maximum simultaneously resource usage count
+- `timeouts` _optional_
+  - `lockTimeout` - ms, time after semaphore will be auto released (expired)
+  - `acquireTimeout` - ms, max timeout for `.acquire()` call
+  - `retryInterval` - ms, time between acquire attempts if resource locked
+  - `refreshInterval` - ms, auto-refresh interval
 
 #### Example
 
@@ -66,6 +70,37 @@ const redisClient = redis.createClient()
 
 async function doSomething() {
   const semaphore = new Semaphore(redisClient, 'lockingResource', 5)
+  await semaphore.acquire()
+  // maximum 5 simultaneously executions
+  await semaphore.release()
+}
+```
+
+### Fair Semaphore
+
+> See [RedisLabs: Fair semaphore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-2-fair-semaphores/)
+
+##### new FairSemaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = acquireTimeout * 0.8 }])
+
+- `redisClient` - **required**, configured `redis` client
+- `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
+- `maxCount` - **required**, maximum simultaneously resource usage count
+- `timeouts` _optional_
+  - `lockTimeout` - ms, time after semaphore will be auto released (expired)
+  - `acquireTimeout` - ms, max timeout for `.acquire()` call
+  - `retryInterval` - ms, time between acquire attempts if resource locked
+  - `refreshInterval` - ms, auto-refresh interval
+
+#### Example
+
+```javascript
+const FairSemaphore = require('redis-semaphore').FairSemaphore
+const redis = require('redis')
+
+const redisClient = redis.createClient()
+
+async function doSomething() {
+  const semaphore = new FairSemaphore(redisClient, 'lockingResource', 5)
   await semaphore.acquire()
   // maximum 5 simultaneously executions
   await semaphore.release()
