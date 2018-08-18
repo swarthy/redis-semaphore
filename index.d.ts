@@ -41,8 +41,8 @@ export class Semaphore {
 
     constructor(client: RedisClient, key: string, limit: number, timeoutOptions: TimeoutOptions);
 
-    public async acquire(): Promise<string>;
-    public async release(): Promise<boolean>;
+    public acquire(): Promise<string>;
+    public release(): Promise<boolean>;
 
     protected _refresh(): void;
     protected _startRefresh(): void;
