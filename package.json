@@ -3,6 +3,7 @@
   "version": "0.3.1",
   "description": "Distributed mutex and semaphore based on Redis",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "eslint . && yarn run mocha",
     "coveralls": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
