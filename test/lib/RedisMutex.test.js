@@ -12,7 +12,7 @@ describe('Mutex', () => {
     expect(await client.getAsync('mutex:key')).to.be.eql(null)
   })
   it('should refresh lock every refreshInterval ms until release', async () => {
-    const mutex = new Mutex(client, 'key', { lockTimeout: 30 })
+    const mutex = new Mutex(client, 'key', { lockTimeout: 100 })
     const identifier = await mutex.acquire()
     await Promise.delay(100)
     expect(await client.getAsync('mutex:key')).to.be.eql(identifier)
@@ -20,7 +20,7 @@ describe('Mutex', () => {
     expect(await client.getAsync('mutex:key')).to.be.eql(null)
   })
   it('should be reusable', async () => {
-    const mutex = new Mutex(client, 'key', { lockTimeout: 20 })
+    const mutex = new Mutex(client, 'key', { lockTimeout: 100 })
 
     /* Lifecycle 1 */
     const identifier1 = await mutex.acquire()

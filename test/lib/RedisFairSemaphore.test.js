@@ -21,8 +21,8 @@ describe('Semaphore', () => {
     expect(await client.zcardAsync('semaphore:key')).to.be.eql(0)
   })
   it('should refresh lock every refreshInterval ms until release', async () => {
-    const semaphore1 = new Semaphore(client, 'key', 2, { lockTimeout: 30 })
-    const semaphore2 = new Semaphore(client, 'key', 2, { lockTimeout: 30 })
+    const semaphore1 = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
+    const semaphore2 = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
     const identifier1 = await semaphore1.acquire()
     const identifier2 = await semaphore2.acquire()
     await Promise.delay(100)
@@ -38,8 +38,8 @@ describe('Semaphore', () => {
     expect(await client.zcardAsync('semaphore:key')).to.be.eql(0)
   })
   it('should be reusable', async () => {
-    const semaphore1 = new Semaphore(client, 'key', 2, { lockTimeout: 20 })
-    const semaphore2 = new Semaphore(client, 'key', 2, { lockTimeout: 20 })
+    const semaphore1 = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
+    const semaphore2 = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
 
     /* Lifecycle 1 */
     const identifier11 = await semaphore1.acquire()
