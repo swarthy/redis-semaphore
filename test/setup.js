@@ -8,8 +8,10 @@ global.expect = chai.expect
 
 const redis = require('redis')
 
+const URL = process.env.REDIS_URI || 'redis://127.0.0.1:6379'
+
 before(() => {
-  global.client = redis.createClient()
+  global.client = redis.createClient({ url: URL })
 })
 
 beforeEach(async () => {

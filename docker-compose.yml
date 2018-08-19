@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    volumes:
+      - ./:/app
+    environment:
+      REDIS_URI: redis://redis
+    command: sh -c "wait-for --redis && npm test"
+
+  redis:
+    image: redis:alpine

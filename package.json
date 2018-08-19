@@ -5,18 +5,16 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "eslint . && yarn run mocha",
-    "coveralls": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "test": "eslint . && mocha",
+    "coveralls":
+      "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "dev": "mocha -w"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:swarthy/redis-semaphore.git"
   },
-  "keywords": [
-    "redis",
-    "mutex",
-    "semaphore"
-  ],
+  "keywords": ["redis", "mutex", "semaphore"],
   "author": "Alexander Mochalin (horroshow@mail.ru)",
   "license": "MIT",
   "devDependencies": {
