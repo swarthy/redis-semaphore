@@ -1,4 +1,4 @@
-// Type definitions for redis-semaphore 0.2
+// Type definitions for redis-semaphore 0.3.2
 // Project: https://github.com/swarthy/redis-semaphore#readme
 // Definitions by: My Self <https://github.com/me>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -47,5 +47,6 @@ export class Semaphore {
     protected _refresh(): void;
     protected _startRefresh(): void;
     protected _stopRefresh(): void;
-
 }
+
+export class FairSemaphore extends Semaphore {}
