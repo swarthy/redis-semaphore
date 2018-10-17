@@ -15,12 +15,12 @@ describe('mutex acquire', () => {
   })
   it('should set identifier for key', async () => {
     await acquire(client, 'key1', '111', 100, 50, 10)
-    const value = await client.getAsync('key1')
+    const value = await client.get('key1')
     expect(value).to.be.eql('111')
   })
   it('should set TTL for key', async () => {
     await acquire(client, 'key2', '111', 1000, 50, 10)
-    const ttl = await client.pttlAsync('key2')
+    const ttl = await client.pttl('key2')
     expect(ttl).to.be.gte(990)
     expect(ttl).to.be.lte(1000)
   })

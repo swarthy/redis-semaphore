@@ -8,9 +8,9 @@ describe('mutex refresh', () => {
     expect(result).to.be.false
   })
   it('should return true for success refresh', async () => {
-    await client.setAsync('key', '111')
+    await client.set('key', '111')
     const result = await refresh(client, 'key', '111', 20000)
     expect(result).to.be.true
-    expect(await client.pttlAsync('key')).to.be.gte(10000)
+    expect(await client.pttl('key')).to.be.gte(10000)
   })
 })
