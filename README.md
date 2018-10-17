@@ -33,9 +33,9 @@
 
 ```javascript
 const Mutex = require('redis-semaphore').Mutex
-const redis = require('redis')
+const Redis = require('ioredis')
 
-const redisClient = redis.createClient()
+const redisClient = new Redis()
 
 async function doSomething() {
   const mutex = new Mutex(redisClient, 'lockingResource')
@@ -64,9 +64,9 @@ async function doSomething() {
 
 ```javascript
 const Semaphore = require('redis-semaphore').Semaphore
-const redis = require('redis')
+const Redis = require('ioredis')
 
-const redisClient = redis.createClient()
+const redisClient = new Redis()
 
 async function doSomething() {
   const semaphore = new Semaphore(redisClient, 'lockingResource', 5)
@@ -95,9 +95,9 @@ async function doSomething() {
 
 ```javascript
 const FairSemaphore = require('redis-semaphore').FairSemaphore
-const redis = require('redis')
+const Redis = require('ioredis')
 
-const redisClient = redis.createClient()
+const redisClient = new Redis()
 
 async function doSomething() {
   const semaphore = new FairSemaphore(redisClient, 'lockingResource', 5)
