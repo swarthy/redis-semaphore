@@ -15,6 +15,14 @@
 
 ## Usage
 
+### Installation
+
+```bash
+npm install redis-semaphore ioredis
+# or
+yarn add redis-semaphore ioredis
+```
+
 ### Mutex
 
 > See [RedisLabs: Locks with timeouts](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-2-distributed-locking/6-2-5-locks-with-timeouts/)
