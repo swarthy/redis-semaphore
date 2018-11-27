@@ -18,7 +18,7 @@
 ### Installation
 
 ```bash
-npm install redis-semaphore ioredis
+npm install --save redis-semaphore ioredis
 # or
 yarn add redis-semaphore ioredis
 ```
@@ -113,14 +113,6 @@ async function doSomething() {
   // maximum 5 simultaneously executions
   await semaphore.release()
 }
-```
-
-## Installation
-
-```bash
-npm install --save redis-semaphore
-# or
-yarn add redis-semaphore
 ```
 
 ## License
