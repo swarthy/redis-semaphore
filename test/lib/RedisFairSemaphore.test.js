@@ -3,7 +3,7 @@
 const Semaphore = require('../../lib/RedisFairSemaphore')
 const Bluebird = require('bluebird')
 
-describe('Semaphore', () => {
+describe('FairSemaphore', () => {
   it('should acquire and release semaphore', async () => {
     const semaphore1 = new Semaphore(client, 'key', 2)
     const semaphore2 = new Semaphore(client, 'key', 2)

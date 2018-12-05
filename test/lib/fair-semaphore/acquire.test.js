@@ -2,7 +2,7 @@
 
 const acquire = require('../../../lib/fair-semaphore/acquire')
 
-describe('semaphore acquire', () => {
+describe('fair-semaphore acquire', () => {
   it('should return true for success acquire', async () => {
     const result = await acquire(client, 'key', 1, '111', 100, 50, 10)
     expect(result).to.be.true

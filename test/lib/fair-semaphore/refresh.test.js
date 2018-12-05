@@ -2,7 +2,7 @@
 
 const refresh = require('../../../lib/fair-semaphore/refresh')
 
-describe('semaphore refresh', () => {
+describe('fair-semaphore refresh', () => {
   it('should return false if resource is not acquired', async () => {
     const result = await refresh(client, 'key', 1, '111')
     expect(result).to.be.false

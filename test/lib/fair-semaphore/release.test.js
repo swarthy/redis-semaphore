@@ -2,7 +2,7 @@
 
 const release = require('../../../lib/fair-semaphore/release')
 
-describe('semaphore release', () => {
+describe('fair-semaphore release', () => {
   it('should return true for success release', async () => {
     await client.zadd('key', Date.now(), '111')
     expect(await client.zcard('key')).to.be.eql(1)

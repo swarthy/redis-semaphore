@@ -3,7 +3,7 @@ const Bluebird = require('bluebird')
 
 const { acquire, refresh, release } = require('../../../lib/fair-semaphore')
 
-describe('semaphore', () => {
+describe('fair-semaphore', () => {
   describe('acquire', () => {
     it('should return identifier on success acquire', async () => {
       const id = await acquire(client, 'key', 3, 100, 50, 10)
