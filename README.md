@@ -27,7 +27,7 @@ yarn add redis-semaphore ioredis
 
 > See [RedisLabs: Locks with timeouts](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-2-distributed-locking/6-2-5-locks-with-timeouts/)
 
-##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = acquireTimeout * 0.8 }])
+##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
@@ -57,7 +57,7 @@ async function doSomething() {
 
 > See [RedisLabs: Basic counting sempahore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-1-building-a-basic-counting-semaphore/)
 
-##### new Semaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = acquireTimeout * 0.8 }])
+##### new Semaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
@@ -88,7 +88,7 @@ async function doSomething() {
 
 > See [RedisLabs: Fair semaphore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-2-fair-semaphores/)
 
-##### new FairSemaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = acquireTimeout * 0.8 }])
+##### new FairSemaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
