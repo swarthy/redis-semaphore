@@ -23,18 +23,18 @@
   "devDependencies": {
     "babel-eslint": "^10.0.1",
     "benchmark": "^2.1.4",
-    "bluebird": "^3.5.3",
+    "bluebird": "^3.5.4",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "eslint": "5.9.0",
-    "eslint-config-inclusive": "1.0.10",
-    "eslint-plugin-node": "8.0.0",
-    "ioredis": "^4.2.0",
+    "eslint": "5.16.0",
+    "eslint-config-inclusive": "1.1.0",
+    "eslint-plugin-node": "8.0.1",
+    "ioredis": "^4.9.0",
     "istanbul": "0.4.5",
-    "mocha": "5.2.0",
-    "sinon": "7.1.1",
+    "mocha": "6.0.2",
+    "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
-    "snyk": "1.114.0"
+    "snyk": "1.147.3"
   },
   "engines": {
     "node": ">= 8.0.0"
@@ -43,7 +43,7 @@
     "ioredis": "^4.1.0"
   },
   "dependencies": {
-    "debug": "^4.1.0",
+    "debug": "^4.1.1",
     "uuid": "^3.3.2"
   }
 }
