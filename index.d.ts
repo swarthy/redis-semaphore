@@ -3,7 +3,7 @@
 // Definitions by: My Self <https://github.com/me>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-import {RedisClient} from "redis";
+import {Redis} from "ioredis";
 
 export interface TimeoutOptions {
     lockTimeout: number,
@@ -14,13 +14,13 @@ export interface TimeoutOptions {
 
 export class Mutex {
     protected _identifier: string;
-    protected _client: RedisClient;
+    protected _client: Redis;
     protected _key: string;
     protected _lockTimeout: number;
     protected _acquireTimeout: number;
     protected _retryInterval: number;
 
-    constructor(client: RedisClient, key: string, timeoutOptions: TimeoutOptions);
+    constructor(client: Redis, key: string, timeoutOptions: TimeoutOptions);
 
     public acquire(): Promise<string>;
     public release(): Promise<boolean>;
@@ -32,14 +32,14 @@ export class Mutex {
 
 export class Semaphore {
     protected _identifier: string;
-    protected _client: RedisClient;
+    protected _client: Redis;
     protected _key: string;
     protected _limit: number;
     protected _lockTimeout: number;
     protected _acquireTimeout: number;
     protected _retryInterval: number;
 
-    constructor(client: RedisClient, key: string, limit: number, timeoutOptions: TimeoutOptions);
+    constructor(client: Redis, key: string, limit: number, timeoutOptions: TimeoutOptions);
 
     public acquire(): Promise<string>;
     public release(): Promise<boolean>;
