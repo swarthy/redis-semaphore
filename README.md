@@ -6,6 +6,7 @@
 [![Coverage Status][coverage-image]][coverage-url]
 [![Code Climate][codeclimate-image]][codeclimate-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
+[![FOSSA Status][fossa-badge-image]][fossa-badge-url]
 
 [Mutex](<https://en.wikipedia.org/wiki/Lock_(computer_science)>) and [Semaphore](<https://en.wikipedia.org/wiki/Semaphore_(programming)>) implementations based on [Redis](https://redis.io/) ready for distributed systems
 
@@ -119,6 +120,8 @@ async function doSomething() {
 
 MIT
 
+[![FOSSA Status][fossa-large-image]][fossa-large-url]
+
 [npm-image]: https://img.shields.io/npm/v/redis-semaphore.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/redis-semaphore
 [ci-image]: https://img.shields.io/travis/swarthy/redis-semaphore/master.svg?style=flat-square
@@ -131,3 +134,7 @@ MIT
 [snyk-url]: https://snyk.io/test/npm/redis-semaphore
 [coverage-image]: https://coveralls.io/repos/github/swarthy/redis-semaphore/badge.svg?branch=master
 [coverage-url]: https://coveralls.io/r/swarthy/redis-semaphore?branch=master
+[fossa-badge-image]: https://app.fossa.com/api/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git.svg?type=shield
+[fossa-badge-url]: https://app.fossa.com/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git?ref=badge_shield
+[fossa-large-image]: https://app.fossa.com/api/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git.svg?type=large
+[fossa-large-url]: https://app.fossa.com/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git?ref=badge_large
