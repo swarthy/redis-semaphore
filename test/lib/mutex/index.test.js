@@ -9,6 +9,12 @@ describe('mutex', () => {
       expect(identifier).to.be.ok
       expect(await client.get('mutex:key')).to.be.eql(identifier)
     })
+    it('should reject error after timeout', async () => {
+      await acquire(client, 'key', 1000, 50, 10)
+      await expect(acquire(client, 'key', 1000, 50, 10)).to.be.rejectedWith(
+        /Acquire mutex key timeout/
+      )
+    })
   })
   describe('refresh', () => {
     it('should refresh ttl', async () => {
@@ -28,4 +34,3 @@ describe('mutex', () => {
     })
   })
 })
-

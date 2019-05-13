@@ -11,13 +11,13 @@ describe('fair-semaphore', () => {
       expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([id])
     })
     it('should acquire maximum LIMIT times', async () => {
-      const pr1 = Bluebird.all([
+      const pr1 = Promise.all([
         acquire(client, 'key', 3, 30, 50, 10),
         acquire(client, 'key', 3, 30, 50, 10),
         acquire(client, 'key', 3, 30, 50, 10)
       ])
       await Bluebird.delay(5)
-      const pr2 = Bluebird.all([
+      const pr2 = Promise.all([
         acquire(client, 'key', 3, 30, 50, 10),
         acquire(client, 'key', 3, 30, 50, 10),
         acquire(client, 'key', 3, 30, 50, 10)
@@ -32,6 +32,16 @@ describe('fair-semaphore', () => {
         .to.not.include(ids1[0])
         .and.not.include(ids1[1])
         .and.not.include(ids1[2])
+    })
+    it('should reject error after timeout', async () => {
+      await Promise.all([
+        acquire(client, 'key', 3, 1000, 50, 10),
+        acquire(client, 'key', 3, 1000, 50, 10),
+        acquire(client, 'key', 3, 1000, 50, 10)
+      ])
+      await expect(acquire(client, 'key', 3, 1000, 50, 10)).to.be.rejectedWith(
+        /Acquire semaphore key timeout/
+      )
     })
   })
   describe('refresh', () => {

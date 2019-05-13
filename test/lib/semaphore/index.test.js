@@ -33,6 +33,16 @@ describe('semaphore', () => {
         .and.not.include(ids1[1])
         .and.not.include(ids1[2])
     })
+    it('should reject error after timeout', async () => {
+      await Promise.all([
+        acquire(client, 'key', 3, 1000, 50, 10),
+        acquire(client, 'key', 3, 1000, 50, 10),
+        acquire(client, 'key', 3, 1000, 50, 10)
+      ])
+      await expect(acquire(client, 'key', 3, 1000, 50, 10)).to.be.rejectedWith(
+        /Acquire semaphore key timeout/
+      )
+    })
   })
   describe('refresh', () => {
     it('should refresh entry', async () => {

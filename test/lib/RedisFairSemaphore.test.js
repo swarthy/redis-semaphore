@@ -33,6 +33,19 @@ describe('FairSemaphore', () => {
     await semaphore2.release()
     expect(await client.zcard('semaphore:key')).to.be.eql(0)
   })
+  it('should reject with error if lock is lost between refreshes', async () => {
+    const semaphore = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
+    let lostLockError
+    function catchError(err) {
+      lostLockError = err
+    }
+    process.on('unhandledRejection', catchError)
+    await semaphore.acquire()
+    await client.del('semaphore:key')
+    await Bluebird.delay(100)
+    expect(lostLockError).to.be.ok
+    process.removeListener('unhandledRejection', catchError)
+  })
   it('should be reusable', async () => {
     const semaphore1 = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
     const semaphore2 = new Semaphore(client, 'key', 2, { lockTimeout: 100 })
