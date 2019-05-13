@@ -4,7 +4,7 @@
 [![Build status][ci-image]][ci-url]
 [![Dependency Status][daviddm-image]][daviddm-url]
 [![Coverage Status][coverage-image]][coverage-url]
-[![Code Climate][codeclimate-image]][codeclimate-url]
+[![Maintainability][codeclimate-image]][codeclimate-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![FOSSA Status][fossa-badge-image]][fossa-badge-url]
 
@@ -128,8 +128,8 @@ MIT
 [ci-url]: https://travis-ci.org/swarthy/redis-semaphore
 [daviddm-image]: http://img.shields.io/david/swarthy/redis-semaphore.svg?style=flat-square
 [daviddm-url]: https://david-dm.org/swarthy/redis-semaphore
-[codeclimate-image]: https://img.shields.io/codeclimate/github/swarthy/redis-semaphore.svg?style=flat-square
-[codeclimate-url]: https://codeclimate.com/github/swarthy/redis-semaphore
+[codeclimate-image]: https://api.codeclimate.com/v1/badges/02778c96bb5983eb150c/maintainability
+[codeclimate-url]: https://codeclimate.com/github/swarthy/redis-semaphore/maintainability
 [snyk-image]: https://snyk.io/test/npm/redis-semaphore/badge.svg
 [snyk-url]: https://snyk.io/test/npm/redis-semaphore
 [coverage-image]: https://coveralls.io/repos/github/swarthy/redis-semaphore/badge.svg?branch=master
