@@ -1,0 +1,6 @@
+extension: ts
+recursive: true
+timeout: 5s
+require:
+  - ts-node/register
+  - test/setup.ts

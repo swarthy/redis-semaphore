@@ -1,15 +1,15 @@
+parser: '@typescript-eslint/parser'
 env:
+  es6: true
   node: true
 plugins:
-- node
+  - '@typescript-eslint'
 extends:
-- inclusive
-- plugin:node/recommended
-rules:
-  node/no-unpublished-require:
-    - error
-    - allowModules:
-      - chai
-      - sinon
-      - sinon-chai
-      - chai-as-promised
+  - plugin:@typescript-eslint/recommended
+  - inclusive/typescript
+overrides:
+  - files:
+      - src/**/*.test.ts
+      - test/**/*.ts
+    env:
+      mocha: true

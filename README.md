@@ -3,6 +3,7 @@
 [![NPM version][npm-image]][npm-url]
 [![Build status][ci-image]][ci-url]
 [![Dependency Status][daviddm-image]][daviddm-url]
+![FOSSA Status][typescript-image]
 [![Coverage Status][coverage-image]][coverage-url]
 [![Maintainability][codeclimate-image]][codeclimate-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
@@ -138,3 +139,4 @@ MIT
 [fossa-badge-url]: https://app.fossa.com/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git?ref=badge_shield
 [fossa-large-image]: https://app.fossa.com/api/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git.svg?type=large
 [fossa-large-url]: https://app.fossa.com/projects/custom%2B10538%2Fgit%40github.com%3Aswarthy%2Fredis-semaphore.git?ref=badge_large
+[typescript-image]: https://badgen.net/npm/types/tslib
