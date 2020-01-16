@@ -46,7 +46,7 @@ const Mutex = require('redis-semaphore').Mutex
 const Redis = require('ioredis')
 
 // TypeScript
-// import { Mutex } from 'redis-semaphore
+// import { Mutex } from 'redis-semaphore'
 // import Redis from 'ioredis'
 
 const redisClient = new Redis()
@@ -81,7 +81,7 @@ const Semaphore = require('redis-semaphore').Semaphore
 const Redis = require('ioredis')
 
 // TypeScript
-// import { Semaphore } from 'redis-semaphore
+// import { Semaphore } from 'redis-semaphore'
 // import Redis from 'ioredis'
 
 const redisClient = new Redis()
@@ -116,7 +116,7 @@ const FairSemaphore = require('redis-semaphore').FairSemaphore
 const Redis = require('ioredis')
 
 // TypeScript
-// import { FairSemaphore } from 'redis-semaphore
+// import { FairSemaphore } from 'redis-semaphore'
 // import Redis from 'ioredis'
 
 const redisClient = new Redis()
