@@ -8,7 +8,7 @@
     "test": "eslint --ext .js,.ts . && mocha",
     "coveralls": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
     "dev": "mocha -w",
-    "build": "yarn build-commonjs && yarn build-es",
+    "build": "yarn build-commonjs",
     "build-commonjs": "rm -rf lib && yarn tsc -b tsconfig.build-commonjs.json",
     "build-es": "rm -rf es && yarn tsc -b tsconfig.build-es.json",
     "preversion": "yarn test && yarn build"
