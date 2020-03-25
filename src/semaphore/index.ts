@@ -1,5 +1,5 @@
 import { Redis } from 'ioredis'
-import uuid4 from 'uuid/v4'
+import { v4 as uuid4 } from 'uuid'
 
 import TimeoutError from '../errors/TimeoutError'
 import acquireSemaphore from './acquire'
