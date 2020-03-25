@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import { Redis } from 'ioredis'
 
 import { TimeoutOptions } from '../../src/misc'
 import Mutex from '../../src/RedisMutex'
@@ -13,6 +14,18 @@ const timeoutOptions: TimeoutOptions = {
 }
 
 describe('Mutex', () => {
+  it('should fail on invalid arguments', () => {
+    expect(() => new Mutex((null as unknown) as Redis, 'key')).to.throw(
+      '"client" is required'
+    )
+    expect(() => new Mutex(({} as unknown) as Redis, 'key')).to.throw(
+      '"client" must be instance of ioredis client'
+    )
+    expect(() => new Mutex(client, '')).to.throw('"key" is required')
+    expect(() => new Mutex(client, (1 as unknown) as string)).to.throw(
+      '"key" must be a string'
+    )
+  })
   it('should acquire and release lock', async () => {
     const mutex = new Mutex(client, 'key')
     const identifier = await mutex.acquire()
@@ -74,5 +87,11 @@ describe('Mutex', () => {
     expect(await client.get('mutex:key')).to.be.eql(null)
     await delay(100)
     expect(await client.get('mutex:key')).to.be.eql(null)
+  })
+  it('should throw error on release not acquired mutex', async () => {
+    const mutex = new Mutex(client, 'key', timeoutOptions)
+    await expect(mutex.release()).to.eventually.rejectedWith(
+      'mutex key has no identifier'
+    )
   })
 })
