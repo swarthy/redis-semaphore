@@ -49,7 +49,7 @@
     "nyc": "^15.0.0",
     "sinon": "9.0.1",
     "sinon-chai": "3.5.0",
-    "snyk": "1.304.0",
+    "snyk": "1.278.1",
     "ts-node": "^8.8.1",
     "typescript": "^3.8.3"
   },
@@ -63,5 +63,8 @@
     "@types/uuid": "^7.0.2",
     "debug": "^4.1.1",
     "uuid": "^7.0.2"
+  },
+  "resolutions": {
+    "@snyk/ruby-semver": "2.0.4"
   }
 }
