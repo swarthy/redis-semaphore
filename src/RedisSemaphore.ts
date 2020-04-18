@@ -36,16 +36,15 @@ export default class RedisSemaphore extends RedisMutex {
     this._limit = +limit
   }
 
-  protected async _refresh() {
-    if (!this._identifier) {
-      throw new Error(`semaphore ${this._key} has no identifier`)
-    }
-    debug(
-      `refresh semaphore (key: ${this._key}, identifier: ${this._identifier})`
+  protected async _processRefresh(identifier: string) {
+    debug(`refresh semaphore (key: ${this._key}, identifier: ${identifier})`)
+    const refreshed = await refresh(
+      this._client,
+      this._key,
+      identifier,
+      this._lockTimeout
     )
-    const refreshed = await refresh(this._client, this._key, this._identifier)
     if (!refreshed) {
-      this._stopRefresh()
       throw new LostLockError(`Lost semaphore for key ${this._key}`)
     }
   }
@@ -60,7 +59,9 @@ export default class RedisSemaphore extends RedisMutex {
       this._acquireTimeout,
       this._retryInterval
     )
-    this._startRefresh()
+    if (this._refreshTimeInterval > 0) {
+      this._startRefresh(this._identifier)
+    }
     return this._identifier
   }
 
@@ -71,8 +72,9 @@ export default class RedisSemaphore extends RedisMutex {
     debug(
       `release semaphore (key: ${this._key}, identifier: ${this._identifier})`
     )
-    this._stopRefresh()
-    const released = await release(this._client, this._key, this._identifier)
-    return released
+    if (this._refreshTimeInterval > 0) {
+      this._stopRefresh()
+    }
+    await release(this._client, this._key, this._identifier)
   }
 }

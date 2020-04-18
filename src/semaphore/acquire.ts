@@ -6,12 +6,22 @@ import { createEval, delay } from '../utils/index'
 const debug = createDebug('redis-semaphore:semaphore:acquire')
 
 const acquireLua = createEval(
-  `redis.call('zremrangebyscore', KEYS[1], '-inf', ARGV[1])
-  if redis.call('zcard', KEYS[1]) < tonumber(ARGV[2]) then
-    redis.call('zadd', KEYS[1], ARGV[3], ARGV[4])
+  `
+  local key = KEYS[1]
+  local limit = tonumber(ARGV[1])
+  local id = ARGV[2]
+  local lockTimeout = tonumber(ARGV[3])
+  local now = tonumber(ARGV[4])
+  local expiredTimestamp = now - lockTimeout
+
+  redis.call('zremrangebyscore', key, '-inf', expiredTimestamp)
+  if redis.call('zcard', key) < limit then
+    redis.call('zadd', key, now, id)
+    redis.call('pexpire', key, lockTimeout)
     return 1
-  end
-  `,
+  else
+    return 0
+  end`,
   1
 )
 
@@ -30,10 +40,10 @@ export default async function acquireSemaphore(
     debug(key, identifier, limit, lockTimeout)
     const result = await acquireLua(client, [
       key,
-      now - lockTimeout,
       limit,
-      now,
-      identifier
+      identifier,
+      lockTimeout,
+      now
     ])
     debug('result', typeof result, result)
     if (result === 1) {

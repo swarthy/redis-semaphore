@@ -54,7 +54,7 @@ describe('fair-semaphore', () => {
         id1,
         id2
       ])
-      await refresh(client, 'key', id1)
+      await refresh(client, 'key', id1, 50)
       expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
         id2,
         id1

@@ -427,10 +427,10 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-7.0.2.tgz#b17f16cf933597e10d6d78eae3251e692ce8b0ce"
   integrity sha512-ZvO2tAcjmMi8V/5Z3JsyofMe3hasRcaw88cto5etSVMwVQfeivGAlEYmaQgceUSVYFofVjT+ioHsATjdWcFt1w==
 
-"@types/node@*", "@types/node@13.11.1":
-  version "13.11.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.11.1.tgz#49a2a83df9d26daacead30d0ccc8762b128d53c7"
-  integrity sha512-eWQGP3qtxwL8FGneRrC5DwrJLGN4/dH1clNTuLfN81HCrxVtxRjygDTUoZJ5ASlDEeo0ppYFQjQIlXhtXpOn6g==
+"@types/node@*", "@types/node@13.13.0":
+  version "13.13.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.0.tgz#30d2d09f623fe32cde9cb582c7a6eda2788ce4a8"
+  integrity sha512-WE4IOAC6r/yBZss1oQGM5zs2D7RuKR6Q+w+X2SouPofnWn+LbCqClRyhO3ZE7Ix8nmFgo/oVuuE01cJT2XB13A==
 
 "@types/node@^6.14.4":
   version "6.14.10"
@@ -1357,10 +1357,10 @@ escodegen@1.x.x:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-inclusive@1.2.6:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/eslint-config-inclusive/-/eslint-config-inclusive-1.2.6.tgz#d661578dcbd608716f4cc64477f84ffadb796456"
-  integrity sha512-i9+SVj0qiHqOe59nE6XaJD5NUpGXFkWGCo9zf3ytGtQCAphLZVoQyYFpZbKX6fbosQtVLvpEm1dcJd8P2Kkn9g==
+eslint-config-inclusive@1.2.7:
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/eslint-config-inclusive/-/eslint-config-inclusive-1.2.7.tgz#862530f85b1d016ff92a0f75582e753121092238"
+  integrity sha512-NhNQ7wxBnr7yEwQ9xiu0C9nu5eMy5oiHtXXuKnK0c9hk6N1q2eSumq4M8ES1im9C6uGDkkJCUWJ2Dxs0DZnWaQ==
 
 eslint-plugin-es@^3.0.0:
   version "3.0.0"
@@ -3296,9 +3296,9 @@ resolve-from@^5.0.0:
   integrity sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==
 
 resolve@^1.10.1, resolve@^1.12.0, resolve@^1.3.2:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.16.0.tgz#063dc704fa3413e13ac1d0d1756a7cbfe95dd1a7"
-  integrity sha512-LarL/PIKJvc09k1jaeT4kQb/8/7P+qV4qSnN2K80AES+OHdfZELAKVOBjxsvtToT/uLOfFbvYvKfZmV8cee7nA==
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.16.1.tgz#49fac5d8bacf1fd53f200fa51247ae736175832c"
+  integrity sha512-rmAglCSqWWMrrBv/XM6sW0NuRFiKViw/W4d9EbC4pt+49H8JwHy+mcGmALTEg504AUDcLTvb1T2q3E9AnmY+ig==
   dependencies:
     path-parse "^1.0.6"
 

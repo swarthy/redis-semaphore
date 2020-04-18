@@ -41,7 +41,12 @@ export async function release(client: Redis, key: string, identifier: string) {
   return await releaseSemaphore(client, finalKey, identifier)
 }
 
-export async function refresh(client: Redis, key: string, identifier: string) {
+export async function refresh(
+  client: Redis,
+  key: string,
+  identifier: string,
+  lockTimeout: number
+) {
   const finalKey = getKey(key)
-  return await refreshSemaphore(client, finalKey, identifier)
+  return await refreshSemaphore(client, finalKey, identifier, lockTimeout)
 }

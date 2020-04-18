@@ -11,5 +11,4 @@ export default async function releaseSemaphore(
   debug(key, identifier)
   const result = await client.zrem(key, identifier)
   debug('result', typeof result, result)
-  return result === 1
 }

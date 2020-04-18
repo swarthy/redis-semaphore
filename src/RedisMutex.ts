@@ -30,7 +30,7 @@ export default class RedisMutex {
       lockTimeout = defaultTimeoutOptions.lockTimeout,
       acquireTimeout = defaultTimeoutOptions.acquireTimeout,
       retryInterval = defaultTimeoutOptions.retryInterval,
-      refreshInterval
+      refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF)
     }: TimeoutOptions = defaultTimeoutOptions
   ) {
     if (!client) {
@@ -50,14 +50,14 @@ export default class RedisMutex {
     this._lockTimeout = lockTimeout
     this._acquireTimeout = acquireTimeout
     this._retryInterval = retryInterval
-    this._refreshTimeInterval =
-      refreshInterval || Math.round(lockTimeout * REFRESH_INTERVAL_COEF)
+    this._refreshTimeInterval = refreshInterval
     this._refresh = this._refresh.bind(this)
   }
-  protected _startRefresh() {
+  protected _startRefresh(identifier: string) {
     this._refreshInterval = setInterval(
       this._refresh,
-      this._refreshTimeInterval
+      this._refreshTimeInterval,
+      identifier
     )
     this._refreshInterval.unref()
   }
@@ -66,19 +66,23 @@ export default class RedisMutex {
       clearInterval(this._refreshInterval)
     }
   }
-  protected async _refresh() {
-    if (!this._identifier) {
-      throw new Error(`mutex ${this._key} has no identifier`)
+  private async _refresh(identifier: string) {
+    try {
+      await this._processRefresh(identifier)
+    } catch (err) {
+      this._stopRefresh()
+      throw err
     }
-    debug(`refresh mutex (key: ${this._key}, identifier: ${this._identifier})`)
+  }
+  protected async _processRefresh(identifier: string) {
+    debug(`refresh mutex (key: ${this._key}, identifier: ${identifier})`)
     const refreshed = await refresh(
       this._client,
       this._key,
-      this._identifier,
+      identifier,
       this._lockTimeout
     )
     if (!refreshed) {
-      this._stopRefresh()
       throw new LostLockError(`Lost mutex for key ${this._key}`)
     }
   }
@@ -92,7 +96,9 @@ export default class RedisMutex {
       this._acquireTimeout,
       this._retryInterval
     )
-    this._startRefresh()
+    if (this._refreshTimeInterval > 0) {
+      this._startRefresh(this._identifier)
+    }
     return this._identifier
   }
 
@@ -101,8 +107,9 @@ export default class RedisMutex {
       throw new Error(`mutex ${this._key} has no identifier`)
     }
     debug(`release mutex (key: ${this._key}, identifier: ${this._identifier})`)
-    this._stopRefresh()
-    const released = await release(this._client, this._key, this._identifier)
-    return released
+    if (this._refreshTimeInterval > 0) {
+      this._stopRefresh()
+    }
+    await release(this._client, this._key, this._identifier)
   }
 }

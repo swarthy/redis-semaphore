@@ -6,7 +6,14 @@ import { createEval } from '../utils/index'
 const debug = createDebug('redis-semaphore:mutex:refresh')
 
 const expireIfEqualLua = createEval(
-  'if redis.call("get",KEYS[1]) == ARGV[1] then return redis.call("pexpire",KEYS[1],ARGV[2]) end',
+  `
+  local key = KEYS[1]
+  local identifier = ARGV[1]
+  local lockTimeout = ARGV[2]
+
+  if redis.call('get', key) == identifier then
+    return redis.call('pexpire', key, lockTimeout)
+  end`,
   1
 )
 

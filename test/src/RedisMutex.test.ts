@@ -90,7 +90,7 @@ describe('Mutex', () => {
   })
   it('should throw error on release not acquired mutex', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
-    await expect(mutex.release()).to.eventually.rejectedWith(
+    await expect(mutex.release()).to.be.rejectedWith(
       'mutex key has no identifier'
     )
   })

@@ -6,17 +6,31 @@ import { createEval, delay } from '../utils/index'
 const debug = createDebug('redis-semaphore:fair-semaphore:acquire')
 const acquireLua = createEval(
   `
-  redis.call('zremrangebyscore', KEYS[1], '-inf', ARGV[1])
-  redis.call('zinterstore', KEYS[2], 2, KEYS[2], KEYS[1], 'WEIGHTS', 1, 0)
-  local counter = redis.call('incr', KEYS[3])
-  redis.call('zadd', KEYS[1], ARGV[3], ARGV[4])
-  redis.call('zadd', KEYS[2], counter, ARGV[4])
-  if redis.call('zrank', KEYS[2], ARGV[4]) < tonumber(ARGV[2]) then
+  local key = KEYS[1]
+  local keyOwner = KEYS[2]
+  local keyCounter = KEYS[3]
+  local limit = tonumber(ARGV[1])
+  local identifier = ARGV[2]
+  local lockTimeout = tonumber(ARGV[3])
+  local now = tonumber(ARGV[4])
+  local expiredTimestamp = now - lockTimeout
+  local expireAt = now + lockTimeout
+
+  redis.call('zremrangebyscore', key, '-inf', expiredTimestamp)
+  redis.call('zinterstore', keyOwner, 2, keyOwner, key, 'WEIGHTS', 1, 0)
+  local counter = redis.call('incr', keyCounter)
+  redis.call('zadd', key, now, identifier)
+  redis.call('zadd', keyOwner, counter, identifier)
+  redis.call('pexpireat', key, expireAt)
+  redis.call('pexpireat', keyOwner, expireAt)
+  redis.call('pexpireat', keyCounter, expireAt)
+  if redis.call('zrank', keyOwner, identifier) < limit then
     return 1
+  else
+    redis.call('zrem', key, identifier)
+    redis.call('zrem', keyOwner, identifier)
+    return 0
   end
-  redis.call('zrem', KEYS[1], ARGV[4])
-  redis.call('zrem', KEYS[2], ARGV[4])
-  return nil
   `,
   3
 )
@@ -38,10 +52,10 @@ export default async function acquireFairSemaphore(
       key,
       `${key}:owner`,
       `${key}:counter`,
-      now - lockTimeout,
       limit,
-      now,
-      identifier
+      identifier,
+      lockTimeout,
+      now
     ])
     debug('result', typeof result, result)
     if (result === 1) {

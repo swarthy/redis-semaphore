@@ -7,17 +7,23 @@ import RedisSemaphore from './RedisSemaphore'
 const debug = createDebug('redis-semaphore:fair-semaphore:instance')
 
 export default class RedisFairSemaphore extends RedisSemaphore {
-  protected async _refresh() {
-    if (!this._identifier) {
-      throw new Error(`fair-semaphore ${this._key} has no identifier`)
-    }
+  protected async _processRefresh(identifier: string) {
     debug(
-      `refresh fair-semaphore (key: ${this._key}, identifier: ${this._identifier})`
+      `refresh fair-semaphore (key: ${this._key}, identifier: ${identifier})`
     )
-    const refreshed = await refresh(this._client, this._key, this._identifier)
-    if (!refreshed) {
+    try {
+      const refreshed = await refresh(
+        this._client,
+        this._key,
+        identifier,
+        this._lockTimeout
+      )
+      if (!refreshed) {
+        throw new LostLockError(`Lost fairSemaphore for key ${this._key}`)
+      }
+    } catch (err) {
       this._stopRefresh()
-      throw new LostLockError(`Lost fairSemaphore for key ${this._key}`)
+      throw err
     }
   }
 
@@ -31,7 +37,9 @@ export default class RedisFairSemaphore extends RedisSemaphore {
       this._acquireTimeout,
       this._retryInterval
     )
-    this._startRefresh()
+    if (this._refreshTimeInterval > 0) {
+      this._startRefresh(this._identifier)
+    }
     return this._identifier
   }
 
@@ -42,8 +50,9 @@ export default class RedisFairSemaphore extends RedisSemaphore {
     debug(
       `release fair-semaphore (key: ${this._key}, identifier: ${this._identifier})`
     )
-    this._stopRefresh()
-    const released = await release(this._client, this._key, this._identifier)
-    return released
+    if (this._refreshTimeInterval > 0) {
+      this._stopRefresh()
+    }
+    await release(this._client, this._key, this._identifier)
   }
 }

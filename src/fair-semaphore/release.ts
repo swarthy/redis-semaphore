@@ -6,9 +6,12 @@ import { createEval } from '../utils/index'
 const debug = createDebug('redis-semaphore:fair-semaphore:release')
 const releaseLua = createEval(
   `
-  local removed = redis.call('zrem', KEYS[1], ARGV[1])
-  redis.call('zrem', KEYS[2], ARGV[1])
-  return removed
+  local key = KEYS[1]
+  local keyOwner = KEYS[2]
+  local identifier = ARGV[1]
+
+  local removed = redis.call('zrem', key, identifier)
+  redis.call('zrem', keyOwner, identifier)
   `,
   2
 )
