@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 
 import { createEval } from '../utils/index'
 
@@ -22,7 +22,7 @@ const refreshLua = createEval(
 )
 
 export default async function refreshSemaphore(
-  client: Redis,
+  client: Redis.Redis | Redis.Cluster,
   key: string,
   identifier: string,
   lockTimeout: number

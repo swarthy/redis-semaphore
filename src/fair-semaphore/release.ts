@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 
 import { createEval } from '../utils/index'
 
@@ -17,7 +17,7 @@ const releaseLua = createEval(
 )
 
 export default async function releaseFairSemaphore(
-  client: Redis,
+  client: Redis.Redis | Redis.Cluster,
   key: string,
   identifier: string
 ) {

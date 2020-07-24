@@ -1,11 +1,13 @@
 import { createHash } from 'crypto'
 import createDebug from 'debug'
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 
 const debug = createDebug('redis-semaphore:eval')
 
 function createSHA1(script: string) {
-  return createHash('sha1').update(script, 'utf8').digest('hex')
+  return createHash('sha1')
+    .update(script, 'utf8')
+    .digest('hex')
 }
 
 function isNoScriptError(err: Error) {
@@ -18,7 +20,7 @@ export default function createEval(script: string, keysCount: number) {
   const baseSHAArgs = [sha1, keysCount]
   debug('creating script:', script, 'sha1:', sha1)
   return async function optimizedEval(
-    client: Redis,
+    client: Redis.Redis | Redis.Cluster,
     args: Array<number | string>
   ) {
     const evalSHAArgs = baseSHAArgs.concat(args)

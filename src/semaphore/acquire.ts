@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 
 import { createEval, delay } from '../utils/index'
 
@@ -26,7 +26,7 @@ const acquireLua = createEval(
 )
 
 export default async function acquireSemaphore(
-  client: Redis,
+  client: Redis.Redis | Redis.Cluster,
   key: string,
   limit: number,
   identifier: string,

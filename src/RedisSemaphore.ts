@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 
 import LostLockError from './errors/LostLockError'
 import { defaultTimeoutOptions, TimeoutOptions } from './misc'
@@ -11,7 +11,7 @@ const debug = createDebug('redis-semaphore:semaphore:instance')
 export default class RedisSemaphore extends RedisMutex {
   protected _limit: number
   constructor(
-    client: Redis,
+    client: Redis.Redis | Redis.Cluster,
     key: string,
     limit: number,
     {

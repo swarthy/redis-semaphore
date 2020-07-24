@@ -1,4 +1,4 @@
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 import { v4 as uuid4 } from 'uuid'
 
 import TimeoutError from '../errors/TimeoutError'
@@ -11,7 +11,7 @@ function getKey(key: string) {
 }
 
 export async function acquire(
-  client: Redis,
+  client: Redis.Redis | Redis.Cluster,
   key: string,
   limit: number,
   lockTimeout: number,
@@ -36,13 +36,17 @@ export async function acquire(
   }
 }
 
-export async function release(client: Redis, key: string, identifier: string) {
+export async function release(
+  client: Redis.Redis | Redis.Cluster,
+  key: string,
+  identifier: string
+) {
   const finalKey = getKey(key)
   return await releaseSemaphore(client, finalKey, identifier)
 }
 
 export async function refresh(
-  client: Redis,
+  client: Redis.Redis | Redis.Cluster,
   key: string,
   identifier: string,
   lockTimeout: number

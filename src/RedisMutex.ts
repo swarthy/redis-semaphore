@@ -15,7 +15,7 @@ const defaultTimeoutOptions = {
 }
 
 export default class RedisMutex {
-  protected _client: Redis.Redis
+  protected _client: Redis.Redis | Redis.Cluster
   protected _key: string
   protected _identifier?: string
   protected _lockTimeout: number
@@ -24,7 +24,7 @@ export default class RedisMutex {
   protected _refreshTimeInterval: number
   protected _refreshInterval?: NodeJS.Timeout
   constructor(
-    client: Redis.Redis,
+    client: Redis.Redis | Redis.Cluster,
     key: string,
     {
       lockTimeout = defaultTimeoutOptions.lockTimeout,
@@ -36,7 +36,7 @@ export default class RedisMutex {
     if (!client) {
       throw new Error('"client" is required')
     }
-    if (!(client instanceof Redis)) {
+    if (!(client instanceof Redis || client instanceof Redis.Cluster)) {
       throw new Error('"client" must be instance of ioredis client')
     }
     if (!key) {

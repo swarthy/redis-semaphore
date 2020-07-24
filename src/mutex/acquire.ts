@@ -1,12 +1,12 @@
 import createDebug from 'debug'
-import { Redis } from 'ioredis'
+import Redis from 'ioredis'
 
 import { delay } from '../utils/index'
 
 const debug = createDebug('redis-semaphore:mutex:acquire')
 
 export default async function acquireMutex(
-  client: Redis,
+  client: Redis.Redis | Redis.Cluster,
   key: string,
   identifier: string,
   lockTimeout: number,
