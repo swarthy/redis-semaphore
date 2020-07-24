@@ -5,9 +5,10 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "scripts": {
-    "test": "eslint --ext .js,.ts . && mocha",
+    "test": "eslint --ext .js,.ts . && yarn check-types && mocha",
     "coveralls": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
     "dev": "mocha -w",
+    "check-types": "tsc -b tsconfig.check-types.json",
     "build": "yarn build-commonjs",
     "build-commonjs": "rm -rf lib && yarn tsc -b tsconfig.build-commonjs.json",
     "build-es": "rm -rf es && yarn tsc -b tsconfig.build-es.json",
