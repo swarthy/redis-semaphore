@@ -138,7 +138,7 @@ MIT
 [npm-image]: https://img.shields.io/npm/v/redis-semaphore.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/redis-semaphore
 [ci-image]: https://img.shields.io/travis/swarthy/redis-semaphore/master.svg?style=flat-square
-[ci-url]: https://travis-ci.org/swarthy/redis-semaphore
+[ci-url]: https://travis-ci.com/swarthy/redis-semaphore
 [daviddm-image]: http://img.shields.io/david/swarthy/redis-semaphore.svg?style=flat-square
 [daviddm-url]: https://david-dm.org/swarthy/redis-semaphore
 [codeclimate-image]: https://api.codeclimate.com/v1/badges/02778c96bb5983eb150c/maintainability
