@@ -37,7 +37,7 @@ export default class RedisMutex {
       throw new Error('"client" is required')
     }
     if (!(client instanceof Redis || client instanceof Redis.Cluster)) {
-      throw new Error('"client" must be instance of ioredis client')
+      throw new Error('"client" must be instance of ioredis client or cluster')
     }
     if (!key) {
       throw new Error('"key" is required')
