@@ -14,6 +14,9 @@ const defaultTimeoutOptions = {
   retryInterval: 10
 }
 
+const a = process.env.TEST
+console.log(a)
+
 export default class RedisMutex {
   protected _client: Redis.Redis | Redis.Cluster
   protected _key: string
@@ -22,7 +25,7 @@ export default class RedisMutex {
   protected _acquireTimeout: number
   protected _retryInterval: number
   protected _refreshTimeInterval: number
-  protected _refreshInterval?: NodeJS.Timeout
+  protected _refreshInterval?: ReturnType<typeof setInterval>
   constructor(
     client: Redis.Redis | Redis.Cluster,
     key: string,
