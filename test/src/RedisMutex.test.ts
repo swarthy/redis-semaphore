@@ -28,20 +28,30 @@ describe('Mutex', () => {
   })
   it('should acquire and release lock', async () => {
     const mutex = new Mutex(client, 'key')
-    const identifier = await mutex.acquire()
-    expect(await client.get('mutex:key')).to.be.eql(identifier)
+    await mutex.acquire()
+    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
+  it('should reject after timeout', async () => {
+    const mutex1 = new Mutex(client, 'key', timeoutOptions)
+    const mutex2 = new Mutex(client, 'key', timeoutOptions)
+    await mutex1.acquire()
+    await expect(mutex2.acquire()).to.be.rejectedWith(
+      'Acquire mutex mutex:key timeout'
+    )
+    await mutex1.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
   it('should refresh lock every refreshInterval ms until release', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
-    const identifier = await mutex.acquire()
+    await mutex.acquire()
     await delay(100)
-    expect(await client.get('mutex:key')).to.be.eql(identifier)
+    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
-  it('should reject with error if lock is lost between refreshes', async () => {
+  it('should throw unhandled error if lock is lost between refreshes', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
     let lostLockError: any
     function catchError(err: any) {
@@ -58,9 +68,9 @@ describe('Mutex', () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
 
     /* Lifecycle 1 */
-    const identifier1 = await mutex.acquire()
+    await mutex.acquire()
     await delay(100)
-    expect(await client.get('mutex:key')).to.be.eql(identifier1)
+    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
     await delay(100)
@@ -69,9 +79,9 @@ describe('Mutex', () => {
     await delay(100)
 
     /* Lifecycle 2 */
-    const identifier2 = await mutex.acquire()
+    await mutex.acquire()
     await delay(100)
-    expect(await client.get('mutex:key')).to.be.eql(identifier2)
+    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
     await delay(100)
@@ -80,18 +90,12 @@ describe('Mutex', () => {
     await delay(100)
 
     /* Lifecycle 3 */
-    const identifier3 = await mutex.acquire()
+    await mutex.acquire()
     await delay(100)
-    expect(await client.get('mutex:key')).to.be.eql(identifier3)
+    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
     await delay(100)
     expect(await client.get('mutex:key')).to.be.eql(null)
-  })
-  it('should throw error on release not acquired mutex', async () => {
-    const mutex = new Mutex(client, 'key', timeoutOptions)
-    await expect(mutex.release()).to.be.rejectedWith(
-      'mutex key has no identifier'
-    )
   })
 })

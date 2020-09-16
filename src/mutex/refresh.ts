@@ -17,7 +17,7 @@ const expireIfEqualLua = createEval(
   1
 )
 
-export default async function refreshMutex(
+export async function refreshMutex(
   client: Redis.Redis | Redis.Cluster,
   key: string,
   identifier: string,

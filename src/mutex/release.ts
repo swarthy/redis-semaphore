@@ -16,7 +16,7 @@ const delIfEqualLua = createEval(
   1
 )
 
-export default async function releaseMutex(
+export async function releaseMutex(
   client: Redis.Redis | Redis.Cluster,
   key: string,
   identifier: string

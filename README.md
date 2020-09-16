@@ -63,6 +63,14 @@ async function doSomething() {
 
 > See [RedisLabs: Basic counting sempahore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-1-building-a-basic-counting-semaphore/)
 
+This implementation is slightly different from the algorithm described in the book, but the main idea has not changed.
+
+`zrank` check replaced with `zcard`, so now it is fair as [RedisLabs: Fair semaphore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-2-fair-semaphores/) (see tests).
+
+In edge cases (node time difference is greater than `lockTimeout`) both algorithms are not fair due cleanup stage (removing expired members from sorted set), so `FairSemaphore` API has been removed (it's safe to replace it with `Semaphore`).
+
+Most reliable way to use: `lockTimeout` is greater than possible node clock differences, `refreshInterval` is not 0 and is less enough than `lockTimeout` (by default is `lockTimeout * 0.8`)
+
 ##### new Semaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
@@ -88,41 +96,6 @@ const redisClient = new Redis()
 
 async function doSomething() {
   const semaphore = new Semaphore(redisClient, 'lockingResource', 5)
-  await semaphore.acquire()
-  // maximum 5 simultaneously executions
-  await semaphore.release()
-}
-```
-
-### Fair Semaphore
-
-> See [RedisLabs: Fair semaphore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-2-fair-semaphores/)
-
-##### new FairSemaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
-
-- `redisClient` - **required**, configured `redis` client
-- `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
-- `maxCount` - **required**, maximum simultaneously resource usage count
-- `timeouts` _optional_
-  - `lockTimeout` - ms, time after semaphore will be auto released (expired)
-  - `acquireTimeout` - ms, max timeout for `.acquire()` call
-  - `retryInterval` - ms, time between acquire attempts if resource locked
-  - `refreshInterval` - ms, auto-refresh interval
-
-#### Example
-
-```javascript
-const FairSemaphore = require('redis-semaphore').FairSemaphore
-const Redis = require('ioredis')
-
-// TypeScript
-// import { FairSemaphore } from 'redis-semaphore'
-// import Redis from 'ioredis'
-
-const redisClient = new Redis()
-
-async function doSomething() {
-  const semaphore = new FairSemaphore(redisClient, 'lockingResource', 5)
   await semaphore.acquire()
   // maximum 5 simultaneously executions
   await semaphore.release()

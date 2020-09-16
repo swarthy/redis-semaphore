@@ -5,14 +5,19 @@ import { delay } from '../utils/index'
 
 const debug = createDebug('redis-semaphore:mutex:acquire')
 
-export default async function acquireMutex(
+export interface Options {
+  identifier: string
+  lockTimeout: number
+  acquireTimeout: number
+  retryInterval: number
+}
+
+export async function acquireMutex(
   client: Redis.Redis | Redis.Cluster,
   key: string,
-  identifier: string,
-  lockTimeout: number,
-  acquireTimeout: number,
-  retryInterval: number
+  options: Options
 ) {
+  const { identifier, lockTimeout, acquireTimeout, retryInterval } = options
   const end = Date.now() + acquireTimeout
   while (Date.now() < end) {
     debug(key, identifier, 'attempt')

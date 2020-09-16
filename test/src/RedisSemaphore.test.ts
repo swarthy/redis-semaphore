@@ -35,33 +35,69 @@ describe('Semaphore', () => {
   it('should acquire and release semaphore', async () => {
     const semaphore1 = new Semaphore(client, 'key', 2)
     const semaphore2 = new Semaphore(client, 'key', 2)
-    const identifier1 = await semaphore1.acquire()
-    const identifier2 = await semaphore2.acquire()
+    await semaphore1.acquire()
+    await semaphore2.acquire()
     expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
-      identifier1,
-      identifier2
+      semaphore1.identifier,
+      semaphore2.identifier
     ])
     await semaphore1.release()
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([identifier2])
+    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+      semaphore2.identifier
+    ])
     await semaphore2.release()
     expect(await client.zcard('semaphore:key')).to.be.eql(0)
+  })
+  it('should reject after timeout', async () => {
+    const semaphore1 = new Semaphore(client, 'key', 1, timeoutOptions)
+    const semaphore2 = new Semaphore(client, 'key', 1, timeoutOptions)
+    await semaphore1.acquire()
+    await expect(semaphore2.acquire()).to.be.rejectedWith(
+      'Acquire semaphore semaphore:key timeout'
+    )
+    await semaphore1.release()
+    expect(await client.get('semaphore:key')).to.be.eql(null)
   })
   it('should refresh lock every refreshInterval ms until release', async () => {
     const semaphore1 = new Semaphore(client, 'key', 2, timeoutOptions)
     const semaphore2 = new Semaphore(client, 'key', 2, timeoutOptions)
-    const identifier1 = await semaphore1.acquire()
-    const identifier2 = await semaphore2.acquire()
+    await semaphore1.acquire()
+    await semaphore2.acquire()
     await delay(100)
     expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
-      identifier1,
-      identifier2
+      semaphore1.identifier,
+      semaphore2.identifier
     ])
     await semaphore1.release()
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([identifier2])
+    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+      semaphore2.identifier
+    ])
     await semaphore2.release()
     expect(await client.zcard('semaphore:key')).to.be.eql(0)
   })
-  it('should reject with error if lock is lost between refreshes', async () => {
+  it('should acquire maximum LIMIT semaphores', async () => {
+    const s = () =>
+      new Semaphore(client, 'key', 3, {
+        acquireTimeout: 1000,
+        lockTimeout: 50,
+        retryInterval: 10,
+        refreshInterval: 0 // disable refresh
+      })
+    const pr1 = Promise.all([s().acquire(), s().acquire(), s().acquire()])
+    await delay(5)
+    const pr2 = Promise.all([s().acquire(), s().acquire(), s().acquire()])
+    await pr1
+    const ids1 = await client.zrange('semaphore:key', 0, -1)
+    expect(ids1.length).to.be.eql(3)
+    await pr2
+    const ids2 = await client.zrange('semaphore:key', 0, -1)
+    expect(ids2.length).to.be.eql(3)
+    expect(ids2)
+      .to.not.include(ids1[0])
+      .and.not.include(ids1[1])
+      .and.not.include(ids1[2])
+  })
+  it('should throw unhandled error if lock is lost between refreshes', async () => {
     const semaphore = new Semaphore(client, 'key', 2, timeoutOptions)
     let lostLockError
     function catchError(err: any) {
@@ -127,17 +163,11 @@ describe('Semaphore', () => {
       await semaphore2.acquire()
       // [2/2]
       await expect(semaphore3.acquire()).to.be.rejectedWith(
-        'Acquire semaphore key timeout'
+        'Acquire semaphore semaphore:key timeout'
       ) // rejectes after 10ms
       await delay(10)
       // [1/2]
       await semaphore3.acquire()
     })
-  })
-  it('should throw error on release not acquired semaphore', async () => {
-    const semaphore = new Semaphore(client, 'key', 2, timeoutOptions)
-    await expect(semaphore.release()).to.eventually.rejectedWith(
-      'semaphore key has no identifier'
-    )
   })
 })

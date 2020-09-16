@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import release from '../../../src/semaphore/release'
+import { releaseSemaphore as release } from '../../../src/semaphore/release'
 import client from '../../redisClient'
 
 describe('semaphore release', () => {

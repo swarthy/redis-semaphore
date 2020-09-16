@@ -1,29 +1,23 @@
 import createDebug from 'debug'
 import Redis from 'ioredis'
+import { v4 as uuid4 } from 'uuid'
 
 import LostLockError from './errors/LostLockError'
-import { TimeoutOptions } from './misc'
-import { acquire, refresh, release } from './mutex/index'
+import TimeoutError from './errors/TimeoutError'
+import { defaultTimeoutOptions, TimeoutOptions } from './misc'
+import { acquireMutex, Options as AcquireOptions } from './mutex/acquire'
+import { refreshMutex } from './mutex/refresh'
+import { releaseMutex } from './mutex/release'
 
-const debug = createDebug('redis-semaphore:mutex:instance')
+const debug = createDebug('redis-semaphore:instance')
 const REFRESH_INTERVAL_COEF = 0.8
 
-const defaultTimeoutOptions = {
-  lockTimeout: 10000,
-  acquireTimeout: 10000,
-  retryInterval: 10
-}
-
-const a = process.env.TEST
-console.log(a)
-
 export default class RedisMutex {
+  protected _kind = 'mutex'
   protected _client: Redis.Redis | Redis.Cluster
   protected _key: string
-  protected _identifier?: string
-  protected _lockTimeout: number
-  protected _acquireTimeout: number
-  protected _retryInterval: number
+  protected _identifier: string
+  protected _acquireOptions: AcquireOptions
   protected _refreshTimeInterval: number
   protected _refreshInterval?: ReturnType<typeof setInterval>
   constructor(
@@ -49,70 +43,86 @@ export default class RedisMutex {
       throw new Error('"key" must be a string')
     }
     this._client = client
-    this._key = key
-    this._lockTimeout = lockTimeout
-    this._acquireTimeout = acquireTimeout
-    this._retryInterval = retryInterval
+    this._key = `mutex:${key}`
+    this._identifier = uuid4()
+    this._acquireOptions = {
+      lockTimeout,
+      acquireTimeout,
+      retryInterval,
+      identifier: this._identifier
+    }
     this._refreshTimeInterval = refreshInterval
-    this._refresh = this._refresh.bind(this)
+    this._processRefresh = this._processRefresh.bind(this)
   }
-  protected _startRefresh(identifier: string) {
+
+  private _startRefresh() {
     this._refreshInterval = setInterval(
-      this._refresh,
-      this._refreshTimeInterval,
-      identifier
+      this._processRefresh,
+      this._refreshTimeInterval
     )
     this._refreshInterval.unref()
   }
-  protected _stopRefresh() {
+
+  private _stopRefresh() {
     if (this._refreshInterval) {
       clearInterval(this._refreshInterval)
     }
   }
-  private async _refresh(identifier: string) {
+
+  private async _processRefresh() {
     try {
-      await this._processRefresh(identifier)
+      debug(
+        `refresh ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
+      )
+      const refreshed = await this._refresh()
+      if (!refreshed) {
+        throw new LostLockError(`Lost ${this._kind} for key ${this._key}`)
+      }
     } catch (err) {
       this._stopRefresh()
       throw err
     }
   }
-  protected async _processRefresh(identifier: string) {
-    debug(`refresh mutex (key: ${this._key}, identifier: ${identifier})`)
-    const refreshed = await refresh(
+
+  protected async _refresh() {
+    return await refreshMutex(
       this._client,
       this._key,
-      identifier,
-      this._lockTimeout
+      this._identifier,
+      this._acquireOptions.lockTimeout
     )
-    if (!refreshed) {
-      throw new LostLockError(`Lost mutex for key ${this._key}`)
-    }
   }
 
-  async acquire() {
-    debug(`acquire mutex (key: ${this._key})`)
-    this._identifier = await acquire(
-      this._client,
-      this._key,
-      this._lockTimeout,
-      this._acquireTimeout,
-      this._retryInterval
-    )
-    if (this._refreshTimeInterval > 0) {
-      this._startRefresh(this._identifier)
-    }
+  protected async _acquire() {
+    return await acquireMutex(this._client, this._key, this._acquireOptions)
+  }
+
+  protected async _release() {
+    await releaseMutex(this._client, this._key, this._identifier)
+  }
+
+  get identifier() {
     return this._identifier
   }
 
-  async release() {
-    if (!this._identifier) {
-      throw new Error(`mutex ${this._key} has no identifier`)
+  async acquire() {
+    debug(`acquire ${this._kind} (key: ${this._key})`)
+    const acquired = await this._acquire()
+    if (!acquired) {
+      throw new TimeoutError(`Acquire ${this._kind} ${this._key} timeout`)
     }
-    debug(`release mutex (key: ${this._key}, identifier: ${this._identifier})`)
+    if (this._refreshTimeInterval > 0) {
+      this._startRefresh()
+    }
+  }
+
+  async release() {
+    debug(
+      `release ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
+    )
     if (this._refreshTimeInterval > 0) {
       this._stopRefresh()
     }
-    await release(this._client, this._key, this._identifier)
+    await this._release()
   }
 }

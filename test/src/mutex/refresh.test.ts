@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import refresh from '../../../src/mutex/refresh'
+import { refreshMutex as refresh } from '../../../src/mutex/refresh'
 import client from '../../redisClient'
 
 describe('mutex refresh', () => {

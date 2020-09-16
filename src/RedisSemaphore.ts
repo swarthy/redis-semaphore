@@ -1,15 +1,15 @@
-import createDebug from 'debug'
 import Redis from 'ioredis'
 
-import LostLockError from './errors/LostLockError'
 import { defaultTimeoutOptions, TimeoutOptions } from './misc'
 import RedisMutex from './RedisMutex'
-import { acquire, refresh, release } from './semaphore/index'
-
-const debug = createDebug('redis-semaphore:semaphore:instance')
+import { acquireSemaphore } from './semaphore/acquire/index'
+import { refreshSemaphore } from './semaphore/refresh/index'
+import { releaseSemaphore } from './semaphore/release'
 
 export default class RedisSemaphore extends RedisMutex {
+  protected _kind = 'semaphore'
   protected _limit: number
+
   constructor(
     client: Redis.Redis | Redis.Cluster,
     key: string,
@@ -33,48 +33,29 @@ export default class RedisSemaphore extends RedisMutex {
     if (typeof limit !== 'number') {
       throw new Error('"limit" must be a number')
     }
-    this._limit = +limit
+    this._key = `semaphore:${key}`
+    this._limit = limit
   }
 
-  protected async _processRefresh(identifier: string) {
-    debug(`refresh semaphore (key: ${this._key}, identifier: ${identifier})`)
-    const refreshed = await refresh(
+  protected async _refresh() {
+    return await refreshSemaphore(
       this._client,
       this._key,
-      identifier,
-      this._lockTimeout
+      this._identifier,
+      this._acquireOptions.lockTimeout
     )
-    if (!refreshed) {
-      throw new LostLockError(`Lost semaphore for key ${this._key}`)
-    }
   }
 
-  async acquire() {
-    debug(`acquire semaphore (key: ${this._key})`)
-    this._identifier = await acquire(
+  protected async _acquire() {
+    return await acquireSemaphore(
       this._client,
       this._key,
       this._limit,
-      this._lockTimeout,
-      this._acquireTimeout,
-      this._retryInterval
+      this._acquireOptions
     )
-    if (this._refreshTimeInterval > 0) {
-      this._startRefresh(this._identifier)
-    }
-    return this._identifier
   }
 
-  async release() {
-    if (!this._identifier) {
-      throw new Error(`semaphore ${this._key} has no identifier`)
-    }
-    debug(
-      `release semaphore (key: ${this._key}, identifier: ${this._identifier})`
-    )
-    if (this._refreshTimeInterval > 0) {
-      this._stopRefresh()
-    }
-    await release(this._client, this._key, this._identifier)
+  protected async _release() {
+    await releaseSemaphore(this._client, this._key, this._identifier)
   }
 }

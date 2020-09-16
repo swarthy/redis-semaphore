@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import release from '../../../src/mutex/release'
+import { releaseMutex as release } from '../../../src/mutex/release'
 import client from '../../redisClient'
 
 describe('Mutex release', () => {
