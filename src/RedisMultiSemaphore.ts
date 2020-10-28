@@ -6,8 +6,8 @@ import { refreshSemaphore } from './multiSemaphore/refresh/index'
 import { releaseSemaphore } from './multiSemaphore/release/index'
 import RedisMutex from './RedisMutex'
 
-export default class RedisSemaphore extends RedisMutex {
-  protected _kind = 'semaphore'
+export default class RedisMultiSemaphore extends RedisMutex {
+  protected _kind = 'multi-semaphore'
   protected _permits: number
   protected _limit: number
 

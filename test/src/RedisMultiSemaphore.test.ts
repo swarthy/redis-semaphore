@@ -63,7 +63,7 @@ describe('MultiSemaphore', () => {
     const semaphore2 = new MultiSemaphore(client, 'key', 3, 1, timeoutOptions)
     await semaphore1.acquire()
     await expect(semaphore2.acquire()).to.be.rejectedWith(
-      'Acquire semaphore semaphore:key timeout'
+      'Acquire multi-semaphore semaphore:key timeout'
     )
     await semaphore1.release()
     expect(await client.get('semaphore:key')).to.be.eql(null)
@@ -192,7 +192,7 @@ describe('MultiSemaphore', () => {
       await semaphore2.acquire()
       // [2/2]
       await expect(semaphore3.acquire()).to.be.rejectedWith(
-        'Acquire semaphore semaphore:key timeout'
+        'Acquire multi-semaphore semaphore:key timeout'
       ) // rejectes after 10ms
       await delay(10)
       // [1/2]
@@ -225,7 +225,7 @@ describe('MultiSemaphore', () => {
         semaphore1.identifier
       ])
       await expect(multiSemaphore2.acquire()).to.be.rejectedWith(
-        'Acquire semaphore semaphore:key timeout'
+        'Acquire multi-semaphore semaphore:key timeout'
       )
       await expect(semaphore2.acquire()).to.be.rejectedWith(
         'Acquire semaphore semaphore:key timeout'
