@@ -54,8 +54,11 @@ const redisClient = new Redis()
 async function doSomething() {
   const mutex = new Mutex(redisClient, 'lockingResource')
   await mutex.acquire()
-  // critical code
-  await mutex.release()
+  try {
+    // critical code
+  } finally {
+    await mutex.release()
+  }
 }
 ```
 
@@ -97,8 +100,53 @@ const redisClient = new Redis()
 async function doSomething() {
   const semaphore = new Semaphore(redisClient, 'lockingResource', 5)
   await semaphore.acquire()
-  // maximum 5 simultaneously executions
-  await semaphore.release()
+  try {
+    // maximum 5 simultaneously executions
+  } finally {
+    await semaphore.release()
+  }
+}
+```
+
+### MultiSemaphore
+
+Same as `Semaphore` with one difference - MultiSemaphore will try to acquire multiple permits instead of one.
+
+`MultiSemaphore` and `Semaphore` shares same key namespace and can be used together (see test/src/RedisMultiSemaphore.test.ts).
+
+##### new MultiSemaphore(redisClient, key, maxCount, permits [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+
+- `redisClient` - **required**, configured `redis` client
+- `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
+- `maxCount` - **required**, maximum simultaneously resource usage count
+- `permits` - **required**, number of acquiring permits
+- `timeouts` _optional_
+  - `lockTimeout` - ms, time after semaphore will be auto released (expired)
+  - `acquireTimeout` - ms, max timeout for `.acquire()` call
+  - `retryInterval` - ms, time between acquire attempts if resource locked
+  - `refreshInterval` - ms, auto-refresh interval
+
+#### Example
+
+```javascript
+const MultiSemaphore = require('redis-semaphore').MultiSemaphore
+const Redis = require('ioredis')
+
+// TypeScript
+// import { MultiSemaphore } from 'redis-semaphore'
+// import Redis from 'ioredis'
+
+const redisClient = new Redis()
+
+async function doSomething() {
+  const semaphore = new MultiSemaphore(redisClient, 'lockingResource', 5, 2)
+
+  await semaphore.acquire()
+  try {
+    // make 2 parallel calls to remote service which allow only 5 simultaneously calls
+  } finally {
+    await semaphore.release()
+  }
 }
 ```
 
