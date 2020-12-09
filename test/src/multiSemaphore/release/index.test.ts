@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { releaseSemaphore as release } from '../../../../src/multiSemaphore/release/index'
-import client from '../../../redisClient'
+import { client1 as client } from '../../../redisClient'
 
 describe('multiSemaphore release', () => {
   it('should remove key after success release', async () => {

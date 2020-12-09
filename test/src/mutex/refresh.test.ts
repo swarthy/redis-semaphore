@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { refreshMutex as refresh } from '../../../src/mutex/refresh'
-import client from '../../redisClient'
+import { client1 as client } from '../../redisClient'
 
 describe('mutex refresh', () => {
   it('should return false if resource is not acquired', async () => {

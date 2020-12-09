@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { refreshSemaphore as refresh } from '../../../../src/semaphore/refresh/index'
-import client from '../../../redisClient'
+import { client1 as client } from '../../../redisClient'
 
 describe('semaphore refresh', () => {
   it('should return false if resource is not acquired', async () => {

@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { releaseMutex as release } from '../../../src/mutex/release'
-import client from '../../redisClient'
+import { client1 as client } from '../../redisClient'
 
 describe('Mutex release', () => {
   it('should remove key after release', async () => {

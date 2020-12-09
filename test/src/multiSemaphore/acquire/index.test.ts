@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { acquireSemaphore as acquire, Options } from '../../../../src/multiSemaphore/acquire/index'
-import client from '../../../redisClient'
+import { client1 as client } from '../../../redisClient'
 
 const opts = (id: string): Options => ({
   identifier: id,

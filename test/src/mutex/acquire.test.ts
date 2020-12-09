@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { acquireMutex as acquire, Options } from '../../../src/mutex/acquire'
-import client from '../../redisClient'
+import { client1 as client } from '../../redisClient'
 
 const opts = (id: string): Options => ({
   identifier: id,

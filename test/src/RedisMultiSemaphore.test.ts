@@ -5,7 +5,7 @@ import { TimeoutOptions } from '../../src/misc'
 import MultiSemaphore from '../../src/RedisMultiSemaphore'
 import Semaphore from '../../src/RedisSemaphore'
 import { delay } from '../../src/utils/index'
-import client from '../redisClient'
+import { client1 as client } from '../redisClient'
 
 const timeoutOptions: TimeoutOptions = {
   lockTimeout: 100,

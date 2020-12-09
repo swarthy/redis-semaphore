@@ -4,7 +4,7 @@ import { Redis } from 'ioredis'
 import { TimeoutOptions } from '../../src/misc'
 import Mutex from '../../src/RedisMutex'
 import { delay } from '../../src/utils/index'
-import client from '../redisClient'
+import { client1 as client } from '../redisClient'
 
 const timeoutOptions: TimeoutOptions = {
   lockTimeout: 100,

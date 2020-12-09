@@ -1,15 +1,30 @@
 version: '3.7'
 
 services:
-  app:
-    build: .
+  waiter:
+    image: node:alpine
     volumes:
       - ./:/app
-    environment:
-      REDIS_URI: redis://redis
-    command: sh -c "wait-for --redis && npm test"
+    working_dir: /app
+    command: >
+      sh -c "
+        yarn wait-for --redis redis://redis1 &&
+        yarn wait-for --redis redis://redis2 &&
+        yarn wait-for --redis redis://redis3 &&
+        echo 'All redis instances ready!'
+      "
 
-  redis:
+  redis1:
     image: redis:alpine
     ports:
-      - 6379:6379
+      - 16379:6379
+
+  redis2:
+    image: redis:alpine
+    ports:
+      - 26379:6379
+
+  redis3:
+    image: redis:alpine
+    ports:
+      - 36379:6379

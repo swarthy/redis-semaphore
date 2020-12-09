@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import { createEval } from '../../../src/utils/index'
-import client from '../../redisClient'
+import { client1 as client } from '../../redisClient'
 
 describe('utils createEval', () => {
   it('should return function', async () => {
