@@ -13,7 +13,7 @@ export interface Options {
 }
 
 export async function acquireMutex(
-  client: Redis.Redis | Redis.Cluster,
+  client: Redis.Redis,
   key: string,
   options: Options
 ) {

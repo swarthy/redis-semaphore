@@ -17,9 +17,9 @@ describe('multiSemaphore acquire', () => {
     expect(result).to.be.true
   })
   it('should return false when timeout', async () => {
-    const result1 = await acquire(client, 'key', 1, 2, opts('111')) // expire after 100ms
-    const result2 = await acquire(client, 'key', 1, 2, opts('112')) // expire after 100ms
-    const result3 = await acquire(client, 'key', 1, 2, opts('113')) // timeout after 50ms
+    const result1 = await acquire(client, 'key', 2, 1, opts('111')) // expire after 100ms
+    const result2 = await acquire(client, 'key', 2, 1, opts('112')) // expire after 100ms
+    const result3 = await acquire(client, 'key', 2, 1, opts('113')) // timeout after 50ms
 
     expect(result1).to.be.true
     expect(result2).to.be.true

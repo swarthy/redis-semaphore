@@ -5,19 +5,22 @@ import { createEval } from '../utils/index'
 
 const debug = createDebug('redis-semaphore:mutex:release')
 
-const delIfEqualLua = createEval(
+export const delIfEqualLua = createEval(
   `
   local key = KEYS[1]
   local identifier = ARGV[1]
 
   if redis.call('get', key) == identifier then
     return redis.call('del', key)
-  end`,
+  end
+
+  return 0
+  `,
   1
 )
 
 export async function releaseMutex(
-  client: Redis.Redis | Redis.Cluster,
+  client: Redis.Redis,
   key: string,
   identifier: string
 ) {

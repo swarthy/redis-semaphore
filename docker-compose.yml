@@ -17,14 +17,14 @@ services:
   redis1:
     image: redis:alpine
     ports:
-      - 16379:6379
+      - 6001:6379
 
   redis2:
     image: redis:alpine
     ports:
-      - 26379:6379
+      - 6002:6379
 
   redis3:
     image: redis:alpine
     ports:
-      - 36379:6379
+      - 6003:6379

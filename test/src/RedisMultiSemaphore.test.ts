@@ -1,14 +1,19 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 
+import LostLockError from '../../src/errors/LostLockError'
 import { TimeoutOptions } from '../../src/misc'
 import MultiSemaphore from '../../src/RedisMultiSemaphore'
 import Semaphore from '../../src/RedisSemaphore'
 import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
+import { downRedisServer, upRedisServer } from '../shell'
+import {
+  catchUnhandledRejection, throwUnhandledRejection, unhandledRejectionSpy
+} from '../unhandledRejection'
 
 const timeoutOptions: TimeoutOptions = {
-  lockTimeout: 100,
+  lockTimeout: 300,
   acquireTimeout: 100,
   refreshInterval: 80,
   retryInterval: 10
@@ -108,43 +113,57 @@ describe('MultiSemaphore', () => {
       .and.not.include(ids1[1])
       .and.not.include(ids1[2])
   })
-  it('should throw unhandled error if lock is lost between refreshes', async () => {
-    const semaphore = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
-    let lostLockError
-    function catchError(err: any) {
-      lostLockError = err
-    }
-    process.on('unhandledRejection', catchError)
-    await semaphore.acquire()
-    await client.del('semaphore:key')
-    await delay(100)
-    expect(lostLockError).to.be.ok
-    process.removeListener('unhandledRejection', catchError)
+  describe('with rejections', () => {
+    beforeEach(() => {
+      catchUnhandledRejection()
+    })
+    afterEach(() => {
+      throwUnhandledRejection()
+    })
+    it('should throw unhandled error if lock is lost between refreshes', async () => {
+      const semaphore = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
+      await semaphore.acquire()
+      await client.del('semaphore:key')
+      await client.zadd(
+        'semaphore:key',
+        Date.now(),
+        'aaa',
+        Date.now(),
+        'bbb',
+        Date.now(),
+        'ccc'
+      )
+      await delay(1000)
+      expect(unhandledRejectionSpy).to.be.called
+      expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
+        .to.be.true
+    })
   })
   describe('reusable', () => {
-    it('autorefresh enabled', async () => {
+    it('autorefresh enabled', async function () {
+      this.timeout(10000)
       const semaphore1 = new MultiSemaphore(client, 'key', 4, 2, timeoutOptions)
       const semaphore2 = new MultiSemaphore(client, 'key', 4, 2, timeoutOptions)
 
       await semaphore1.acquire()
       await semaphore2.acquire()
-      await delay(100)
+      await delay(300)
       await semaphore1.release()
       await semaphore2.release()
 
-      await delay(100)
+      await delay(300)
 
       await semaphore1.acquire()
       await semaphore2.acquire()
-      await delay(100)
+      await delay(300)
       await semaphore1.release()
       await semaphore2.release()
 
-      await delay(100)
+      await delay(300)
 
       await semaphore1.acquire()
       await semaphore2.acquire()
-      await delay(100)
+      await delay(300)
       await semaphore1.release()
       await semaphore2.release()
     })
@@ -179,11 +198,11 @@ describe('MultiSemaphore', () => {
 
       await semaphore1.acquire()
       await semaphore2.acquire()
-      await delay(100)
+      await delay(300)
       await semaphore1.release()
       await semaphore2.release()
 
-      await delay(100)
+      await delay(300)
 
       // [0/2]
       await semaphore1.acquire()
@@ -194,7 +213,11 @@ describe('MultiSemaphore', () => {
       await expect(semaphore3.acquire()).to.be.rejectedWith(
         'Acquire multi-semaphore semaphore:key timeout'
       ) // rejectes after 10ms
-      await delay(10)
+
+      // since semaphore1.acquire() elapsed 80ms (delay) + 10ms (semaphore3 timeout)
+      // semaphore1 will expire after 300 - 90 = 210ms
+      await delay(210)
+
       // [1/2]
       await semaphore3.acquire()
     })
@@ -236,6 +259,48 @@ describe('MultiSemaphore', () => {
       ])
       await semaphore1.release()
       expect(await client.zcard('semaphore:key')).to.be.eql(0)
+    })
+  })
+  describe('[Node shutdown]', () => {
+    beforeEach(() => {
+      catchUnhandledRejection()
+    })
+    afterEach(async () => {
+      throwUnhandledRejection()
+      await upRedisServer(1)
+    })
+    it('should work again if node become alive', async function () {
+      this.timeout(60000)
+      const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
+      await semaphore1.acquire()
+
+      await downRedisServer(1)
+      console.log('SHUT DOWN')
+
+      await delay(1000)
+
+      await upRedisServer(1)
+      console.log('ONLINE')
+
+      // semaphore was expired, key was deleted in redis
+      // give refresh mechanism time to reacquire the lock
+      // (includes reconnection time)
+      await delay(1000)
+
+      const data = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
+      // console.log(data)
+      expect(data).to.include(semaphore1.identifier + '_0')
+      expect(data).to.include(semaphore1.identifier + '_1')
+
+      // now lock reacquired by semaphore1, so semaphore2 cant acquire the lock
+
+      const semaphore2 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
+
+      await expect(semaphore2.acquire()).to.be.rejectedWith(
+        'Acquire multi-semaphore semaphore:key timeout'
+      )
+
+      await semaphore1.release()
     })
   })
 })

@@ -3,13 +3,17 @@ import { createEval } from '../../utils/index'
 export const refreshLua = createEval(
   `
   local key = KEYS[1]
-  local permits = tonumber(ARGV[1])
-  local identifier = ARGV[2]
-  local lockTimeout = ARGV[3]
-  local now = ARGV[4]
+  local limit = tonumber(ARGV[1])
+  local permits = tonumber(ARGV[2])
+  local identifier = ARGV[3]
+  local lockTimeout = tonumber(ARGV[4])
+  local now = tonumber(ARGV[5])
+  local expiredTimestamp = now - lockTimeout
   local args = {}
 
-  if redis.call('zscore', key, identifier .. '_0') then
+  redis.call('zremrangebyscore', key, '-inf', expiredTimestamp)
+
+  if (redis.call('zcard', key) + permits) <= limit or redis.call('zscore', key, identifier .. '_0') then
     for i=0, permits - 1 do
       table.insert(args, now)
       table.insert(args, identifier .. '_' .. i)

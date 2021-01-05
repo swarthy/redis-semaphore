@@ -1,25 +1,33 @@
 import createDebug from 'debug'
 import Redis from 'ioredis'
 
-import { refresh } from './internal'
+import { refreshLua } from './lua'
 
 const debug = createDebug('redis-semaphore:multi-semaphore:refresh')
 
-export async function refreshSemaphore(
-  client: Redis.Redis | Redis.Cluster,
-  key: string,
-  permits: number,
-  identifier: string,
+export interface Options {
+  identifier: string
   lockTimeout: number
+}
+
+export async function refreshSemaphore(
+  client: Redis.Redis,
+  key: string,
+  limit: number,
+  permits: number,
+  options: Options
 ) {
+  const { identifier, lockTimeout } = options
   const now = Date.now()
   debug(key, identifier, now)
-  const internalOptions = {
+  const result = await refreshLua(client, [
+    key,
+    limit,
+    permits,
     identifier,
     lockTimeout,
     now
-  }
-  const result = await refresh(client, key, permits, internalOptions)
+  ])
   debug('result', typeof result, result)
   return result === 1
 }

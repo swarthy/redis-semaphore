@@ -4,7 +4,7 @@ import Redis from 'ioredis'
 const debug = createDebug('redis-semaphore:semaphore:release')
 
 export async function releaseSemaphore(
-  client: Redis.Redis | Redis.Cluster,
+  client: Redis.Redis,
   key: string,
   identifier: string
 ) {

@@ -1,23 +1,23 @@
 import Redis from 'ioredis'
 
 import { TimeoutOptions } from './misc'
-import { acquireSemaphore } from './multiSemaphore/acquire/index'
-import { refreshSemaphore } from './multiSemaphore/refresh/index'
-import { releaseSemaphore } from './multiSemaphore/release/index'
-import RedisSemaphore from './RedisSemaphore'
+import { acquireRedlockMultiSemaphore } from './redlockMultiSemaphore/acquire'
+import { refreshRedlockMultiSemaphore } from './redlockMultiSemaphore/refresh'
+import { releaseRedlockMultiSemaphore } from './redlockMultiSemaphore/release'
+import RedlockSemaphore from './RedlockSemaphore'
 
-export default class RedisMultiSemaphore extends RedisSemaphore {
-  protected _kind = 'multi-semaphore'
+export default class RedlockMultiSemaphore extends RedlockSemaphore {
+  protected _kind = 'redlock-multi-semaphore'
   protected _permits: number
 
   constructor(
-    client: Redis.Redis,
+    clients: Redis.Redis[],
     key: string,
     limit: number,
     permits: number,
     options?: TimeoutOptions
   ) {
-    super(client, key, limit, options)
+    super(clients, key, limit, options)
     if (!permits) {
       throw new Error('"permits" is required')
     }
@@ -28,8 +28,8 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
   }
 
   protected async _refresh() {
-    return await refreshSemaphore(
-      this._client,
+    return await refreshRedlockMultiSemaphore(
+      this._clients,
       this._key,
       this._limit,
       this._permits,
@@ -38,8 +38,8 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
   }
 
   protected async _acquire() {
-    return await acquireSemaphore(
-      this._client,
+    return await acquireRedlockMultiSemaphore(
+      this._clients,
       this._key,
       this._limit,
       this._permits,
@@ -48,8 +48,8 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
   }
 
   protected async _release() {
-    await releaseSemaphore(
-      this._client,
+    await releaseRedlockMultiSemaphore(
+      this._clients,
       this._key,
       this._permits,
       this._identifier

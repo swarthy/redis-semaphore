@@ -2,7 +2,7 @@ import createDebug from 'debug'
 import Redis from 'ioredis'
 
 import { delay } from '../../utils/index'
-import { acquire } from './internal'
+import { acquireLua } from './lua'
 
 const debug = createDebug('redis-semaphore:semaphore:acquire')
 
@@ -14,7 +14,7 @@ export interface Options {
 }
 
 export async function acquireSemaphore(
-  client: Redis.Redis | Redis.Cluster,
+  client: Redis.Redis,
   key: string,
   limit: number,
   options: Options
@@ -24,14 +24,16 @@ export async function acquireSemaphore(
   let now
   while ((now = Date.now()) < end) {
     debug(key, identifier, limit, lockTimeout)
-    const internalOptions = {
+    const result = await acquireLua(client, [
+      key,
+      limit,
       identifier,
       lockTimeout,
       now
-    }
-    const result = await acquire(client, key, limit, internalOptions)
+    ])
     debug(key, 'result', typeof result, result)
-    if (result === 1) {
+    // support options.stringNumbers
+    if (+result === 1) {
       debug(key, identifier, 'acquired')
       return true
     } else {

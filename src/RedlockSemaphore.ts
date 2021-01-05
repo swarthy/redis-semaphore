@@ -1,22 +1,22 @@
 import Redis from 'ioredis'
 
 import { TimeoutOptions } from './misc'
-import RedisMutex from './RedisMutex'
-import { acquireSemaphore } from './semaphore/acquire/index'
-import { refreshSemaphore } from './semaphore/refresh/index'
-import { releaseSemaphore } from './semaphore/release'
+import RedlockMutex from './RedlockMutex'
+import { acquireRedlockSemaphore } from './redlockSemaphore/acquire'
+import { refreshRedlockSemaphore } from './redlockSemaphore/refresh'
+import { releaseRedlockSemaphore } from './redlockSemaphore/release'
 
-export default class RedisSemaphore extends RedisMutex {
-  protected _kind = 'semaphore'
+export default class RedlockSemaphore extends RedlockMutex {
+  protected _kind = 'redlock-semaphore'
   protected _limit: number
 
   constructor(
-    client: Redis.Redis,
+    clients: Redis.Redis[],
     key: string,
     limit: number,
     options?: TimeoutOptions
   ) {
-    super(client, key, options)
+    super(clients, key, options)
     if (!limit) {
       throw new Error('"limit" is required')
     }
@@ -28,8 +28,8 @@ export default class RedisSemaphore extends RedisMutex {
   }
 
   protected async _refresh() {
-    return await refreshSemaphore(
-      this._client,
+    return await refreshRedlockSemaphore(
+      this._clients,
       this._key,
       this._limit,
       this._acquireOptions
@@ -37,8 +37,8 @@ export default class RedisSemaphore extends RedisMutex {
   }
 
   protected async _acquire() {
-    return await acquireSemaphore(
-      this._client,
+    return await acquireRedlockSemaphore(
+      this._clients,
       this._key,
       this._limit,
       this._acquireOptions
@@ -46,6 +46,6 @@ export default class RedisSemaphore extends RedisMutex {
   }
 
   protected async _release() {
-    await releaseSemaphore(this._client, this._key, this._identifier)
+    await releaseRedlockSemaphore(this._clients, this._key, this._identifier)
   }
 }

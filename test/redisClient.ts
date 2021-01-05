@@ -1,32 +1,42 @@
 import Redis from 'ioredis'
 
-export const client1 = new Redis(
-  process.env.REDIS_URI1 || 'redis://127.0.0.1:16379',
-  { lazyConnect: true }
-)
-export const client2 = new Redis(
-  process.env.REDIS_URI2 || 'redis://127.0.0.1:26379',
-  { lazyConnect: true }
-)
-export const client3 = new Redis(
-  process.env.REDIS_URI3 || 'redis://127.0.0.1:36379',
-  { lazyConnect: true }
-)
+function createClient(num: number) {
+  const serverURL =
+    process.env[`REDIS_URI${num}`] || `redis://127.0.0.1:${6000 + num}`
+  const client = new Redis(serverURL, {
+    connectionName: `client${num}`,
+    lazyConnect: true,
+    autoResendUnfulfilledCommands: false, // dont queue commands while server is offline (dont break test logic)
+    maxRetriesPerRequest: 0, // dont retry, fail faster (default is 20)
+
+    // https://github.com/luin/ioredis#auto-reconnect
+    // retryStrategy is a function that will be called when the connection is lost.
+    // The argument times means this is the nth reconnection being made and the return value represents how long (in ms) to wait to reconnect.
+    retryStrategy() {
+      return 100 // for tests we disable increasing timeout
+    }
+  })
+  client.on('error', err => {
+    console.log('Redis client error:', err.message)
+  })
+  return client
+}
+
+export const client1 = createClient(1)
+export const client2 = createClient(2)
+export const client3 = createClient(3)
+
+export const allClients = [client1, client2, client3]
 
 before(async () => {
-  await client1.connect()
-  await client2.connect()
-  await client3.connect()
+  await Promise.all(allClients.map(c => c.connect()))
 })
 
 beforeEach(async () => {
-  await client1.flushdb()
-  await client2.flushdb()
-  await client3.flushdb()
+  await Promise.all(allClients.map(c => c.flushdb()))
 })
 
 after(async () => {
-  await client1.quit()
-  await client2.quit()
-  await client3.quit()
+  await Promise.all(allClients.map(c => c.quit()))
+  // allClients.forEach(c => c.disconnect())
 })
