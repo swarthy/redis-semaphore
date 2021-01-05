@@ -20,6 +20,7 @@
   },
   "keywords": [
     "redis",
+    "redlock",
     "mutex",
     "semaphore"
   ],
