@@ -1,3 +1,9 @@
+### redis-semaphore@4.0.0
+
+- **Breaking change:** `Mutex`, `Semaphore`, `MultiSemaphore` not longer support `Cluster`. For multi-node case use `Redlock*` instead.
+- Added `RedlockMutex`, `RedlockSemaphore`, `RedlockMultiSemaphore`
+- Internals refactored
+
 ### redis-semaphore@3.2.0
 
 - Added `MultiSemaphore`

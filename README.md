@@ -79,11 +79,7 @@ Most reliable way to use: `lockTimeout` is greater than possible node clock diff
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
 - `maxCount` - **required**, maximum simultaneously resource usage count
-- `timeouts` _optional_
-  - `lockTimeout` - ms, time after semaphore will be auto released (expired)
-  - `acquireTimeout` - ms, max timeout for `.acquire()` call
-  - `retryInterval` - ms, time between acquire attempts if resource locked
-  - `refreshInterval` - ms, auto-refresh interval
+- `timeouts` _optional_ See `Mutex` timeouts
 
 #### Example
 
@@ -120,11 +116,7 @@ Same as `Semaphore` with one difference - MultiSemaphore will try to acquire mul
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
 - `maxCount` - **required**, maximum simultaneously resource usage count
 - `permits` - **required**, number of acquiring permits
-- `timeouts` _optional_
-  - `lockTimeout` - ms, time after semaphore will be auto released (expired)
-  - `acquireTimeout` - ms, max timeout for `.acquire()` call
-  - `retryInterval` - ms, time between acquire attempts if resource locked
-  - `refreshInterval` - ms, auto-refresh interval
+- `timeouts` _optional_ See `Mutex` timeouts
 
 #### Example
 
@@ -140,6 +132,132 @@ const redisClient = new Redis()
 
 async function doSomething() {
   const semaphore = new MultiSemaphore(redisClient, 'lockingResource', 5, 2)
+
+  await semaphore.acquire()
+  try {
+    // make 2 parallel calls to remote service which allow only 5 simultaneously calls
+  } finally {
+    await semaphore.release()
+  }
+}
+```
+
+### RedlockMutex
+
+Distributed `Mutex` version
+
+> See [The Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm)
+
+##### new RedlockMutex(redisClients, key [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+
+- `redisClients` - **required**, array of configured `redis` client connected to independent nodes
+- `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
+- `timeouts` _optional_ See `Mutex` timeouts
+
+#### Example
+
+```javascript
+const RedlockMutex = require('redis-semaphore').RedlockMutex
+const Redis = require('ioredis')
+
+// TypeScript
+// import { RedlockMutex } from 'redis-semaphore'
+// import Redis from 'ioredis'
+
+const redisClients = [
+  new Redis('127.0.0.1:6377'),
+  new Redis('127.0.0.1:6378'),
+  new Redis('127.0.0.1:6379')
+] // or cluster.nodes('master')
+
+async function doSomething() {
+  const mutex = new RedlockMutex(redisClients, 'lockingResource')
+  await mutex.acquire()
+  try {
+    // critical code
+  } finally {
+    await mutex.release()
+  }
+}
+```
+
+### RedlockSemaphore
+
+Distributed `Semaphore` version
+
+> See [The Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm)
+
+##### new RedlockSemaphore(redisClients, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+
+- `redisClients` - **required**, array of configured `redis` client connected to independent nodes
+- `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
+- `maxCount` - **required**, maximum simultaneously resource usage count
+- `timeouts` _optional_ See `Mutex` timeouts
+
+#### Example
+
+```javascript
+const RedlockSemaphore = require('redis-semaphore').RedlockSemaphore
+const Redis = require('ioredis')
+
+// TypeScript
+// import { RedlockSemaphore } from 'redis-semaphore'
+// import Redis from 'ioredis'
+
+const redisClients = [
+  new Redis('127.0.0.1:6377'),
+  new Redis('127.0.0.1:6378'),
+  new Redis('127.0.0.1:6379')
+] // or cluster.nodes('master')
+
+async function doSomething() {
+  const semaphore = new Semaphore(redisClients, 'lockingResource', 5)
+  await semaphore.acquire()
+  try {
+    // maximum 5 simultaneously executions
+  } finally {
+    await semaphore.release()
+  }
+}
+```
+
+### RedlockMultiSemaphore
+
+Distributed `MultiSemaphore` version
+
+> See [The Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm)
+
+##### new RedlockMultiSemaphore(redisClients, key, maxCount, permits [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+
+- `redisClients` - **required**, array of configured `redis` client connected to independent nodes
+- `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
+- `maxCount` - **required**, maximum simultaneously resource usage count
+- `permits` - **required**, number of acquiring permits
+- `timeouts` _optional_ See `Mutex` timeouts
+
+#### Example
+
+```javascript
+const RedlockMultiSemaphore = require('redis-semaphore').RedlockMultiSemaphore
+const Redis = require('ioredis')
+
+// TypeScript
+// import { RedlockMultiSemaphore } from 'redis-semaphore'
+// import Redis from 'ioredis'
+
+const redisClients = [
+  new Redis('127.0.0.1:6377'),
+  new Redis('127.0.0.1:6378'),
+  new Redis('127.0.0.1:6379')
+] // or cluster.nodes('master')
+
+async function doSomething() {
+  const semaphore = new RedlockMultiSemaphore(
+    redisClients,
+    'lockingResource',
+    5,
+    2
+  )
 
   await semaphore.acquire()
   try {
