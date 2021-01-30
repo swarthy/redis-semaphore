@@ -5,7 +5,7 @@ import RedlockMultiSemaphore from './RedlockMultiSemaphore'
 import RedlockMutex from './RedlockMutex'
 import RedlockSemaphore from './RedlockSemaphore'
 
-export * from './misc'
+export { defaultTimeoutOptions } from './misc'
 
 export {
   Mutex,
@@ -15,3 +15,5 @@ export {
   RedlockSemaphore,
   RedlockMultiSemaphore
 }
+
+export type { LockLostCallback, TimeoutOptions, LockOptions } from './types'

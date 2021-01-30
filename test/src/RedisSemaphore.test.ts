@@ -1,9 +1,10 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
+import sinon from 'sinon'
 
 import LostLockError from '../../src/errors/LostLockError'
-import { TimeoutOptions } from '../../src/misc'
 import Semaphore from '../../src/RedisSemaphore'
+import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
@@ -110,7 +111,7 @@ describe('Semaphore', () => {
       .and.not.include(ids1[1])
       .and.not.include(ids1[2])
   })
-  describe('with rejections', () => {
+  describe('lost lock case', () => {
     beforeEach(() => {
       catchUnhandledRejection()
     })
@@ -130,10 +131,37 @@ describe('Semaphore', () => {
         Date.now(),
         'ccc'
       )
-      await delay(1000)
+      await delay(200)
       expect(unhandledRejectionSpy).to.be.called
       expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
         .to.be.true
+    })
+    it('should call onLockLost callback if provided', async () => {
+      const onLockLostCallback = sinon.spy(function (this: Semaphore) {
+        expect(this.isAcquired).to.be.false
+      })
+      const semaphore = new Semaphore(client, 'key', 3, {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
+      await semaphore.acquire()
+      expect(semaphore.isAcquired).to.be.true
+      await client.del('semaphore:key')
+      await client.zadd(
+        'semaphore:key',
+        Date.now(),
+        'aaa',
+        Date.now(),
+        'bbb',
+        Date.now(),
+        'ccc'
+      )
+      await delay(200)
+      expect(semaphore.isAcquired).to.be.false
+      expect(unhandledRejectionSpy).to.not.called
+      expect(onLockLostCallback).to.be.called
+      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
+        .be.true
     })
   })
   describe('reusable', () => {

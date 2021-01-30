@@ -1,9 +1,10 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
+import sinon from 'sinon'
 
 import LostLockError from '../../src/errors/LostLockError'
-import { TimeoutOptions } from '../../src/misc'
 import RedlockMutex from '../../src/RedlockMutex'
+import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
 import { allClients, client1, client2, client3 } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
@@ -67,7 +68,7 @@ describe('RedlockMutex', () => {
     await mutex.release()
     await expectGetAll('mutex:key', null)
   })
-  describe('with unhandled rejections', () => {
+  describe('lost lock case', () => {
     beforeEach(() => {
       catchUnhandledRejection()
     })
@@ -82,10 +83,32 @@ describe('RedlockMutex', () => {
         client2.set('mutex:key', '222'), // another instance
         client3.set('mutex:key', '222') // another instance
       ])
-      await delay(100)
+      await delay(200)
       expect(unhandledRejectionSpy).to.be.called
       expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
         .to.be.true
+    })
+    it('should call onLockLost callback if provided', async () => {
+      const onLockLostCallback = sinon.spy(function (this: RedlockMutex) {
+        expect(this.isAcquired).to.be.false
+      })
+      const mutex = new RedlockMutex(allClients, 'key', {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
+      await mutex.acquire()
+      expect(mutex.isAcquired).to.be.true
+      await Promise.all([
+        client1.set('mutex:key', '222'), // another instance
+        client2.set('mutex:key', '222'), // another instance
+        client3.set('mutex:key', '222') // another instance
+      ])
+      await delay(200)
+      expect(mutex.isAcquired).to.be.false
+      expect(unhandledRejectionSpy).to.not.called
+      expect(onLockLostCallback).to.be.called
+      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
+        .be.true
     })
   })
   it('should be reusable', async () => {

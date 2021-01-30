@@ -1,10 +1,10 @@
 import Redis from 'ioredis'
 
-import { TimeoutOptions } from './misc'
 import { acquireSemaphore } from './multiSemaphore/acquire/index'
 import { refreshSemaphore } from './multiSemaphore/refresh/index'
 import { releaseSemaphore } from './multiSemaphore/release/index'
 import RedisSemaphore from './RedisSemaphore'
+import { LockOptions } from './types'
 
 export default class RedisMultiSemaphore extends RedisSemaphore {
   protected _kind = 'multi-semaphore'
@@ -15,7 +15,7 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
     key: string,
     limit: number,
     permits: number,
-    options?: TimeoutOptions
+    options?: LockOptions
   ) {
     super(client, key, limit, options)
     if (!permits) {

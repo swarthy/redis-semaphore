@@ -3,7 +3,8 @@ import { v4 as uuid4 } from 'uuid'
 
 import LostLockError from './errors/LostLockError'
 import TimeoutError from './errors/TimeoutError'
-import { defaultTimeoutOptions, TimeoutOptions } from './misc'
+import { defaultOnLockLost, defaultTimeoutOptions } from './misc'
+import { LockLostCallback, LockOptions } from './types'
 
 const REFRESH_INTERVAL_COEF = 0.8
 
@@ -25,6 +26,7 @@ export abstract class Lock {
   protected _refreshInterval?: ReturnType<typeof setInterval>
   protected _refreshing = false
   protected _acquired = false
+  protected _onLockLost: LockLostCallback
 
   protected abstract _refresh(): Promise<boolean>
   protected abstract _acquire(): Promise<boolean>
@@ -34,8 +36,9 @@ export abstract class Lock {
     lockTimeout = defaultTimeoutOptions.lockTimeout,
     acquireTimeout = defaultTimeoutOptions.acquireTimeout,
     retryInterval = defaultTimeoutOptions.retryInterval,
-    refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF)
-  }: TimeoutOptions = defaultTimeoutOptions) {
+    refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF),
+    onLockLost = defaultOnLockLost
+  }: LockOptions = defaultTimeoutOptions) {
     this._identifier = uuid4()
     this._acquireOptions = {
       lockTimeout,
@@ -45,6 +48,7 @@ export abstract class Lock {
     }
     this._refreshTimeInterval = refreshInterval
     this._processRefresh = this._processRefresh.bind(this)
+    this._onLockLost = onLockLost
   }
 
   get identifier() {
@@ -88,7 +92,10 @@ export abstract class Lock {
       if (!refreshed) {
         this._acquired = false
         this._stopRefresh()
-        throw new LostLockError(`Lost ${this._kind} for key ${this._key}`)
+        const lockLostError = new LostLockError(
+          `Lost ${this._kind} for key ${this._key}`
+        )
+        this._onLockLost(lockLostError)
       }
     } finally {
       this._refreshing = false

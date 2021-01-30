@@ -1,10 +1,10 @@
 import Redis from 'ioredis'
 
-import { TimeoutOptions } from './misc'
 import RedlockMutex from './RedlockMutex'
 import { acquireRedlockSemaphore } from './redlockSemaphore/acquire'
 import { refreshRedlockSemaphore } from './redlockSemaphore/refresh'
 import { releaseRedlockSemaphore } from './redlockSemaphore/release'
+import { LockOptions } from './types'
 
 export default class RedlockSemaphore extends RedlockMutex {
   protected _kind = 'redlock-semaphore'
@@ -14,7 +14,7 @@ export default class RedlockSemaphore extends RedlockMutex {
     clients: Redis.Redis[],
     key: string,
     limit: number,
-    options?: TimeoutOptions
+    options?: LockOptions
   ) {
     super(clients, key, options)
     if (!limit) {

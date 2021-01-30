@@ -1,10 +1,11 @@
 import Redis from 'ioredis'
 
 import { Lock } from './Lock'
-import { defaultTimeoutOptions, TimeoutOptions } from './misc'
+import { defaultTimeoutOptions } from './misc'
 import { acquireRedlockMutex } from './redlockMutex/acquire'
 import { refreshRedlockMutex } from './redlockMutex/refresh'
 import { releaseRedlockMutex } from './redlockMutex/release'
+import { LockOptions } from './types'
 
 export default class RedlockMutex extends Lock {
   protected _kind = 'redlock-mutex'
@@ -14,7 +15,7 @@ export default class RedlockMutex extends Lock {
   constructor(
     clients: Redis.Redis[],
     key: string,
-    options: TimeoutOptions = defaultTimeoutOptions
+    options: LockOptions = defaultTimeoutOptions
   ) {
     super(options)
     if (!clients || !Array.isArray(clients)) {

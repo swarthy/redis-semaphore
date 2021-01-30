@@ -1,9 +1,10 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
+import sinon from 'sinon'
 
 import LostLockError from '../../src/errors/LostLockError'
-import { TimeoutOptions } from '../../src/misc'
 import Mutex from '../../src/RedisMutex'
+import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
@@ -68,7 +69,7 @@ describe('Mutex', () => {
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
-  describe('with unhandled rejections', () => {
+  describe('lost lock case', () => {
     beforeEach(() => {
       catchUnhandledRejection()
     })
@@ -78,11 +79,31 @@ describe('Mutex', () => {
     it('should throw unhandled error if lock was lost between refreshes', async () => {
       const mutex = new Mutex(client, 'key', timeoutOptions)
       await mutex.acquire()
+      expect(mutex.isAcquired).to.be.true
       await client.set('mutex:key', '222') // another instance
-      await delay(1000)
+      await delay(200)
+      expect(mutex.isAcquired).to.be.false
       expect(unhandledRejectionSpy).to.be.called
       expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
         .to.be.true
+    })
+    it('should call onLockLost callback if provided', async () => {
+      const onLockLostCallback = sinon.spy(function (this: Mutex) {
+        expect(this.isAcquired).to.be.false
+      })
+      const mutex = new Mutex(client, 'key', {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
+      await mutex.acquire()
+      expect(mutex.isAcquired).to.be.true
+      await client.set('mutex:key', '222') // another instance
+      await delay(200)
+      expect(mutex.isAcquired).to.be.false
+      expect(unhandledRejectionSpy).to.not.called
+      expect(onLockLostCallback).to.be.called
+      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
+        .be.true
     })
   })
   it('should be reusable', async function () {

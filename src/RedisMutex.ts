@@ -1,17 +1,17 @@
 import Redis from 'ioredis'
 
 import { Lock } from './Lock'
-import { TimeoutOptions } from './misc'
 import { acquireMutex } from './mutex/acquire'
 import { refreshMutex } from './mutex/refresh'
 import { releaseMutex } from './mutex/release'
+import { LockOptions } from './types'
 
 export default class RedisMutex extends Lock {
   protected _kind = 'mutex'
   protected _key: string
   protected _client: Redis.Redis
 
-  constructor(client: Redis.Redis, key: string, options?: TimeoutOptions) {
+  constructor(client: Redis.Redis, key: string, options?: LockOptions) {
     super(options)
     if (!client) {
       throw new Error('"client" is required')
