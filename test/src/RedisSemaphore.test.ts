@@ -40,17 +40,25 @@ describe('Semaphore', () => {
   it('should acquire and release semaphore', async () => {
     const semaphore1 = new Semaphore(client, 'key', 2)
     const semaphore2 = new Semaphore(client, 'key', 2)
+    expect(semaphore1.isAcquired).to.be.false
+    expect(semaphore2.isAcquired).to.be.false
+
     await semaphore1.acquire()
+    expect(semaphore1.isAcquired).to.be.true
     await semaphore2.acquire()
+    expect(semaphore2.isAcquired).to.be.true
     expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
       semaphore1.identifier,
       semaphore2.identifier
     ])
+
     await semaphore1.release()
+    expect(semaphore1.isAcquired).to.be.false
     expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
       semaphore2.identifier
     ])
     await semaphore2.release()
+    expect(semaphore2.isAcquired).to.be.false
     expect(await client.zcard('semaphore:key')).to.be.eql(0)
   })
   it('should reject after timeout', async () => {

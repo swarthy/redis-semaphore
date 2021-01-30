@@ -39,9 +39,14 @@ describe('RedlockMutex', () => {
   })
   it('should acquire and release lock', async () => {
     const mutex = new RedlockMutex(allClients, 'key')
+    expect(mutex.isAcquired).to.be.false
+
     await mutex.acquire()
+    expect(mutex.isAcquired).to.be.true
     await expectGetAll('mutex:key', mutex.identifier)
+
     await mutex.release()
+    expect(mutex.isAcquired).to.be.false
     await expectGetAll('mutex:key', null)
   })
   it('should reject after timeout', async () => {

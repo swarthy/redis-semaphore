@@ -91,16 +91,24 @@ describe('RedlockMultiSemaphore', () => {
   it('should acquire and release semaphore', async () => {
     const semaphore1 = new RedlockMultiSemaphore(allClients, 'key', 3, 2)
     const semaphore2 = new RedlockMultiSemaphore(allClients, 'key', 3, 1)
+    expect(semaphore1.isAcquired).to.be.false
+    expect(semaphore2.isAcquired).to.be.false
+
     await semaphore1.acquire()
+    expect(semaphore1.isAcquired).to.be.true
     await semaphore2.acquire()
+    expect(semaphore2.isAcquired).to.be.true
     await expectZRangeAllHaveMembers('semaphore:key', [
       semaphore1.identifier + '_0',
       semaphore1.identifier + '_1',
       semaphore2.identifier + '_0'
     ])
+
     await semaphore1.release()
+    expect(semaphore1.isAcquired).to.be.false
     await expectZRangeAllEql('semaphore:key', [semaphore2.identifier + '_0'])
     await semaphore2.release()
+    expect(semaphore2.isAcquired).to.be.false
     await expectZCardAllEql('semaphore:key', 0)
   })
   it('should reject after timeout', async () => {

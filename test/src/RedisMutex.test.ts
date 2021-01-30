@@ -33,9 +33,12 @@ describe('Mutex', () => {
   })
   it('should acquire and release lock', async () => {
     const mutex = new Mutex(client, 'key')
+    expect(mutex.isAcquired).to.be.false
     await mutex.acquire()
+    expect(mutex.isAcquired).to.be.true
     expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
+    expect(mutex.isAcquired).to.be.false
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
   it('should reject after timeout', async () => {

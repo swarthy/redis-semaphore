@@ -24,6 +24,7 @@ export abstract class Lock {
   protected _refreshTimeInterval: number
   protected _refreshInterval?: ReturnType<typeof setInterval>
   protected _refreshing = false
+  protected _acquired = false
 
   protected abstract _refresh(): Promise<boolean>
   protected abstract _acquire(): Promise<boolean>
@@ -48,6 +49,10 @@ export abstract class Lock {
 
   get identifier() {
     return this._identifier
+  }
+
+  get isAcquired() {
+    return this._acquired
   }
 
   private _startRefresh() {
@@ -81,6 +86,7 @@ export abstract class Lock {
       )
       const refreshed = await this._refresh()
       if (!refreshed) {
+        this._acquired = false
         this._stopRefresh()
         throw new LostLockError(`Lost ${this._kind} for key ${this._key}`)
       }
@@ -95,6 +101,7 @@ export abstract class Lock {
     if (!acquired) {
       throw new TimeoutError(`Acquire ${this._kind} ${this._key} timeout`)
     }
+    this._acquired = true
     if (this._refreshTimeInterval > 0) {
       this._startRefresh()
     }
@@ -108,5 +115,6 @@ export abstract class Lock {
       this._stopRefresh()
     }
     await this._release()
+    this._acquired = false
   }
 }
