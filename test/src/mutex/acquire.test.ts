@@ -5,8 +5,8 @@ import { client1 as client } from '../../redisClient'
 
 const opts = (id: string): Options => ({
   identifier: id,
+  acquireTimeout: 50,
   lockTimeout: 100,
-  acquireTimeout: 100,
   retryInterval: 10
 })
 
@@ -40,8 +40,8 @@ describe('mutex acquire', () => {
     const now = Date.now()
     expect(start2 - start1).to.be.gte(0)
     expect(start2 - start1).to.be.lt(10)
-    expect(now - start1).to.be.gte(100)
-    expect(now - start2).to.be.gte(100)
+    expect(now - start1).to.be.gte(50)
+    expect(now - start2).to.be.gte(50)
   })
   it('should wait per key', async () => {
     const start1 = Date.now()
@@ -57,7 +57,7 @@ describe('mutex acquire', () => {
     const now = Date.now()
     expect(start2 - start1).to.be.gte(0)
     expect(start2 - start1).to.be.lt(10)
-    expect(now - start1).to.be.gte(100)
-    expect(now - start2).to.be.gte(100)
+    expect(now - start1).to.be.gte(50)
+    expect(now - start2).to.be.gte(50)
   })
 })
