@@ -33,11 +33,12 @@ yarn add redis-semaphore ioredis
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
-- `timeouts` _optional_
-  - `lockTimeout` - ms, time after mutex will be auto released (expired)
-  - `acquireTimeout` - ms, max timeout for `.acquire()` call
-  - `retryInterval` - ms, time between acquire attempts if resource locked
-  - `refreshInterval` - ms, auto-refresh interval
+- `options` - _optional_
+  - `lockTimeout` - _optional_ ms, time after mutex will be auto released (expired)
+  - `acquireTimeout` - _optional_ ms, max timeout for `.acquire()` call
+  - `retryInterval` - _optional_ ms, time between acquire attempts if resource locked
+  - `refreshInterval` - _optional_ ms, auto-refresh interval; to disable auto-refresh behaviour set `0`
+  - `onLockLost` - _optional_ function, called when lock loss is detected due refresh cycle; default onLockLost throws unhandled LostLockError
 
 #### Example
 
@@ -62,6 +63,28 @@ async function doSomething() {
 }
 ```
 
+#### Example with lost lock handling
+
+```javascript
+async function doSomething() {
+  const mutex = new Mutex(redisClient, 'lockingResource', {
+    // By default onLockLost throws unhandled LostLockError
+    onLockLost(err) {
+      console.error(err)
+    }
+  })
+  await mutex.acquire()
+  try {
+    while (mutex.isAcquired) {
+      // critical cycle iteration
+    }
+  } finally {
+    // It's safe to always call release, because if lock is no longer belongs to this mutex, .release() will have no effect
+    await mutex.release()
+  }
+}
+```
+
 ### Semaphore
 
 > See [RedisLabs: Basic counting sempahore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-1-building-a-basic-counting-semaphore/)
@@ -79,7 +102,7 @@ Most reliable way to use: `lockTimeout` is greater than possible node clock diff
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
 - `maxCount` - **required**, maximum simultaneously resource usage count
-- `timeouts` _optional_ See `Mutex` timeouts
+- `options` _optional_ See `Mutex` options
 
 #### Example
 
@@ -116,7 +139,7 @@ Same as `Semaphore` with one difference - MultiSemaphore will try to acquire mul
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
 - `maxCount` - **required**, maximum simultaneously resource usage count
 - `permits` - **required**, number of acquiring permits
-- `timeouts` _optional_ See `Mutex` timeouts
+- `options` _optional_ See `Mutex` options
 
 #### Example
 
@@ -152,7 +175,7 @@ Distributed `Mutex` version
 
 - `redisClients` - **required**, array of configured `redis` client connected to independent nodes
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
-- `timeouts` _optional_ See `Mutex` timeouts
+- `options` _optional_ See `Mutex` options
 
 #### Example
 
@@ -192,7 +215,7 @@ Distributed `Semaphore` version
 - `redisClients` - **required**, array of configured `redis` client connected to independent nodes
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
 - `maxCount` - **required**, maximum simultaneously resource usage count
-- `timeouts` _optional_ See `Mutex` timeouts
+- `options` _optional_ See `Mutex` options
 
 #### Example
 
@@ -233,7 +256,7 @@ Distributed `MultiSemaphore` version
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
 - `maxCount` - **required**, maximum simultaneously resource usage count
 - `permits` - **required**, number of acquiring permits
-- `timeouts` _optional_ See `Mutex` timeouts
+- `options` _optional_ See `Mutex` options
 
 #### Example
 

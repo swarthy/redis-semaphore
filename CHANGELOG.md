@@ -1,3 +1,8 @@
+### redis-semaphore@4.1.0
+
+- Added `.isAcquired` property on all locks
+- Added `onLostLock` constructor option. By default throws unhandled error.
+
 ### redis-semaphore@4.0.0
 
 - **Breaking change:** `Mutex`, `Semaphore`, `MultiSemaphore` not longer support `Cluster`. For multi-node case use `Redlock*` instead.
