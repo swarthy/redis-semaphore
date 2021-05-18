@@ -1,10 +1,7 @@
-name: CI
+name: CI (push)
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
     branches:
       - master
   workflow_dispatch:
@@ -36,4 +33,4 @@ jobs:
       - run: docker-compose up -d redis1 redis2 redis3
       - run: docker-compose run waiter
 
-      - run: yarn test-ci
+      - run: yarn test-ci-with-coverage

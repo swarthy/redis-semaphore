@@ -1,6 +1,7 @@
 test
-.nyc_output
 .*
 *.sh
 tsconfig*
 docker-*
+Dockerfile
+coverage

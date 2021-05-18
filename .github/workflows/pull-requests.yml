@@ -1,0 +1,32 @@
+name: CI (PR)
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  intergartion-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x, 15.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: c-hive/gha-yarn-cache@v1
+
+      - run: yarn --frozen-lockfile
+
+      - run: docker-compose up -d redis1 redis2 redis3
+      - run: docker-compose run waiter
+
+      - run: yarn test
