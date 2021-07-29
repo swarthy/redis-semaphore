@@ -2,7 +2,6 @@
 
 [![NPM version][npm-image]][npm-url]
 [![Build status][ci-image]][ci-url]
-[![Dependency Status][daviddm-image]][daviddm-url]
 ![FOSSA Status][typescript-image]
 [![Coverage Status][coverage-image]][coverage-url]
 [![Maintainability][codeclimate-image]][codeclimate-url]
@@ -301,8 +300,6 @@ MIT
 [npm-url]: https://npmjs.org/package/redis-semaphore
 [ci-image]: https://github.com/swarthy/redis-semaphore/actions/workflows/branches.yml/badge.svg
 [ci-url]: https://github.com/swarthy/redis-semaphore/actions/workflows/branches.yml
-[daviddm-image]: http://img.shields.io/david/swarthy/redis-semaphore.svg?style=flat-square
-[daviddm-url]: https://david-dm.org/swarthy/redis-semaphore
 [codeclimate-image]: https://api.codeclimate.com/v1/badges/02778c96bb5983eb150c/maintainability
 [codeclimate-url]: https://codeclimate.com/github/swarthy/redis-semaphore/maintainability
 [snyk-image]: https://snyk.io/test/npm/redis-semaphore/badge.svg
