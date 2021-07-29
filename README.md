@@ -299,8 +299,8 @@ MIT
 
 [npm-image]: https://img.shields.io/npm/v/redis-semaphore.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/redis-semaphore
-[ci-image]: https://github.com/swarthy/redis-semaphore/actions/workflows/main.yml/badge.svg
-[ci-url]: https://github.com/swarthy/redis-semaphore/actions/workflows/main.yml
+[ci-image]: https://github.com/swarthy/redis-semaphore/actions/workflows/branches.yml/badge.svg
+[ci-url]: https://github.com/swarthy/redis-semaphore/actions/workflows/branches.yml
 [daviddm-image]: http://img.shields.io/david/swarthy/redis-semaphore.svg?style=flat-square
 [daviddm-url]: https://david-dm.org/swarthy/redis-semaphore
 [codeclimate-image]: https://api.codeclimate.com/v1/badges/02778c96bb5983eb150c/maintainability
