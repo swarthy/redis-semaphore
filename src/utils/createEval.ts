@@ -28,7 +28,7 @@ export default function createEval(script: string, keysCount: number) {
     debug(connectionName, sha1, 'attempt, args:', evalSHAArgs)
     try {
       return await client.evalsha(sha1, keysCount, ...args)
-    } catch (err) {
+    } catch (err: any) {
       if (isNoScriptError(err)) {
         const evalArgs = baseArgs.concat(args)
         debug(connectionName, sha1, 'fallback to eval, args:', evalArgs)
