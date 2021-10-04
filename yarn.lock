@@ -366,9 +366,9 @@
     "@types/ms" "*"
 
 "@types/ioredis@^4.26.6":
-  version "4.27.1"
-  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.27.1.tgz#f1c2d8a4341ed5ff9f4dd7aebfb38e275e3b3197"
-  integrity sha512-+JichYPCtVapxi5Z+7V/8Uhn+4Piz+rkb03JQTQ0kW0pkV71+bmzSTkpwmIqa7FfWIszp0VbRyN8gfgWDNQMdA==
+  version "4.27.5"
+  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.27.5.tgz#f3bd216d8fdd02e831fbac0fbdcf418a4a46b0f9"
+  integrity sha512-RA8Ba0MPNjCSwukqJlapzu4KRT/MokzauUHbHAfOJtgw93pZ0vX/BBmYvodp2kzIU5bwYycH9n6pGBJaysPqxQ==
   dependencies:
     "@types/node" "*"
 
