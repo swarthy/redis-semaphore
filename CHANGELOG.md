@@ -1,3 +1,8 @@
+### redis-semaphore@5.0.0
+
+- **Breadking change:** Drop Node.js v10.x, v12.x support
+- Added `ioredis@5` support
+
 ### redis-semaphore@4.1.0
 
 - Added `.isAcquired` property on all locks
