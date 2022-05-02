@@ -4,7 +4,7 @@ import Redis from 'ioredis'
 const debug = createDebug('redis-semaphore:redlock-mutex:release')
 
 export async function releaseRedlockSemaphore(
-  clients: Redis.Redis[],
+  clients: Redis[],
   key: string,
   identifier: string
 ) {

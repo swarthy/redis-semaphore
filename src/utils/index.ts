@@ -8,7 +8,7 @@ export async function delay(ms: number) {
   return await new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export function getConnectionName(client: Redis.Redis) {
+export function getConnectionName(client: Redis) {
   return client instanceof Redis && client.options.connectionName
     ? `<${client.options.connectionName}>`
     : '<client>'

@@ -11,7 +11,7 @@ export default class RedlockMultiSemaphore extends RedlockSemaphore {
   protected _permits: number
 
   constructor(
-    clients: Redis.Redis[],
+    clients: Redis[],
     key: string,
     limit: number,
     permits: number,

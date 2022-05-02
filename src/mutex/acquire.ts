@@ -13,7 +13,7 @@ export interface Options {
 }
 
 export async function acquireMutex(
-  client: Redis.Redis,
+  client: Redis,
   key: string,
   options: Options
 ) {
@@ -21,7 +21,7 @@ export async function acquireMutex(
   const end = Date.now() + acquireTimeout
   while (Date.now() < end) {
     debug(key, identifier, 'attempt')
-    const result = await client.set(key, identifier, 'NX', 'PX', lockTimeout)
+    const result = await client.set(key, identifier, 'PX', lockTimeout, 'NX')
     debug('result', typeof result, result)
     if (result === 'OK') {
       debug(key, identifier, 'acquired')

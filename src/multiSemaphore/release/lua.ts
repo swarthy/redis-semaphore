@@ -1,6 +1,6 @@
 import { createEval } from '../../utils/index'
 
-export const releaseLua = createEval(
+export const releaseLua = createEval<[string, number, string], number>(
   `
   local key = KEYS[1]
   local permits = tonumber(ARGV[1])

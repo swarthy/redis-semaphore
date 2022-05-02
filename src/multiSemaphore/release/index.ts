@@ -12,7 +12,7 @@ export interface Options {
 }
 
 export async function releaseSemaphore(
-  client: Redis.Redis,
+  client: Redis,
   key: string,
   permits: number,
   identifier: string

@@ -7,7 +7,7 @@ import { getQuorum, smartSum } from '../utils/redlock'
 const debug = createDebug('redis-semaphore:redlock-mutex:refresh')
 
 export async function refreshRedlockMutex(
-  clients: Redis.Redis[],
+  clients: Redis[],
   key: string,
   identifier: string,
   lockTimeout: number

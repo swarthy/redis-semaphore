@@ -11,7 +11,7 @@ export default class RedlockSemaphore extends RedlockMutex {
   protected _limit: number
 
   constructor(
-    clients: Redis.Redis[],
+    clients: Redis[],
     key: string,
     limit: number,
     options?: LockOptions

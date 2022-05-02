@@ -12,7 +12,7 @@ interface Options {
 }
 
 export async function refreshRedlockMultiSemaphore(
-  clients: Redis.Redis[],
+  clients: Redis[],
   key: string,
   limit: number,
   permits: number,

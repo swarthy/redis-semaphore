@@ -10,10 +10,10 @@ import { LockOptions } from './types'
 export default class RedlockMutex extends Lock {
   protected _kind = 'redlock-mutex'
   protected _key: string
-  protected _clients: Redis.Redis[]
+  protected _clients: Redis[]
 
   constructor(
-    clients: Redis.Redis[],
+    clients: Redis[],
     key: string,
     options: LockOptions = defaultTimeoutOptions
   ) {

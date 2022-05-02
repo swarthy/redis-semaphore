@@ -5,7 +5,7 @@ import { createEval } from '../utils/index'
 
 const debug = createDebug('redis-semaphore:mutex:refresh')
 
-export const expireIfEqualLua = createEval(
+export const expireIfEqualLua = createEval<[string, string, number], 0 | 1>(
   `
   local key = KEYS[1]
   local identifier = ARGV[1]
@@ -28,7 +28,7 @@ export const expireIfEqualLua = createEval(
 )
 
 export async function refreshMutex(
-  client: Redis.Redis,
+  client: Redis,
   key: string,
   identifier: string,
   lockTimeout: number

@@ -11,7 +11,7 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
   protected _permits: number
 
   constructor(
-    client: Redis.Redis,
+    client: Redis,
     key: string,
     limit: number,
     permits: number,

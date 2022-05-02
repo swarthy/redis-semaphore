@@ -9,9 +9,9 @@ import { LockOptions } from './types'
 export default class RedisMutex extends Lock {
   protected _kind = 'mutex'
   protected _key: string
-  protected _client: Redis.Redis
+  protected _client: Redis
 
-  constructor(client: Redis.Redis, key: string, options?: LockOptions) {
+  constructor(client: Redis, key: string, options?: LockOptions) {
     super(options)
     if (!client) {
       throw new Error('"client" is required')

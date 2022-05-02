@@ -15,7 +15,7 @@ export interface Options {
 }
 
 export async function acquireRedlockMultiSemaphore(
-  clients: Redis.Redis[],
+  clients: Redis[],
   key: string,
   limit: number,
   permits: number,

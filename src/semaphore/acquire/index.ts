@@ -14,7 +14,7 @@ export interface Options {
 }
 
 export async function acquireSemaphore(
-  client: Redis.Redis,
+  client: Redis,
   key: string,
   limit: number,
   options: Options

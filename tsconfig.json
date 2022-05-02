@@ -4,6 +4,7 @@
     "lib": ["ES6"],
     "declaration": true,
     "esModuleInterop": true,
+    "moduleResolution": "Node",
     "sourceMap": true,
     "strict": true
   }

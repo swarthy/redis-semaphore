@@ -6,7 +6,7 @@ import { releaseLua } from '../multiSemaphore/release/lua'
 const debug = createDebug('redis-semaphore:redlock-mutex:release')
 
 export async function releaseRedlockMultiSemaphore(
-  clients: Redis.Redis[],
+  clients: Redis[],
   key: string,
   permits: number,
   identifier: string

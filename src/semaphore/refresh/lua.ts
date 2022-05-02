@@ -1,6 +1,9 @@
 import { createEval } from '../../utils/index'
 
-export const refreshLua = createEval(
+export const refreshLua = createEval<
+  [string, number, string, number, number],
+  0 | 1
+>(
   `
   local key = KEYS[1]
   local limit = tonumber(ARGV[1])

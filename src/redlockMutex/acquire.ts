@@ -15,7 +15,7 @@ export interface Options {
 }
 
 export async function acquireRedlockMutex(
-  clients: Redis.Redis[],
+  clients: Redis[],
   key: string,
   options: Options
 ) {
@@ -26,7 +26,7 @@ export async function acquireRedlockMutex(
     debug(key, identifier, 'attempt')
     const promises = clients.map(client =>
       client
-        .set(key, identifier, 'NX', 'PX', lockTimeout)
+        .set(key, identifier, 'PX', lockTimeout, 'NX')
         .then(result => (result === 'OK' ? 1 : 0))
         .catch(() => 0)
     )
