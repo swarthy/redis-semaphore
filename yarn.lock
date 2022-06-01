@@ -2521,10 +2521,10 @@ slash@^3.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-3.0.0.tgz#6539be870c165adbd5240220dbe361f1bc4d4634"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
 
-snyk@1.915.0:
-  version "1.915.0"
-  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.915.0.tgz#1a3a6d6c220582fa3549f95d01cc35fe2fb08b59"
-  integrity sha512-1b7HkeFdD33hA/yWbAhenPIMJeqxR0w377+HsgIUHqDbbBVMvgEkz93tlZE3WigaiQ1J09R6bA4QA1/ELMnUNA==
+snyk@1.945.0:
+  version "1.945.0"
+  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.945.0.tgz#c0a84dd0bd00cf4f858f230bf4204cba00058398"
+  integrity sha512-l+DM5Jcgrxy+0Iuh6IHSrl/+0ubJ8pqkS6HvyXOIkydyCWSik9XZAoK+EMKV9swpZKLtJOjCj6yxGNyl4HBZhQ==
 
 source-map@^0.5.0:
   version "0.5.7"
