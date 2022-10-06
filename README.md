@@ -84,6 +84,26 @@ async function doSomething() {
 }
 ```
 
+#### Example with optional lock
+
+```javascript
+async function doSomething() {
+  const mutex = new Mutex(redisClient, 'lockingResource', { acquireTimeout: 0 })
+  const lockAcquired = await mutex.tryAcquire()
+  if (!lockAcquired) {
+    return
+  }
+  try {
+    while (mutex.isAcquired) {
+      // critical cycle iteration
+    }
+  } finally {
+    // It's safe to always call release, because if lock is no longer belongs to this mutex, .release() will have no effect
+    await mutex.release()
+  }
+}
+```
+
 ### Semaphore
 
 > See [RedisLabs: Basic counting sempahore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-1-building-a-basic-counting-semaphore/)
