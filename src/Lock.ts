@@ -134,7 +134,9 @@ export abstract class Lock {
     if (this._refreshTimeInterval > 0) {
       this._stopRefresh()
     }
-    await this._release()
+    if (this._acquired) {
+      await this._release()
+    }
     this._acquired = false
   }
 }
