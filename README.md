@@ -34,7 +34,7 @@ yarn add redis-semaphore ioredis
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
 - `options` - _optional_
   - `lockTimeout` - _optional_ ms, time after mutex will be auto released (expired)
-  - `acquireTimeout` - _optional_ ms, max timeout for `.acquire()` call
+  - `acquireTimeout` - _optional_ ms, max timeout for `.acquire()` call. If set to 0, will only attempt to acquire lock once
   - `retryInterval` - _optional_ ms, time between acquire attempts if resource locked
   - `refreshInterval` - _optional_ ms, auto-refresh interval; to disable auto-refresh behaviour set `0`
   - `onLockLost` - _optional_ function, called when lock loss is detected due refresh cycle; default onLockLost throws unhandled LostLockError

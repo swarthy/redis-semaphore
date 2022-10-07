@@ -1,7 +1,7 @@
 import Redis from 'ioredis'
 
 import { Lock } from './Lock'
-import { acquireMutex } from './mutex/acquire'
+import { acquireMutex, acquireMutexOnce } from './mutex/acquire'
 import { refreshMutex } from './mutex/refresh'
 import { releaseMutex } from './mutex/release'
 import { LockOptions } from './types'
@@ -39,6 +39,9 @@ export default class RedisMutex extends Lock {
   }
 
   protected async _acquire() {
+    if (this._acquireOptions.acquireTimeout === 0) {
+      return await acquireMutexOnce(this._client, this._key, this._acquireOptions)
+    }
     return await acquireMutex(this._client, this._key, this._acquireOptions)
   }
 

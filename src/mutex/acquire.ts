@@ -33,3 +33,20 @@ export async function acquireMutex(
   debug(key, identifier, 'timeout')
   return false
 }
+
+export async function acquireMutexOnce(
+  client: Redis,
+  key: string,
+  options: Options
+) {
+  const { identifier, lockTimeout } = options
+    debug(key, identifier, 'attempt')
+    const result = await client.set(key, identifier, 'PX', lockTimeout, 'NX')
+    debug('result', typeof result, result)
+    if (result === 'OK') {
+      debug(key, identifier, 'acquired')
+      return true
+    }
+  debug(key, identifier, 'timeout')
+  return false
+}
