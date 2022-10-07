@@ -114,6 +114,19 @@ export abstract class Lock {
     }
   }
 
+  async tryAcquire() {
+    debug(`tryAcquire ${this._kind} (key: ${this._key})`)
+    const acquired = await this._acquire()
+    if (!acquired) {
+      return false
+    }
+    this._acquired = true
+    if (this._refreshTimeInterval > 0) {
+      this._startRefresh()
+    }
+    return true
+  }
+
   async release() {
     debug(
       `release ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`

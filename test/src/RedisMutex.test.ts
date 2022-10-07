@@ -52,6 +52,22 @@ describe('Mutex', () => {
     await mutex1.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
+  it('should return false for tryAcquire after timeout', async () => {
+    const mutex1 = new Mutex(client, 'key', timeoutOptions)
+    const mutex2 = new Mutex(client, 'key', timeoutOptions)
+    await mutex1.acquire()
+    const result = await mutex2.tryAcquire()
+    expect(result).to.be.false
+    await mutex1.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
+  it('should return true for successful tryAcquire', async () => {
+    const mutex = new Mutex(client, 'key', timeoutOptions)
+    const result = await mutex.tryAcquire()
+    expect(result).to.be.true
+    await mutex.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
   it('should refresh lock every refreshInterval ms until release', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
     await mutex.acquire()
