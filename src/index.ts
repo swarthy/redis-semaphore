@@ -4,6 +4,8 @@ import Semaphore from './RedisSemaphore'
 import RedlockMultiSemaphore from './RedlockMultiSemaphore'
 import RedlockMutex from './RedlockMutex'
 import RedlockSemaphore from './RedlockSemaphore'
+import TimeoutError from './errors/TimeoutError'
+import LostLockError from './errors/LostLockError'
 
 export { defaultTimeoutOptions } from './misc'
 
@@ -13,7 +15,9 @@ export {
   MultiSemaphore,
   RedlockMutex,
   RedlockSemaphore,
-  RedlockMultiSemaphore
+  RedlockMultiSemaphore,
+  TimeoutError,
+  LostLockError
 }
 
 export type { LockLostCallback, TimeoutOptions, LockOptions } from './types'
