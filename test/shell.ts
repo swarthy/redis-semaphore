@@ -28,13 +28,13 @@ function sh(cmd: string) {
 export async function upRedisServer(num: number) {
   const port = 6000 + num
   await sh(
-    `docker-compose up -d redis${num} && yarn wait-for --redis redis://127.0.0.1:${port}`
+    `docker compose up -d redis${num} && yarn wait-for --redis redis://127.0.0.1:${port}`
   )
 }
 
 export async function downRedisServer(num: number) {
   const port = 6000 + num
-  await sh(`docker-compose stop redis${num}`)
+  await sh(`docker compose stop redis${num}`)
   let tries = 0
   while (true) {
     try {
