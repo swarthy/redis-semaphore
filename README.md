@@ -28,13 +28,14 @@ yarn add redis-semaphore ioredis
 
 > See [RedisLabs: Locks with timeouts](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-2-distributed-locking/6-2-5-locks-with-timeouts/)
 
-##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
 - `options` - _optional_
   - `lockTimeout` - _optional_ ms, time after mutex will be auto released (expired)
   - `acquireTimeout` - _optional_ ms, max timeout for `.acquire()` call
+  - `acquireAttemptsLimit` - _optional_ max number of attempts to be made in `.acquire()` call
   - `retryInterval` - _optional_ ms, time between acquire attempts if resource locked
   - `refreshInterval` - _optional_ ms, auto-refresh interval; to disable auto-refresh behaviour set `0`
   - `onLockLost` - _optional_ function, called when lock loss is detected due refresh cycle; default onLockLost throws unhandled LostLockError
@@ -88,7 +89,9 @@ async function doSomething() {
 
 ```javascript
 async function doSomething() {
-  const mutex = new Mutex(redisClient, 'lockingResource', { acquireTimeout: 0 })
+  const mutex = new Mutex(redisClient, 'lockingResource', {
+    acquireAttemptsLimit: 1
+  })
   const lockAcquired = await mutex.tryAcquire()
   if (!lockAcquired) {
     return
@@ -116,7 +119,7 @@ In edge cases (node time difference is greater than `lockTimeout`) both algorith
 
 Most reliable way to use: `lockTimeout` is greater than possible node clock differences, `refreshInterval` is not 0 and is less enough than `lockTimeout` (by default is `lockTimeout * 0.8`)
 
-##### new Semaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new Semaphore(redisClient, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
@@ -152,7 +155,7 @@ Same as `Semaphore` with one difference - MultiSemaphore will try to acquire mul
 
 `MultiSemaphore` and `Semaphore` shares same key namespace and can be used together (see test/src/RedisMultiSemaphore.test.ts).
 
-##### new MultiSemaphore(redisClient, key, maxCount, permits [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new MultiSemaphore(redisClient, key, maxCount, permits [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
@@ -190,7 +193,7 @@ Distributed `Mutex` version
 
 > See [The Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm)
 
-##### new RedlockMutex(redisClients, key [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new RedlockMutex(redisClients, key [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClients` - **required**, array of configured `redis` client connected to independent nodes
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
@@ -229,7 +232,7 @@ Distributed `Semaphore` version
 
 > See [The Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm)
 
-##### new RedlockSemaphore(redisClients, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new RedlockSemaphore(redisClients, key, maxCount [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClients` - **required**, array of configured `redis` client connected to independent nodes
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)
@@ -269,7 +272,7 @@ Distributed `MultiSemaphore` version
 
 > See [The Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm)
 
-##### new RedlockMultiSemaphore(redisClients, key, maxCount, permits [, { lockTimeout = 10000, acquireTimeout = 10000, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new RedlockMultiSemaphore(redisClients, key, maxCount, permits [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
 
 - `redisClients` - **required**, array of configured `redis` client connected to independent nodes
 - `key` - **required**, key for locking resource (final key in redis: `semaphore:<key>`)

@@ -8,10 +8,19 @@ export interface LockLostCallback {
 export interface TimeoutOptions {
   lockTimeout?: number
   acquireTimeout?: number
+  acquireAttemptsLimit?: number
   retryInterval?: number
   refreshInterval?: number
 }
 
 export interface LockOptions extends TimeoutOptions {
   onLockLost?: LockLostCallback
+}
+
+export interface AcquireOptions {
+  identifier: string
+  lockTimeout: number
+  acquireTimeout: number
+  acquireAttemptsLimit: number
+  retryInterval: number
 }

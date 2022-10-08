@@ -11,6 +11,7 @@ export interface Options {
   identifier: string
   lockTimeout: number
   acquireTimeout: number
+  acquireAttemptsLimit: number
   retryInterval: number
 }
 
@@ -21,12 +22,19 @@ export async function acquireRedlockMultiSemaphore(
   permits: number,
   options: Options
 ) {
-  const { identifier, lockTimeout, acquireTimeout, retryInterval } = options
+  const {
+    identifier,
+    lockTimeout,
+    acquireTimeout,
+    acquireAttemptsLimit,
+    retryInterval
+  } = options
+  let attempt = 0
   const end = Date.now() + acquireTimeout
   const quorum = getQuorum(clients.length)
   let now: number
-  while ((now = Date.now()) < end) {
-    debug(key, identifier, 'attempt')
+  while ((now = Date.now()) < end && ++attempt <= acquireAttemptsLimit) {
+    debug(key, identifier, 'attempt', attempt)
     const promises = clients.map(client =>
       acquireLua(client, [key, limit, permits, identifier, lockTimeout, now])
         .then(result => +result)
@@ -44,6 +52,6 @@ export async function acquireRedlockMultiSemaphore(
       await delay(retryInterval)
     }
   }
-  debug(key, identifier, 'timeout')
+  debug(key, identifier, 'timeout or reach limit')
   return false
 }

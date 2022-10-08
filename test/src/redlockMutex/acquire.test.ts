@@ -1,13 +1,18 @@
 import { expect } from 'chai'
 
-import { acquireRedlockMutex as acquire, Options } from '../../../src/redlockMutex/acquire'
+import {
+  acquireRedlockMutex as acquire,
+  Options
+} from '../../../src/redlockMutex/acquire'
 import { allClients } from '../../redisClient'
 
-const opts = (id: string): Options => ({
+const opts = (id: string, overrides?: Partial<Options>): Options => ({
   identifier: id,
   acquireTimeout: 50,
+  acquireAttemptsLimit: Number.POSITIVE_INFINITY,
   lockTimeout: 100,
-  retryInterval: 10
+  retryInterval: 10,
+  ...overrides
 })
 
 describe('redlockMutex acquire', () => {
@@ -18,6 +23,19 @@ describe('redlockMutex acquire', () => {
   it('should return false when timeout', async () => {
     const result1 = await acquire(allClients, 'key', opts('111'))
     const result2 = await acquire(allClients, 'key', opts('222'))
+    expect(result1).to.be.true
+    expect(result2).to.be.false
+  })
+  it('should return false after acquireAttemptsLimit', async () => {
+    const result1 = await acquire(allClients, 'key', opts('111'))
+    const result2 = await acquire(
+      allClients,
+      'key',
+      opts('222', {
+        acquireAttemptsLimit: 1,
+        acquireTimeout: Number.POSITIVE_INFINITY
+      })
+    )
     expect(result1).to.be.true
     expect(result2).to.be.false
   })

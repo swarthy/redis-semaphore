@@ -10,6 +10,7 @@ export interface Options {
   identifier: string
   lockTimeout: number
   acquireTimeout: number
+  acquireAttemptsLimit: number
   retryInterval: number
 }
 
@@ -20,11 +21,18 @@ export async function acquireSemaphore(
   permits: number,
   options: Options
 ) {
-  const { identifier, lockTimeout, acquireTimeout, retryInterval } = options
+  const {
+    identifier,
+    lockTimeout,
+    acquireTimeout,
+    acquireAttemptsLimit,
+    retryInterval
+  } = options
+  let attempt = 0
   const end = Date.now() + acquireTimeout
   let now
-  while ((now = Date.now()) < end) {
-    debug(key, identifier, limit, lockTimeout)
+  while ((now = Date.now()) < end && ++attempt <= acquireAttemptsLimit) {
+    debug(key, identifier, limit, lockTimeout, 'attempt', attempt)
     const result = await acquireLua(client, [
       key,
       limit,
@@ -41,5 +49,6 @@ export async function acquireSemaphore(
       await delay(retryInterval)
     }
   }
+  debug(key, identifier, limit, lockTimeout, 'timeout or reach limit')
   return false
 }
