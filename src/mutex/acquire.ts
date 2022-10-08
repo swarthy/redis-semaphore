@@ -9,6 +9,7 @@ export interface Options {
   identifier: string
   lockTimeout: number
   acquireTimeout: number
+  acquireAttemptsLimit: number
   retryInterval: number
 }
 
@@ -17,10 +18,17 @@ export async function acquireMutex(
   key: string,
   options: Options
 ) {
-  const { identifier, lockTimeout, acquireTimeout, retryInterval } = options
+  const {
+    identifier,
+    lockTimeout,
+    acquireTimeout,
+    acquireAttemptsLimit,
+    retryInterval
+  } = options
+  let attempt = 0
   const end = Date.now() + acquireTimeout
-  while (Date.now() < end) {
-    debug(key, identifier, 'attempt')
+  while (Date.now() < end && ++attempt <= acquireAttemptsLimit) {
+    debug(key, identifier, 'attempt', attempt)
     const result = await client.set(key, identifier, 'PX', lockTimeout, 'NX')
     debug('result', typeof result, result)
     if (result === 'OK') {
@@ -30,6 +38,6 @@ export async function acquireMutex(
       await delay(retryInterval)
     }
   }
-  debug(key, identifier, 'timeout')
+  debug(key, identifier, 'timeout or reach limit')
   return false
 }

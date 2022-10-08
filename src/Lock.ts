@@ -4,18 +4,11 @@ import { v4 as uuid4 } from 'uuid'
 import LostLockError from './errors/LostLockError'
 import TimeoutError from './errors/TimeoutError'
 import { defaultOnLockLost, defaultTimeoutOptions } from './misc'
-import { LockLostCallback, LockOptions } from './types'
+import { AcquireOptions, LockLostCallback, LockOptions } from './types'
 
 const REFRESH_INTERVAL_COEF = 0.8
 
 const debug = createDebug('redis-semaphore:instance')
-
-interface AcquireOptions {
-  identifier: string
-  lockTimeout: number
-  acquireTimeout: number
-  retryInterval: number
-}
 
 export abstract class Lock {
   protected abstract _kind: string
@@ -35,6 +28,7 @@ export abstract class Lock {
   constructor({
     lockTimeout = defaultTimeoutOptions.lockTimeout,
     acquireTimeout = defaultTimeoutOptions.acquireTimeout,
+    acquireAttemptsLimit = defaultTimeoutOptions.acquireAttemptsLimit,
     retryInterval = defaultTimeoutOptions.retryInterval,
     refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF),
     onLockLost = defaultOnLockLost
@@ -43,6 +37,7 @@ export abstract class Lock {
     this._acquireOptions = {
       lockTimeout,
       acquireTimeout,
+      acquireAttemptsLimit,
       retryInterval,
       identifier: this._identifier
     }
