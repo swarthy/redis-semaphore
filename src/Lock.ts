@@ -19,6 +19,7 @@ export abstract class Lock {
   protected _refreshInterval?: ReturnType<typeof setInterval>
   protected _refreshing = false
   protected _acquired = false
+  protected _acquiredExternally = false
   protected _onLockLost: LockLostCallback
 
   protected abstract _refresh(): Promise<boolean>
@@ -31,9 +32,11 @@ export abstract class Lock {
     acquireAttemptsLimit = defaultTimeoutOptions.acquireAttemptsLimit,
     retryInterval = defaultTimeoutOptions.retryInterval,
     refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF),
-    onLockLost = defaultOnLockLost
+    onLockLost = defaultOnLockLost,
+    externallyAcquiredIdentifier
   }: LockOptions = defaultTimeoutOptions) {
-    this._identifier = uuid4()
+    this._identifier = externallyAcquiredIdentifier || uuid4()
+    this._acquiredExternally = !!externallyAcquiredIdentifier
     this._acquireOptions = {
       lockTimeout,
       acquireTimeout,
@@ -99,23 +102,22 @@ export abstract class Lock {
 
   async acquire() {
     debug(`acquire ${this._kind} (key: ${this._key})`)
-    const acquired = await this._acquire()
+    const acquired = await this.tryAcquire()
     if (!acquired) {
       throw new TimeoutError(`Acquire ${this._kind} ${this._key} timeout`)
-    }
-    this._acquired = true
-    if (this._refreshTimeInterval > 0) {
-      this._startRefresh()
     }
   }
 
   async tryAcquire() {
     debug(`tryAcquire ${this._kind} (key: ${this._key})`)
-    const acquired = await this._acquire()
+    const acquired = this._acquiredExternally
+      ? await this._refresh()
+      : await this._acquire()
     if (!acquired) {
       return false
     }
     this._acquired = true
+    this._acquiredExternally = false
     if (this._refreshTimeInterval > 0) {
       this._startRefresh()
     }
@@ -129,9 +131,10 @@ export abstract class Lock {
     if (this._refreshTimeInterval > 0) {
       this.stopRefresh()
     }
-    if (this._acquired) {
+    if (this._acquired || this._acquiredExternally) {
       await this._release()
     }
     this._acquired = false
+    this._acquiredExternally = false
   }
 }
