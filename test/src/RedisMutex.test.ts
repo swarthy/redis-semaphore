@@ -71,7 +71,7 @@ describe('Mutex', () => {
   it('should refresh lock every refreshInterval ms until release', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
     await mutex.acquire()
-    await delay(100)
+    await delay(400)
     expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
@@ -88,7 +88,7 @@ describe('Mutex', () => {
     await mutex.acquire()
     mutex.stopRefresh()
     mutex.startRefresh()
-    await delay(100)
+    await delay(400)
     expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
@@ -97,7 +97,7 @@ describe('Mutex', () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
     await mutex.acquire()
     await client.del('mutex:key') // "expired"
-    await delay(100)
+    await delay(400)
     expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
