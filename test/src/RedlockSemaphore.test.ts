@@ -118,7 +118,7 @@ describe('RedlockSemaphore', () => {
     )
     await semaphore1.acquire()
     await semaphore2.acquire()
-    await delay(100)
+    await delay(400)
     await expectZRangeAllHaveMembers('semaphore:key', [
       semaphore1.identifier,
       semaphore2.identifier
@@ -126,6 +126,28 @@ describe('RedlockSemaphore', () => {
     await semaphore1.release()
     await expectZRangeAllEql('semaphore:key', [semaphore2.identifier])
     await semaphore2.release()
+    await expectZCardAllEql('semaphore:key', 0)
+  })
+  it('should stop refreshing lock if stopped', async () => {
+    const semaphore1 = new RedlockSemaphore(
+      allClients,
+      'key',
+      2,
+      timeoutOptions
+    )
+    const semaphore2 = new RedlockSemaphore(
+      allClients,
+      'key',
+      2,
+      timeoutOptions
+    )
+    await semaphore1.acquire()
+    await semaphore2.acquire()
+    semaphore1.stopRefresh()
+    await delay(400)
+    await expectZRangeAllEql('semaphore:key', [semaphore2.identifier])
+    semaphore2.stopRefresh()
+    await delay(400)
     await expectZCardAllEql('semaphore:key', 0)
   })
   it('should acquire maximum LIMIT semaphores', async () => {
