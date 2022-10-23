@@ -76,6 +76,23 @@ describe('Mutex', () => {
     await mutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
+  it('should stop refreshing lock every refreshInterval ms if stopped', async () => {
+    const mutex = new Mutex(client, 'key', timeoutOptions)
+    await mutex.acquire()
+    mutex.stopRefresh()
+    await delay(100)
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
+  it('should restart refreshing lock every refreshInterval ms if stopped and started again', async () => {
+    const mutex = new Mutex(client, 'key', timeoutOptions)
+    await mutex.acquire()
+    mutex.stopRefresh()
+    mutex.startRefresh()
+    await delay(100)
+    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
+    await mutex.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
   it('should re-acquire lock if lock was expired between refreshes, but was not acquired by another instance', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
     await mutex.acquire()

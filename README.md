@@ -107,6 +107,29 @@ async function doSomething() {
 }
 ```
 
+#### Example with temporary refresh
+
+```javascript
+async function doSomething() {
+  const mutex = new Mutex(redisClient, 'lockingResource', {
+    lockTimeout: 120000,
+    refreshInterval: 15000
+  })
+  const lockAcquired = await mutex.tryAcquire()
+  if (!lockAcquired) {
+    return
+  }
+  try {
+    while (mutex.isAcquired) {
+      // critical cycle iteration
+    }
+  } finally {
+    // We want to let lock expire over time after operation is finished 
+    await mutex.stopRefresh()
+  }
+}
+```
+
 ### Semaphore
 
 > See [RedisLabs: Basic counting sempahore](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-3-counting-semaphores/6-3-1-building-a-basic-counting-semaphore/)
