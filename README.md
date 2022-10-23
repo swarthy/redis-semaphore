@@ -120,9 +120,7 @@ async function doSomething() {
     return
   }
   try {
-    while (mutex.isAcquired) {
       // critical cycle iteration
-    }
   } finally {
     // We want to let lock expire over time after operation is finished 
     await mutex.stopRefresh()

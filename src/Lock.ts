@@ -54,7 +54,7 @@ export abstract class Lock {
     return this._acquired
   }
 
-  public startRefresh() {
+  private _startRefresh() {
     this._refreshInterval = setInterval(
       this._processRefresh,
       this._refreshTimeInterval
@@ -62,7 +62,7 @@ export abstract class Lock {
     this._refreshInterval.unref()
   }
 
-  public stopRefresh() {
+  stopRefresh() {
     if (this._refreshInterval) {
       debug(
         `clear refresh interval ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
@@ -105,7 +105,7 @@ export abstract class Lock {
     }
     this._acquired = true
     if (this._refreshTimeInterval > 0) {
-      this.startRefresh()
+      this._startRefresh()
     }
   }
 
@@ -117,7 +117,7 @@ export abstract class Lock {
     }
     this._acquired = true
     if (this._refreshTimeInterval > 0) {
-      this.startRefresh()
+      this._startRefresh()
     }
     return true
   }
