@@ -80,7 +80,7 @@ describe('Mutex', () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
     await mutex.acquire()
     mutex.stopRefresh()
-    await delay(100)
+    await delay(400)
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
   it('should restart refreshing lock every refreshInterval ms if stopped and started again', async () => {
