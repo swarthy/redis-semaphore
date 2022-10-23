@@ -63,9 +63,16 @@ describe('RedlockMutex', () => {
   it('should refresh lock every refreshInterval ms until release', async () => {
     const mutex = new RedlockMutex(allClients, 'key', timeoutOptions)
     await mutex.acquire()
-    await delay(100)
+    await delay(400)
     await expectGetAll('mutex:key', mutex.identifier)
     await mutex.release()
+    await expectGetAll('mutex:key', null)
+  })
+  it('should stop refreshing if stopped', async () => {
+    const mutex = new RedlockMutex(allClients, 'key', timeoutOptions)
+    await mutex.acquire()
+    mutex.stopRefresh()
+    await delay(400)
     await expectGetAll('mutex:key', null)
   })
   describe('lost lock case', () => {

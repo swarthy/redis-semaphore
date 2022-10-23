@@ -62,7 +62,7 @@ export abstract class Lock {
     this._refreshInterval.unref()
   }
 
-  private _stopRefresh() {
+  stopRefresh() {
     if (this._refreshInterval) {
       debug(
         `clear refresh interval ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
@@ -86,7 +86,7 @@ export abstract class Lock {
       const refreshed = await this._refresh()
       if (!refreshed) {
         this._acquired = false
-        this._stopRefresh()
+        this.stopRefresh()
         const lockLostError = new LostLockError(
           `Lost ${this._kind} for key ${this._key}`
         )
@@ -127,7 +127,7 @@ export abstract class Lock {
       `release ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
     )
     if (this._refreshTimeInterval > 0) {
-      this._stopRefresh()
+      this.stopRefresh()
     }
     if (this._acquired) {
       await this._release()

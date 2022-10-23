@@ -87,7 +87,7 @@ describe('MultiSemaphore', () => {
     const semaphore2 = new MultiSemaphore(client, 'key', 3, 1, timeoutOptions)
     await semaphore1.acquire()
     await semaphore2.acquire()
-    await delay(100)
+    await delay(400)
     expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
       semaphore1.identifier + '_0',
       semaphore1.identifier + '_1',
@@ -98,6 +98,20 @@ describe('MultiSemaphore', () => {
       semaphore2.identifier + '_0'
     ])
     await semaphore2.release()
+    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+  })
+  it('should stop refreshing lock if stopped', async () => {
+    const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
+    const semaphore2 = new MultiSemaphore(client, 'key', 3, 1, timeoutOptions)
+    await semaphore1.acquire()
+    await semaphore2.acquire()
+    await semaphore1.stopRefresh()
+    await delay(400)
+    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+      semaphore2.identifier + '_0'
+    ])
+    await semaphore2.stopRefresh()
+    await delay(400)
     expect(await client.zcard('semaphore:key')).to.be.eql(0)
   })
   it('should acquire maximum LIMIT semaphores', async () => {
