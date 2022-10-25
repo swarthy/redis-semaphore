@@ -1,3 +1,13 @@
+### redis-semaphore@5.3.0
+
+- Added `stopRefresh` method
+- Added `externallyAcquiredIdentifier` optional constructor option
+- Removed `uuid` dependency
+
+### redis-semaphore@5.2.0
+
+- Added `acquireAttemptsLimit` method
+
 ### redis-semaphore@5.1.0
 
 - Added `tryAcquire`
