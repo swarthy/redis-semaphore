@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { v4 as uuid4 } from 'uuid'
+import * as crypto from 'node:crypto'
 
 import LostLockError from './errors/LostLockError'
 import TimeoutError from './errors/TimeoutError'
@@ -35,7 +35,7 @@ export abstract class Lock {
     onLockLost = defaultOnLockLost,
     externallyAcquiredIdentifier
   }: LockOptions = defaultTimeoutOptions) {
-    this._identifier = externallyAcquiredIdentifier || uuid4()
+    this._identifier = externallyAcquiredIdentifier || crypto.randomUUID()
     this._acquiredExternally = !!externallyAcquiredIdentifier
     this._acquireOptions = {
       lockTimeout,
