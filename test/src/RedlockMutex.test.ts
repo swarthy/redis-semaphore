@@ -9,7 +9,9 @@ import { delay } from '../../src/utils/index'
 import { allClients, client1, client2, client3 } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
-  catchUnhandledRejection, throwUnhandledRejection, unhandledRejectionSpy
+  catchUnhandledRejection,
+  throwUnhandledRejection,
+  unhandledRejectionSpy
 } from '../unhandledRejection'
 
 const timeoutOptions: TimeoutOptions = {
@@ -27,16 +29,16 @@ async function expectGetAll(key: string, value: string | null) {
 
 describe('RedlockMutex', () => {
   it('should fail on invalid arguments', () => {
-    expect(
-      () => new RedlockMutex((null as unknown) as Redis[], 'key')
-    ).to.throw('"clients" array is required')
-    expect(
-      () => new RedlockMutex(([{}] as unknown) as Redis[], 'key')
-    ).to.throw('"client" must be instance of ioredis client')
+    expect(() => new RedlockMutex(null as unknown as Redis[], 'key')).to.throw(
+      '"clients" array is required'
+    )
+    expect(() => new RedlockMutex([{}] as unknown as Redis[], 'key')).to.throw(
+      '"client" must be instance of ioredis client'
+    )
     expect(() => new RedlockMutex(allClients, '')).to.throw('"key" is required')
-    expect(
-      () => new RedlockMutex(allClients, (1 as unknown) as string)
-    ).to.throw('"key" must be a string')
+    expect(() => new RedlockMutex(allClients, 1 as unknown as string)).to.throw(
+      '"key" must be a string'
+    )
   })
   it('should acquire and release lock', async () => {
     const mutex = new RedlockMutex(allClients, 'key')
@@ -73,6 +75,22 @@ describe('RedlockMutex', () => {
     await mutex.acquire()
     mutex.stopRefresh()
     await delay(400)
+    await expectGetAll('mutex:key', null)
+  })
+  it('should support externally acquired mutex', async () => {
+    const externalMutex = new RedlockMutex(allClients, 'key', {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localMutex = new RedlockMutex(allClients, 'key', {
+      ...timeoutOptions,
+      externallyAcquiredIdentifier: externalMutex.identifier
+    })
+    await externalMutex.acquire()
+    await localMutex.acquire()
+    await delay(400)
+    await expectGetAll('mutex:key', localMutex.identifier)
+    await localMutex.release()
     await expectGetAll('mutex:key', null)
   })
   describe('lost lock case', () => {
