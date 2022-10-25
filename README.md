@@ -38,6 +38,7 @@ yarn add redis-semaphore ioredis
   - `acquireAttemptsLimit` - _optional_ max number of attempts to be made in `.acquire()` call
   - `retryInterval` - _optional_ ms, time between acquire attempts if resource locked
   - `refreshInterval` - _optional_ ms, auto-refresh interval; to disable auto-refresh behaviour set `0`
+  - `externallyAcquiredIdentifier` - _optional_ uuid, previously acquired mutex identifier (useful for lock sharing between processes: acquire in scheduler, refresh and release in handler)
   - `onLockLost` - _optional_ function, called when lock loss is detected due refresh cycle; default onLockLost throws unhandled LostLockError
 
 #### Example
@@ -120,10 +121,55 @@ async function doSomething() {
     return
   }
   try {
-      // critical cycle iteration
+    // critical cycle iteration
   } finally {
-    // We want to let lock expire over time after operation is finished 
+    // We want to let lock expire over time after operation is finished
     await mutex.stopRefresh()
+  }
+}
+```
+
+Example with `externallyAcquiredIdentifier`
+
+```javascript
+const Mutex = require('redis-semaphore').Mutex
+const Redis = require('ioredis')
+
+// TypeScript
+// import { Mutex } from 'redis-semaphore'
+// import Redis from 'ioredis'
+
+const redisClient = new Redis()
+
+// scheduler app code
+async function every10MinutesCronScheduler() {
+  const mutex = new Mutex(redisClient, 'lockingResource', {
+    lockTimeout: 30 * 60 * 1e3, // lock for 30min
+    refreshInterval: 0
+  })
+  if (await mutex.tryAcquire()) {
+    someQueue.publish({ mutexIdentifier: mutex.identifier })
+  } else {
+    logger.info('Job already scheduled. Do nothing in current cron cycle')
+  }
+}
+
+// handler app code
+async function queueHandler(queueMessageData) {
+  const { mutexIdentifier } = queueMessageData
+  const mutex = new Mutex(redisClient, 'lockingResource', {
+    lockTimeout: 10 * 1e3, // 10sec
+    externallyAcquiredIdentifier: mutexIdentifier
+  })
+
+  // actually will do `refresh` with new lockTimeout instead of acquire
+  // if mutex was locked by another process or lock was expired - exception will be thrown (default refresh behavior)
+  await mutex.acquire()
+
+  try {
+    // critical code
+  } finally {
+    await mutex.release()
   }
 }
 ```
