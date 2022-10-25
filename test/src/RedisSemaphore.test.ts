@@ -9,7 +9,9 @@ import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
-  catchUnhandledRejection, throwUnhandledRejection, unhandledRejectionSpy
+  catchUnhandledRejection,
+  throwUnhandledRejection,
+  unhandledRejectionSpy
 } from '../unhandledRejection'
 
 const timeoutOptions: TimeoutOptions = {
@@ -21,21 +23,21 @@ const timeoutOptions: TimeoutOptions = {
 
 describe('Semaphore', () => {
   it('should fail on invalid arguments', () => {
-    expect(() => new Semaphore((null as unknown) as Redis, 'key', 5)).to.throw(
+    expect(() => new Semaphore(null as unknown as Redis, 'key', 5)).to.throw(
       '"client" is required'
     )
-    expect(() => new Semaphore(({} as unknown) as Redis, 'key', 5)).to.throw(
+    expect(() => new Semaphore({} as unknown as Redis, 'key', 5)).to.throw(
       '"client" must be instance of ioredis client'
     )
     expect(() => new Semaphore(client, '', 5)).to.throw('"key" is required')
-    expect(() => new Semaphore(client, (1 as unknown) as string, 5)).to.throw(
+    expect(() => new Semaphore(client, 1 as unknown as string, 5)).to.throw(
       '"key" must be a string'
     )
     expect(() => new Semaphore(client, 'key', 0)).to.throw(
       '"limit" is required'
     )
     expect(
-      () => new Semaphore(client, 'key', ('10' as unknown) as number)
+      () => new Semaphore(client, 'key', '10' as unknown as number)
     ).to.throw('"limit" must be a number')
   })
   it('should acquire and release semaphore', async () => {
@@ -124,6 +126,24 @@ describe('Semaphore', () => {
       .to.not.include(ids1[0])
       .and.not.include(ids1[1])
       .and.not.include(ids1[2])
+  })
+  it('should support externally acquired semaphore', async () => {
+    const externalSemaphore = new Semaphore(client, 'key', 3, {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localSemaphore = new Semaphore(client, 'key', 3, {
+      ...timeoutOptions,
+      externallyAcquiredIdentifier: externalSemaphore.identifier
+    })
+    await externalSemaphore.acquire()
+    await localSemaphore.acquire()
+    await delay(400)
+    expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
+      localSemaphore.identifier
+    ])
+    await localSemaphore.release()
+    expect(await client.zcard('semaphore:key')).to.be.eql(0)
   })
   describe('lost lock case', () => {
     beforeEach(() => {

@@ -10,7 +10,9 @@ import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
-  catchUnhandledRejection, throwUnhandledRejection, unhandledRejectionSpy
+  catchUnhandledRejection,
+  throwUnhandledRejection,
+  unhandledRejectionSpy
 } from '../unhandledRejection'
 
 const timeoutOptions: TimeoutOptions = {
@@ -23,28 +25,28 @@ const timeoutOptions: TimeoutOptions = {
 describe('MultiSemaphore', () => {
   it('should fail on invalid arguments', () => {
     expect(
-      () => new MultiSemaphore((null as unknown) as Redis, 'key', 5, 2)
+      () => new MultiSemaphore(null as unknown as Redis, 'key', 5, 2)
     ).to.throw('"client" is required')
     expect(
-      () => new MultiSemaphore(({} as unknown) as Redis, 'key', 5, 2)
+      () => new MultiSemaphore({} as unknown as Redis, 'key', 5, 2)
     ).to.throw('"client" must be instance of ioredis client')
     expect(() => new MultiSemaphore(client, '', 5, 2)).to.throw(
       '"key" is required'
     )
     expect(
-      () => new MultiSemaphore(client, (1 as unknown) as string, 5, 2)
+      () => new MultiSemaphore(client, 1 as unknown as string, 5, 2)
     ).to.throw('"key" must be a string')
     expect(() => new MultiSemaphore(client, 'key', 0, 2)).to.throw(
       '"limit" is required'
     )
     expect(
-      () => new MultiSemaphore(client, 'key', ('10' as unknown) as number, 2)
+      () => new MultiSemaphore(client, 'key', '10' as unknown as number, 2)
     ).to.throw('"limit" must be a number')
     expect(() => new MultiSemaphore(client, 'key', 5, 0)).to.throw(
       '"permits" is required'
     )
     expect(
-      () => new MultiSemaphore(client, 'key', 5, ('2' as unknown) as number)
+      () => new MultiSemaphore(client, 'key', 5, '2' as unknown as number)
     ).to.throw('"permits" must be a number')
   })
   it('should acquire and release semaphore', async () => {
@@ -135,6 +137,25 @@ describe('MultiSemaphore', () => {
       .to.not.include(ids1[0])
       .and.not.include(ids1[1])
       .and.not.include(ids1[2])
+  })
+  it('should support externally acquired semaphore', async () => {
+    const externalSemaphore = new MultiSemaphore(client, 'key', 3, 2, {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localSemaphore = new MultiSemaphore(client, 'key', 3, 2, {
+      ...timeoutOptions,
+      externallyAcquiredIdentifier: externalSemaphore.identifier
+    })
+    await externalSemaphore.acquire()
+    await localSemaphore.acquire()
+    await delay(400)
+    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+      localSemaphore.identifier + '_0',
+      localSemaphore.identifier + '_1'
+    ])
+    await localSemaphore.release()
+    expect(await client.zcard('semaphore:key')).to.be.eql(0)
   })
   describe('lost lock case', () => {
     beforeEach(() => {

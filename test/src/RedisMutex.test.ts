@@ -9,7 +9,9 @@ import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
-  catchUnhandledRejection, throwUnhandledRejection, unhandledRejectionSpy
+  catchUnhandledRejection,
+  throwUnhandledRejection,
+  unhandledRejectionSpy
 } from '../unhandledRejection'
 
 const timeoutOptions: TimeoutOptions = {
@@ -21,14 +23,14 @@ const timeoutOptions: TimeoutOptions = {
 
 describe('Mutex', () => {
   it('should fail on invalid arguments', () => {
-    expect(() => new Mutex((null as unknown) as Redis, 'key')).to.throw(
+    expect(() => new Mutex(null as unknown as Redis, 'key')).to.throw(
       '"client" is required'
     )
-    expect(() => new Mutex(({} as unknown) as Redis, 'key')).to.throw(
+    expect(() => new Mutex({} as unknown as Redis, 'key')).to.throw(
       '"client" must be instance of ioredis client'
     )
     expect(() => new Mutex(client, '')).to.throw('"key" is required')
-    expect(() => new Mutex(client, (1 as unknown) as string)).to.throw(
+    expect(() => new Mutex(client, 1 as unknown as string)).to.throw(
       '"key" must be a string'
     )
   })
@@ -90,6 +92,22 @@ describe('Mutex', () => {
     await delay(400)
     expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
     await mutex.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
+  it('should support externally acquired mutex', async () => {
+    const externalMutex = new Mutex(client, 'key', {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localMutex = new Mutex(client, 'key', {
+      ...timeoutOptions,
+      externallyAcquiredIdentifier: externalMutex.identifier
+    })
+    await externalMutex.acquire()
+    await localMutex.acquire()
+    await delay(400)
+    expect(await client.get('mutex:key')).to.be.eql(localMutex.identifier)
+    await localMutex.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
   describe('lost lock case', () => {

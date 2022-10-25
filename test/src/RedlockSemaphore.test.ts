@@ -9,7 +9,9 @@ import { delay } from '../../src/utils/index'
 import { allClients, client1, client2, client3 } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
-  catchUnhandledRejection, throwUnhandledRejection, unhandledRejectionSpy
+  catchUnhandledRejection,
+  throwUnhandledRejection,
+  unhandledRejectionSpy
 } from '../unhandledRejection'
 
 const timeoutOptions: TimeoutOptions = {
@@ -51,22 +53,22 @@ async function expectZCardAllEql(key: string, count: number) {
 describe('RedlockSemaphore', () => {
   it('should fail on invalid arguments', () => {
     expect(
-      () => new RedlockSemaphore((null as unknown) as Redis[], 'key', 5)
+      () => new RedlockSemaphore(null as unknown as Redis[], 'key', 5)
     ).to.throw('"clients" array is required')
     expect(
-      () => new RedlockSemaphore(([{}] as unknown) as Redis[], 'key', 5)
+      () => new RedlockSemaphore([{}] as unknown as Redis[], 'key', 5)
     ).to.throw('"client" must be instance of ioredis client')
     expect(() => new RedlockSemaphore(allClients, '', 5)).to.throw(
       '"key" is required'
     )
     expect(
-      () => new RedlockSemaphore(allClients, (1 as unknown) as string, 5)
+      () => new RedlockSemaphore(allClients, 1 as unknown as string, 5)
     ).to.throw('"key" must be a string')
     expect(() => new RedlockSemaphore(allClients, 'key', 0)).to.throw(
       '"limit" is required'
     )
     expect(
-      () => new RedlockSemaphore(allClients, 'key', ('10' as unknown) as number)
+      () => new RedlockSemaphore(allClients, 'key', '10' as unknown as number)
     ).to.throw('"limit" must be a number')
   })
   it('should acquire and release semaphore', async () => {
@@ -177,6 +179,22 @@ describe('RedlockSemaphore', () => {
       set2[2].identifier
     ])
     await expectZCardAllEql('semaphore:key', 3)
+  })
+  it('should support externally acquired semaphore', async () => {
+    const externalSemaphore = new RedlockSemaphore(allClients, 'key', 3, {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localSemaphore = new RedlockSemaphore(allClients, 'key', 3, {
+      ...timeoutOptions,
+      externallyAcquiredIdentifier: externalSemaphore.identifier
+    })
+    await externalSemaphore.acquire()
+    await localSemaphore.acquire()
+    await delay(400)
+    await expectZRangeAllEql('semaphore:key', [localSemaphore.identifier])
+    await localSemaphore.release()
+    await expectZCardAllEql('semaphore:key', 0)
   })
   describe('lost lock case', () => {
     beforeEach(() => {
