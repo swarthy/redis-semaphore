@@ -37,7 +37,7 @@
     "@types/sinon": "^10.0.13",
     "@types/sinon-chai": "^3.2.8",
     "@typescript-eslint/eslint-plugin": "5.41.0",
-    "@typescript-eslint/parser": "5.41.0",
+    "@typescript-eslint/parser": "5.45.0",
     "benchmark": "^2.1.4",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
