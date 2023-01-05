@@ -37,6 +37,19 @@ export default class RedlockMultiSemaphore extends RedlockSemaphore {
     )
   }
 
+  protected async _update(newTimeout: number) {
+    return await refreshRedlockMultiSemaphore(
+      this._clients,
+      this._key,
+      this._limit,
+      this._permits,
+      {
+        ...this._acquireOptions,
+        lockTimeout: newTimeout
+      }
+    )
+  }
+
   protected async _acquire() {
     return await acquireRedlockMultiSemaphore(
       this._clients,

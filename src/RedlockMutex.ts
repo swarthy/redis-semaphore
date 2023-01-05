@@ -43,6 +43,15 @@ export default class RedlockMutex extends Lock {
     )
   }
 
+  protected async _update(newTimeout: number) {
+    return await refreshRedlockMutex(
+      this._clients,
+      this._key,
+      this._identifier,
+      newTimeout
+    )
+  }
+
   protected async _acquire() {
     return await acquireRedlockMutex(
       this._clients,

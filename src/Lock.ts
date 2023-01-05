@@ -23,6 +23,7 @@ export abstract class Lock {
   protected _onLockLost: LockLostCallback
 
   protected abstract _refresh(): Promise<boolean>
+  protected abstract _update(newTimeout: number): Promise<boolean>
   protected abstract _acquire(): Promise<boolean>
   protected abstract _release(): Promise<void>
 
@@ -105,6 +106,19 @@ export abstract class Lock {
     const acquired = await this.tryAcquire()
     if (!acquired) {
       throw new TimeoutError(`Acquire ${this._kind} ${this._key} timeout`)
+    }
+  }
+
+  async update(newTimeout: number) {
+    debug(`update ${this._kind} (key: ${this._key})`)
+    const updated = await this._update(newTimeout)
+    if (!updated) {
+      this._acquired = false
+      this.stopRefresh()
+      const lockLostError = new LostLockError(
+        `Lost ${this._kind} for key ${this._key}`
+      )
+      this._onLockLost(lockLostError)
     }
   }
 

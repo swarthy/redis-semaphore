@@ -38,6 +38,15 @@ export default class RedisMutex extends Lock {
     )
   }
 
+  protected async _update(newTimeout: number) {
+    return await refreshMutex(
+      this._client,
+      this._key,
+      this._identifier,
+      newTimeout
+    )
+  }
+
   protected async _acquire() {
     return await acquireMutex(this._client, this._key, this._acquireOptions)
   }

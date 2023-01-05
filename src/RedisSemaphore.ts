@@ -36,6 +36,18 @@ export default class RedisSemaphore extends RedisMutex {
     )
   }
 
+  protected async _update(newTimeout: number) {
+    return await refreshSemaphore(
+      this._client,
+      this._key,
+      this._limit,
+      {
+        ...this._acquireOptions,
+        lockTimeout: newTimeout
+      }
+    )
+  }
+
   protected async _acquire() {
     return await acquireSemaphore(
       this._client,

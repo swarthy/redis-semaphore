@@ -36,6 +36,18 @@ export default class RedlockSemaphore extends RedlockMutex {
     )
   }
 
+  protected async _update(newTimeout: number) {
+    return await refreshRedlockSemaphore(
+      this._clients,
+      this._key,
+      this._limit,
+      {
+        ...this._acquireOptions,
+        lockTimeout: newTimeout
+      }
+    )
+  }
+
   protected async _acquire() {
     return await acquireRedlockSemaphore(
       this._clients,
