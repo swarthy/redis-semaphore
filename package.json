@@ -10,7 +10,8 @@
     "coverage-html": "nyc mocha && nyc report --reporter=html",
     "converalls": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
     "dev": "mocha -w",
-    "build": "yarn build-commonjs",
+    "prepack": "yarn build",
+    "build": "yarn build-commonjs && yarn build-es",
     "build-commonjs": "rm -rf lib && yarn tsc -b tsconfig.build-commonjs.json",
     "build-es": "rm -rf es && yarn tsc -b tsconfig.build-es.json",
     "preversion": "yarn lint && yarn test && yarn build"
