@@ -10,7 +10,8 @@
     "converalls": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
     "dev": "mocha -w",
     "check-types": "tsc -b tsconfig.check-types.json",
-    "build": "yarn build-commonjs",
+    "prepack": "yarn build",
+    "build": "yarn build-commonjs && yarn build-es",
     "build-commonjs": "rm -rf lib && yarn tsc -b tsconfig.build-commonjs.json",
     "build-es": "rm -rf es && yarn tsc -b tsconfig.build-es.json",
     "preversion": "yarn test && yarn build"
