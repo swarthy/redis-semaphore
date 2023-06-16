@@ -1,3 +1,7 @@
+### redis-semaphore@5.3.1
+
+- Fixed reacquire expired resource in refresh
+
 ### redis-semaphore@5.3.0
 
 - Added `stopRefresh` method
