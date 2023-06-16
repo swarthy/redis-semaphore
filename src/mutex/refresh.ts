@@ -16,10 +16,6 @@ export const expireIfEqualLua = createEval<[string, string, number], 0 | 1>(
   if value == identifier then
     redis.call('pexpire', key, lockTimeout)
     return 1
-  elseif value == false then
-    redis.call('set', key, identifier)
-    redis.call('pexpire', key, lockTimeout)
-    return 1
   end
 
   return 0

@@ -340,9 +340,15 @@ describe('MultiSemaphore', () => {
       throwUnhandledRejection()
       await upRedisServer(1)
     })
-    it('should work again if node become alive', async function () {
+    it('should lost lock when node become alive', async function () {
       this.timeout(60000)
-      const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
+      const onLockLostCallback = sinon.spy(function (this: Semaphore) {
+        expect(this.isAcquired).to.be.false
+      })
+      const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
       await semaphore1.acquire()
 
       await downRedisServer(1)
@@ -354,24 +360,23 @@ describe('MultiSemaphore', () => {
       console.log('ONLINE')
 
       // semaphore was expired, key was deleted in redis
-      // give refresh mechanism time to reacquire the lock
+      // give refresh mechanism time to detect lock lost
       // (includes reconnection time)
       await delay(1000)
 
-      const data = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
+      const data1 = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
       // console.log(data)
-      expect(data).to.include(semaphore1.identifier + '_0')
-      expect(data).to.include(semaphore1.identifier + '_1')
+      expect(data1).to.be.eql([])
 
-      // now lock reacquired by semaphore1, so semaphore2 cant acquire the lock
+      // lock was not refreshed by semaphore1, so semaphore2 can acquire the lock
 
       const semaphore2 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
+      await semaphore2.acquire()
+      const data2 = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
+      expect(data2).to.include(semaphore2.identifier + '_0')
+      expect(data2).to.include(semaphore2.identifier + '_1')
 
-      await expect(semaphore2.acquire()).to.be.rejectedWith(
-        'Acquire multi-semaphore semaphore:key timeout'
-      )
-
-      await semaphore1.release()
+      await Promise.all([semaphore1.release(), semaphore2.release()])
     })
   })
 })

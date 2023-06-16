@@ -452,14 +452,10 @@ describe('RedlockMultiSemaphore', () => {
     })
   })
   describe('[Node shutdown]', () => {
-    beforeEach(() => {
-      catchUnhandledRejection()
-    })
     afterEach(async () => {
-      throwUnhandledRejection()
-      await upRedisServer(1)
+      await Promise.all([upRedisServer(1), upRedisServer(2), upRedisServer(3)])
     })
-    it('should work again if node become alive', async function () {
+    it('should handle server shutdown if quorum is alive', async function () {
       this.timeout(60000)
       const semaphore11 = new RedlockMultiSemaphore(
         allClients,
@@ -577,6 +573,53 @@ describe('RedlockMultiSemaphore', () => {
       // </Server3Failure>
 
       await Promise.all([semaphore11.release(), semaphore12.release()])
+    })
+    it('should fail and release if quorum become dead', async function () {
+      this.timeout(60000)
+      const onLockLostCallbacks = [1, 2].map(() =>
+        sinon.spy(function (this: RedlockMultiSemaphore) {
+          expect(this.isAcquired).to.be.false
+        })
+      )
+
+      const semaphore11 = new RedlockMultiSemaphore(allClients, 'key', 3, 2, {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallbacks[0]
+      })
+      const semaphore12 = new RedlockMultiSemaphore(allClients, 'key', 3, 1, {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallbacks[1]
+      })
+      await Promise.all([semaphore11.acquire(), semaphore12.acquire()])
+
+      await downRedisServer(1)
+      console.log('SHUT DOWN 1')
+
+      await downRedisServer(2)
+      console.log('SHUT DOWN 2')
+
+      await delay(1000)
+
+      for (const lostCb of onLockLostCallbacks) {
+        expect(lostCb).to.be.called
+        expect(lostCb.firstCall.firstArg instanceof LostLockError).to.be.true
+      }
+
+      // released lock on server3
+      expect(await client3.zrange('semaphore:key', 0, -1)).to.be.eql([])
+
+      // semaphore2 will NOT be able to acquire the lock
+
+      const semaphore2 = new RedlockMultiSemaphore(
+        allClients,
+        'key',
+        3,
+        1,
+        timeoutOptions
+      )
+      await expect(semaphore2.acquire()).to.be.rejectedWith(
+        'Acquire redlock-multi-semaphore semaphore:key timeout'
+      )
     })
   })
 })

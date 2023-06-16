@@ -1,4 +1,5 @@
 import Redis from 'ioredis'
+import { once } from 'stream'
 
 function createClient(num: number) {
   const serverURL =
@@ -6,6 +7,7 @@ function createClient(num: number) {
   const client = new Redis(serverURL, {
     connectionName: `client${num}`,
     lazyConnect: true,
+    enableOfflineQueue: false,
     autoResendUnfulfilledCommands: false, // dont queue commands while server is offline (dont break test logic)
     maxRetriesPerRequest: 0, // dont retry, fail faster (default is 20)
 
@@ -33,6 +35,17 @@ before(async () => {
 })
 
 beforeEach(async () => {
+  await Promise.all(
+    allClients.map(c => {
+      if (c.status !== 'ready') {
+        console.warn(
+          `client ${c.options.connectionName} status = ${c.status}. Wait for ready.`
+        )
+        return once(c, 'ready')
+      }
+      return null
+    })
+  )
   await Promise.all(allClients.map(c => c.flushdb()))
 })
 

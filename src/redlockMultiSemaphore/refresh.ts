@@ -1,7 +1,9 @@
 import createDebug from 'debug'
 import Redis from 'ioredis'
+import { acquireLua } from '../multiSemaphore/acquire/lua'
 
 import { refreshLua } from '../multiSemaphore/refresh/lua'
+import { releaseLua } from '../multiSemaphore/release/lua'
 import { getQuorum, smartSum } from '../utils/redlock'
 
 const debug = createDebug('redis-semaphore:redlock-semaphore:refresh')
@@ -29,5 +31,39 @@ export async function refreshRedlockMultiSemaphore(
   )
   const results = await Promise.all(promises)
   debug('results', results)
-  return results.reduce(smartSum, 0) >= quorum
+  const refreshedCount = results.reduce(smartSum, 0)
+  if (refreshedCount >= quorum) {
+    debug(key, identifier, 'refreshed')
+    if (refreshedCount < clients.length) {
+      debug(key, identifier, 'try to acquire on failed nodes')
+      const promises = results
+        .reduce<Redis[]>((failedClients, result, index) => {
+          if (!result) {
+            failedClients.push(clients[index])
+          }
+          return failedClients
+        }, [])
+        .map(client =>
+          acquireLua(client, [
+            key,
+            limit,
+            permits,
+            identifier,
+            lockTimeout,
+            now
+          ])
+            .then(result => +result)
+            .catch(() => 0)
+        )
+      const acquireResults = await Promise.all(promises)
+      debug(key, identifier, 'acquire on failed nodes results', acquireResults)
+    }
+    return true
+  } else {
+    const promises = clients.map(client =>
+      releaseLua(client, [key, permits, identifier]).catch(() => 0)
+    )
+    await Promise.all(promises)
+    return false
+  }
 }

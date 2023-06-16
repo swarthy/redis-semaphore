@@ -19,9 +19,9 @@ describe('redlockMutex refresh', () => {
     expect(await client1.pttl('key')).to.be.gte(10000)
     expect(await client2.pttl('key')).to.be.gte(10000)
   })
-  it('should return true if resource is not acquired on quorum', async () => {
+  it('should return false if resource is not acquired on quorum', async () => {
     await client1.set('key', '111')
     const result = await refresh(allClients, 'key', '111', 10000)
-    expect(result).to.be.true
+    expect(result).to.be.false
   })
 })
