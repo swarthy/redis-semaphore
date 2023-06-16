@@ -4,7 +4,7 @@ import sinon from 'sinon'
 
 import LostLockError from '../../src/errors/LostLockError'
 import Semaphore from '../../src/RedisSemaphore'
-import { LockOptions, TimeoutOptions } from '../../src/types'
+import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
@@ -272,7 +272,7 @@ describe('Semaphore', () => {
     })
     it('should lost lock when node become alive', async function () {
       this.timeout(60000)
-      const onLockLostCallbacks = [1, 2, 3].map((n, i) =>
+      const onLockLostCallbacks = [1, 2, 3].map(() =>
         sinon.spy(function (this: Semaphore) {
           expect(this.isAcquired).to.be.false
         })

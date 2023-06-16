@@ -576,7 +576,7 @@ describe('RedlockMultiSemaphore', () => {
     })
     it('should fail and release if quorum become dead', async function () {
       this.timeout(60000)
-      const onLockLostCallbacks = [1, 2].map((n, i) =>
+      const onLockLostCallbacks = [1, 2].map(() =>
         sinon.spy(function (this: RedlockMultiSemaphore) {
           expect(this.isAcquired).to.be.false
         })
