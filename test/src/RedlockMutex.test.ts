@@ -253,5 +253,38 @@ describe('RedlockMutex', () => {
 
       await mutex1.release()
     })
+    it('should fail and release when quorum is become dead', async function () {
+      this.timeout(60000)
+      const onLockLostCallback = sinon.spy(function (this: RedlockMutex) {
+        expect(this.isAcquired).to.be.false
+      })
+      const mutex1 = new RedlockMutex(allClients, 'key', {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
+      await mutex1.acquire()
+
+      await downRedisServer(1)
+      console.log('SHUT DOWN 1')
+
+      await downRedisServer(2)
+      console.log('SHUT DOWN 2')
+
+      await delay(1000)
+
+      expect(onLockLostCallback).to.be.called
+      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
+        .be.true
+
+      // released lock on server3
+      expect(await client3.get('mutex:key')).to.be.eql(null)
+
+      // mutex2 will NOT be able to acquire the lock cause quorum is dead
+
+      const mutex2 = new RedlockMutex(allClients, 'key', timeoutOptions)
+      await expect(mutex2.acquire()).to.be.rejectedWith(
+        'Acquire redlock-mutex mutex:key timeout'
+      )
+    })
   })
 })

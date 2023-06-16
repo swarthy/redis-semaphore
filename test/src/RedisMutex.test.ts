@@ -34,6 +34,10 @@ describe('Mutex', () => {
       '"key" must be a string'
     )
   })
+  it('should set default options', () => {
+    expect(new Mutex(client, 'key', {})).to.be.ok
+    expect(new Mutex(client, 'key')).to.be.ok
+  })
   it('should acquire and release lock', async () => {
     const mutex = new Mutex(client, 'key')
     expect(mutex.isAcquired).to.be.false
@@ -85,15 +89,21 @@ describe('Mutex', () => {
     await delay(400)
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
-  it('should re-acquire lock if lock was expired between refreshes, but was not acquired by another instance', async () => {
+  it('should not call _refresh if already refreshing', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
+    let callCount = 0
+    Object.assign(mutex, {
+      _refresh: () =>
+        delay(100).then(() => {
+          callCount++
+          return true
+        })
+    })
     await mutex.acquire()
-    await client.del('mutex:key') // "expired"
     await delay(400)
-    expect(await client.get('mutex:key')).to.be.eql(mutex.identifier)
-    await mutex.release()
-    expect(await client.get('mutex:key')).to.be.eql(null)
+    expect(callCount).to.be.eql(2) // not floor(400/80) = 9
   })
+
   it('should support externally acquired mutex', async () => {
     const externalMutex = new Mutex(client, 'key', {
       ...timeoutOptions,
@@ -117,7 +127,7 @@ describe('Mutex', () => {
     afterEach(() => {
       throwUnhandledRejection()
     })
-    it('should throw unhandled error if lock was lost between refreshes', async () => {
+    it('should throw unhandled error if lock was lost between refreshes (another instance acquired)', async () => {
       const mutex = new Mutex(client, 'key', timeoutOptions)
       await mutex.acquire()
       expect(mutex.isAcquired).to.be.true
@@ -128,7 +138,18 @@ describe('Mutex', () => {
       expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
         .to.be.true
     })
-    it('should call onLockLost callback if provided', async () => {
+    it('should throw unhandled error if lock was lost between refreshes (lock expired)', async () => {
+      const mutex = new Mutex(client, 'key', timeoutOptions)
+      await mutex.acquire()
+      expect(mutex.isAcquired).to.be.true
+      await client.del('mutex:key') // expired
+      await delay(200)
+      expect(mutex.isAcquired).to.be.false
+      expect(unhandledRejectionSpy).to.be.called
+      expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
+        .to.be.true
+    })
+    it('should call onLockLost callback if provided (another instance acquired)', async () => {
       const onLockLostCallback = sinon.spy(function (this: Mutex) {
         expect(this.isAcquired).to.be.false
       })
@@ -139,6 +160,24 @@ describe('Mutex', () => {
       await mutex.acquire()
       expect(mutex.isAcquired).to.be.true
       await client.set('mutex:key', '222') // another instance
+      await delay(200)
+      expect(mutex.isAcquired).to.be.false
+      expect(unhandledRejectionSpy).to.not.called
+      expect(onLockLostCallback).to.be.called
+      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
+        .be.true
+    })
+    it('should call onLockLost callback if provided (lock expired)', async () => {
+      const onLockLostCallback = sinon.spy(function (this: Mutex) {
+        expect(this.isAcquired).to.be.false
+      })
+      const mutex = new Mutex(client, 'key', {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
+      await mutex.acquire()
+      expect(mutex.isAcquired).to.be.true
+      await client.del('mutex:key') // expired
       await delay(200)
       expect(mutex.isAcquired).to.be.false
       expect(unhandledRejectionSpy).to.not.called
@@ -190,34 +229,39 @@ describe('Mutex', () => {
       throwUnhandledRejection()
       await upRedisServer(1)
     })
-    it('should work again if node become alive', async function () {
+    it('should lost lock when node become alive', async function () {
       this.timeout(60000)
-      const mutex1 = new Mutex(client, 'key', timeoutOptions)
+      const onLockLostCallback = sinon.spy(function (this: Mutex) {
+        expect(this.isAcquired).to.be.false
+      })
+      const mutex1 = new Mutex(client, 'key', {
+        ...timeoutOptions,
+        onLockLost: onLockLostCallback
+      })
       await mutex1.acquire()
       await downRedisServer(1)
-      console.log('SHUT DOWN')
 
       await delay(1000)
       // lock expired now
 
       await upRedisServer(1)
-      console.log('ONLINE')
       // mutex was expired, key was deleted in redis
-      // give refresh mechanism time to reacquire the lock
+      // give refresh mechanism time to detect lock lost
       // (includes client reconnection time)
       await delay(1000)
 
-      expect(await client.get('mutex:key')).to.be.eql(mutex1.identifier)
+      expect(await client.get('mutex:key')).to.be.eql(null)
+      expect(onLockLostCallback).to.be.called
+      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
+        .be.true
 
-      console.log('mutex1 should be reacquired right now')
-
-      // now lock reacquired by mutex1, so mutex2 cant acquire the lock
+      // lock was not reacquired by mutex1, so mutex2 can acquire the lock
 
       const mutex2 = new Mutex(client, 'key', timeoutOptions)
-      await expect(mutex2.acquire()).to.be.rejectedWith(
-        'Acquire mutex mutex:key timeout'
-      )
-      await mutex1.release()
+      await mutex2.acquire()
+      expect(await client.get('mutex:key')).to.be.eql(mutex2.identifier)
+
+      await Promise.all([mutex1.release(), mutex2.release()])
     })
   })
 })

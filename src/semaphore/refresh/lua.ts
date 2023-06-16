@@ -14,7 +14,7 @@ export const refreshLua = createEval<
 
   redis.call('zremrangebyscore', key, '-inf', expiredTimestamp)
 
-  if redis.call('zcard', key) < limit or redis.call('zscore', key, identifier) then
+  if redis.call('zscore', key, identifier) then
     redis.call('zadd', key, now, identifier)
     redis.call('pexpire', key, lockTimeout)
     return 1

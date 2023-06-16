@@ -4,7 +4,7 @@ import sinon from 'sinon'
 
 import LostLockError from '../../src/errors/LostLockError'
 import Semaphore from '../../src/RedisSemaphore'
-import { TimeoutOptions } from '../../src/types'
+import { LockOptions, TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
 import { client1 as client } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
@@ -270,16 +270,22 @@ describe('Semaphore', () => {
       throwUnhandledRejection()
       await upRedisServer(1)
     })
-    it('should work again if node become alive', async function () {
+    it('should lost lock when node become alive', async function () {
       this.timeout(60000)
-      const semaphore11 = new Semaphore(client, 'key', 3, timeoutOptions)
-      const semaphore12 = new Semaphore(client, 'key', 3, timeoutOptions)
-      const semaphore13 = new Semaphore(client, 'key', 3, timeoutOptions)
-      await Promise.all([
-        semaphore11.acquire(),
-        semaphore12.acquire(),
-        semaphore13.acquire()
-      ])
+      const onLockLostCallbacks = [1, 2, 3].map((n, i) =>
+        sinon.spy(function (this: Semaphore) {
+          expect(this.isAcquired).to.be.false
+        })
+      )
+      const semaphores1 = [1, 2, 3].map(
+        (n, i) =>
+          new Semaphore(client, 'key', 3, {
+            ...timeoutOptions,
+            onLockLost: onLockLostCallbacks[i]
+          })
+      )
+
+      await Promise.all(semaphores1.map(s => s.acquire()))
 
       await downRedisServer(1)
       console.log('SHUT DOWN')
@@ -290,28 +296,30 @@ describe('Semaphore', () => {
       console.log('ONLINE')
 
       // semaphore was expired, key was deleted in redis
-      // give refresh mechanism time to reacquire the lock
+      // give refresh mechanism time to detect lock lost
       // (includes reconnection time)
       await delay(1000)
 
       const data = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
-      // console.log(data)
-      expect(data).to.include(semaphore11.identifier)
-      expect(data).to.include(semaphore12.identifier)
-      expect(data).to.include(semaphore13.identifier)
+      expect(data).to.be.eql([])
 
-      // now lock reacquired by semaphore1[1-3], so semaphore2 cant acquire the lock
+      // console.log(data)
+      // expect(data).to.include(semaphore11.identifier)
+      // expect(data).to.include(semaphore12.identifier)
+      // expect(data).to.include(semaphore13.identifier)
+
+      // lock was not reacquired by semaphore1[1-3], so semaphore2 can acquire the lock
 
       const semaphore2 = new Semaphore(client, 'key', 3, timeoutOptions)
+      await semaphore2.acquire()
 
-      await expect(semaphore2.acquire()).to.be.rejectedWith(
-        'Acquire semaphore semaphore:key timeout'
-      )
+      expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
+        semaphore2.identifier
+      ])
 
       await Promise.all([
-        semaphore11.release(),
-        semaphore12.release(),
-        semaphore13.release()
+        ...semaphores1.map(s => s.release()),
+        semaphore2.release()
       ])
     })
   })
