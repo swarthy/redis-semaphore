@@ -129,7 +129,34 @@ async function doSomething() {
 }
 ```
 
-Example with `externallyAcquiredIdentifier`
+#### Example with dynamically adjusting existing lock
+
+```javascript
+const Mutex = require('redis-semaphore').Mutex
+const Redis = require('ioredis')
+
+// TypeScript
+// import { Mutex } from 'redis-semaphore'
+// import Redis from 'ioredis'
+
+const redisClient = new Redis()
+
+// This creates an original lock
+const preMutex = new Mutex(redisClient, 'lockingResource', {
+  lockTimeout: 10 * 1e3, // lock for 10s
+  refreshInterval: 0
+});
+
+// This modifies lock with a new TTL and starts refresh
+const mutex = new Mutex(redisClient, 'lockingResource', {
+  externallyAcquiredIdentifier: preMutex.identifier,
+  lockTimeout: 30 * 60 * 1e3, // lock for 30min
+  refreshInterval: 60 * 1e3
+});
+
+```
+
+#### Example with shared lock between scheduler and handler apps
 
 ```javascript
 const Mutex = require('redis-semaphore').Mutex
