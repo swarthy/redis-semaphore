@@ -15,6 +15,7 @@ export interface TimeoutOptions {
 
 export interface LockOptions extends TimeoutOptions {
   externallyAcquiredIdentifier?: string
+  identifierSuffix?: string
   onLockLost?: LockLostCallback
 }
 

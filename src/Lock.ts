@@ -33,9 +33,11 @@ export abstract class Lock {
     retryInterval = defaultTimeoutOptions.retryInterval,
     refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF),
     onLockLost = defaultOnLockLost,
-    externallyAcquiredIdentifier
+    externallyAcquiredIdentifier,
+    identifierSuffix
   }: LockOptions = defaultTimeoutOptions) {
-    this._identifier = externallyAcquiredIdentifier || crypto.randomUUID()
+    this._identifier =
+      externallyAcquiredIdentifier || this.getIdentifier(identifierSuffix)
     this._acquiredExternally = !!externallyAcquiredIdentifier
     this._acquireOptions = {
       lockTimeout,
@@ -55,6 +57,11 @@ export abstract class Lock {
 
   get isAcquired() {
     return this._acquired
+  }
+
+  private getIdentifier(identifierSuffix: string | undefined): string {
+    const uuid = crypto.randomUUID()
+    return identifierSuffix ? `${uuid}-${identifierSuffix}` : uuid
   }
 
   private _startRefresh() {

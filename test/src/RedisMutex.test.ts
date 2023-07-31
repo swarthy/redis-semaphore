@@ -38,6 +38,18 @@ describe('Mutex', () => {
     expect(new Mutex(client, 'key', {})).to.be.ok
     expect(new Mutex(client, 'key')).to.be.ok
   })
+  it('should set random UUID as identifier', () => {
+    expect(new Mutex(client, 'key').identifier).to.match(
+      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+    )
+  })
+  it('should add identifier suffix', () => {
+    expect(
+      new Mutex(client, 'key', { identifierSuffix: 'abc' }).identifier
+    ).to.match(
+      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}-abc$/
+    )
+  })
   it('should acquire and release lock', async () => {
     const mutex = new Mutex(client, 'key')
     expect(mutex.isAcquired).to.be.false
