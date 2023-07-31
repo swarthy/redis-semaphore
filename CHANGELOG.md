@@ -1,3 +1,7 @@
+### redis-semaphore@5.4.0
+
+- Added `identifierSuffix` option, usefull for tracing app instance which locked resource
+
 ### redis-semaphore@5.3.1
 
 - Fixed reacquire expired resource in refresh
