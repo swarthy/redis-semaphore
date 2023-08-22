@@ -127,7 +127,7 @@ describe('Semaphore', () => {
       .and.not.include(ids1[1])
       .and.not.include(ids1[2])
   })
-  it('should support externally acquired semaphore', async () => {
+  it('should support externally acquired semaphore (deprecated interface)', async () => {
     const externalSemaphore = new Semaphore(client, 'key', 3, {
       ...timeoutOptions,
       refreshInterval: 0
@@ -135,6 +135,25 @@ describe('Semaphore', () => {
     const localSemaphore = new Semaphore(client, 'key', 3, {
       ...timeoutOptions,
       externallyAcquiredIdentifier: externalSemaphore.identifier
+    })
+    await externalSemaphore.acquire()
+    await localSemaphore.acquire()
+    await delay(400)
+    expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
+      localSemaphore.identifier
+    ])
+    await localSemaphore.release()
+    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+  })
+  it('should support externally acquired semaphore', async () => {
+    const externalSemaphore = new Semaphore(client, 'key', 3, {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localSemaphore = new Semaphore(client, 'key', 3, {
+      ...timeoutOptions,
+      identifier: externalSemaphore.identifier,
+      acquiredExternally: true
     })
     await externalSemaphore.acquire()
     await localSemaphore.acquire()

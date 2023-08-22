@@ -34,11 +34,32 @@ export abstract class Lock {
     refreshInterval = Math.round(lockTimeout * REFRESH_INTERVAL_COEF),
     onLockLost = defaultOnLockLost,
     externallyAcquiredIdentifier,
-    identifierSuffix
+    identifierSuffix,
+    identifier,
+    acquiredExternally
   }: LockOptions = defaultTimeoutOptions) {
+    if (
+      identifier !== undefined &&
+      (!identifier || typeof identifier !== 'string')
+    ) {
+      throw new Error('identifier must be not empty random string')
+    }
+    if (acquiredExternally && !identifier) {
+      throw new Error(
+        'acquiredExternally=true meanless without custom identifier'
+      )
+    }
+    if (externallyAcquiredIdentifier && (identifier || acquiredExternally)) {
+      throw new Error(
+        'Invalid usage. Use custom identifier and acquiredExternally: true'
+      )
+    }
     this._identifier =
-      externallyAcquiredIdentifier || this.getIdentifier(identifierSuffix)
-    this._acquiredExternally = !!externallyAcquiredIdentifier
+      identifier ||
+      externallyAcquiredIdentifier ||
+      this.getIdentifier(identifierSuffix)
+    this._acquiredExternally =
+      !!acquiredExternally || !!externallyAcquiredIdentifier
     this._acquireOptions = {
       lockTimeout,
       acquireTimeout,

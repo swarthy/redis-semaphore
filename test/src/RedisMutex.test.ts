@@ -50,6 +50,11 @@ describe('Mutex', () => {
       /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}-abc$/
     )
   })
+  it('should use custom identifier if provided', () => {
+    expect(
+      new Mutex(client, 'key', { identifier: 'abc' }).identifier
+    ).to.be.eql('abc')
+  })
   it('should acquire and release lock', async () => {
     const mutex = new Mutex(client, 'key')
     expect(mutex.isAcquired).to.be.false
@@ -116,7 +121,7 @@ describe('Mutex', () => {
     expect(callCount).to.be.eql(2) // not floor(400/80) = 9
   })
 
-  it('should support externally acquired mutex', async () => {
+  it('should support externally acquired mutex (deprecated interface)', async () => {
     const externalMutex = new Mutex(client, 'key', {
       ...timeoutOptions,
       refreshInterval: 0
@@ -124,6 +129,23 @@ describe('Mutex', () => {
     const localMutex = new Mutex(client, 'key', {
       ...timeoutOptions,
       externallyAcquiredIdentifier: externalMutex.identifier
+    })
+    await externalMutex.acquire()
+    await localMutex.acquire()
+    await delay(400)
+    expect(await client.get('mutex:key')).to.be.eql(localMutex.identifier)
+    await localMutex.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
+  it('should support externally acquired mutex', async () => {
+    const externalMutex = new Mutex(client, 'key', {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localMutex = new Mutex(client, 'key', {
+      ...timeoutOptions,
+      identifier: externalMutex.identifier,
+      acquiredExternally: true
     })
     await externalMutex.acquire()
     await localMutex.acquire()
