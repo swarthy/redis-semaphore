@@ -1,3 +1,10 @@
+### redis-semaphore@5.5.0
+
+- Added `identifier` constructor option.
+- Added `acquiredExternally` constructor option.
+- Option `externallyAcquiredIdentifier` **DEPRECATED**.
+- Option `identifierSuffix` **DEPRECATED**.
+
 ### redis-semaphore@5.4.0
 
 - Added `identifierSuffix` option, usefull for tracing app instance which locked resource
