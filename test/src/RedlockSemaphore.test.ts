@@ -180,7 +180,7 @@ describe('RedlockSemaphore', () => {
     ])
     await expectZCardAllEql('semaphore:key', 3)
   })
-  it('should support externally acquired semaphore', async () => {
+  it('should support externally acquired semaphore (deprecated interface)', async () => {
     const externalSemaphore = new RedlockSemaphore(allClients, 'key', 3, {
       ...timeoutOptions,
       refreshInterval: 0
@@ -188,6 +188,23 @@ describe('RedlockSemaphore', () => {
     const localSemaphore = new RedlockSemaphore(allClients, 'key', 3, {
       ...timeoutOptions,
       externallyAcquiredIdentifier: externalSemaphore.identifier
+    })
+    await externalSemaphore.acquire()
+    await localSemaphore.acquire()
+    await delay(400)
+    await expectZRangeAllEql('semaphore:key', [localSemaphore.identifier])
+    await localSemaphore.release()
+    await expectZCardAllEql('semaphore:key', 0)
+  })
+  it('should support externally acquired semaphore', async () => {
+    const externalSemaphore = new RedlockSemaphore(allClients, 'key', 3, {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localSemaphore = new RedlockSemaphore(allClients, 'key', 3, {
+      ...timeoutOptions,
+      identifier: externalSemaphore.identifier,
+      acquiredExternally: true
     })
     await externalSemaphore.acquire()
     await localSemaphore.acquire()

@@ -77,7 +77,7 @@ describe('RedlockMutex', () => {
     await delay(400)
     await expectGetAll('mutex:key', null)
   })
-  it('should support externally acquired mutex', async () => {
+  it('should support externally acquired mutex (deprecated interface)', async () => {
     const externalMutex = new RedlockMutex(allClients, 'key', {
       ...timeoutOptions,
       refreshInterval: 0
@@ -85,6 +85,23 @@ describe('RedlockMutex', () => {
     const localMutex = new RedlockMutex(allClients, 'key', {
       ...timeoutOptions,
       externallyAcquiredIdentifier: externalMutex.identifier
+    })
+    await externalMutex.acquire()
+    await localMutex.acquire()
+    await delay(400)
+    await expectGetAll('mutex:key', localMutex.identifier)
+    await localMutex.release()
+    await expectGetAll('mutex:key', null)
+  })
+  it('should support externally acquired mutex', async () => {
+    const externalMutex = new RedlockMutex(allClients, 'key', {
+      ...timeoutOptions,
+      refreshInterval: 0
+    })
+    const localMutex = new RedlockMutex(allClients, 'key', {
+      ...timeoutOptions,
+      identifier: externalMutex.identifier,
+      acquiredExternally: true
     })
     await externalMutex.acquire()
     await localMutex.acquire()

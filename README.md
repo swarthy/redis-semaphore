@@ -28,7 +28,7 @@ yarn add redis-semaphore ioredis
 
 > See [RedisLabs: Locks with timeouts](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-2-distributed-locking/6-2-5-locks-with-timeouts/)
 
-##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8 }])
+##### new Mutex(redisClient, key [, { lockTimeout = 10000, acquireTimeout = 10000, acquireAttemptsLimit = Number.POSITIVE_INFINITY, retryInterval = 10, refreshInterval = lockTimeout * 0.8, identifier = crypto.randomUUID() }])
 
 - `redisClient` - **required**, configured `redis` client
 - `key` - **required**, key for locking resource (final key in redis: `mutex:<key>`)
@@ -38,7 +38,8 @@ yarn add redis-semaphore ioredis
   - `acquireAttemptsLimit` - _optional_ max number of attempts to be made in `.acquire()` call
   - `retryInterval` - _optional_ ms, time between acquire attempts if resource locked
   - `refreshInterval` - _optional_ ms, auto-refresh interval; to disable auto-refresh behaviour set `0`
-  - `externallyAcquiredIdentifier` - _optional_ uuid, previously acquired mutex identifier (useful for lock sharing between processes: acquire in scheduler, refresh and release in handler)
+  - `identifier` - _optional_ uuid, custom mutex identifier. Must be unique between parallel executors, otherwise multiple locks with same identifier *can* be treated as the same lock holder. Override only if you know what you are doing (see `acquiredExternally` option).
+  - `acquiredExternally` - _optional_ `true`, If `identifier` provided and `acquiredExternally` is `true` then `_refresh` will be used instead of `_acquire` in `.tryAcquire()`/`.acquire()`. Useful for lock sharing between processes: acquire in scheduler, refresh and release in handler.
   - `onLockLost` - _optional_ function, called when lock loss is detected due refresh cycle; default onLockLost throws unhandled LostLockError
 
 #### Example
@@ -149,7 +150,8 @@ const preMutex = new Mutex(redisClient, 'lockingResource', {
 
 // This modifies lock with a new TTL and starts refresh
 const mutex = new Mutex(redisClient, 'lockingResource', {
-  externallyAcquiredIdentifier: preMutex.identifier,
+  identifier: preMutex.identifier,
+  acquiredExternally: true, // required in this case
   lockTimeout: 30 * 60 * 1e3, // lock for 30min
   refreshInterval: 60 * 1e3
 });
@@ -186,7 +188,8 @@ async function queueHandler(queueMessageData) {
   const { mutexIdentifier } = queueMessageData
   const mutex = new Mutex(redisClient, 'lockingResource', {
     lockTimeout: 10 * 1e3, // 10sec
-    externallyAcquiredIdentifier: mutexIdentifier
+    identifier: mutexIdentifier,
+    acquiredExternally: true // required in this case
   })
 
   // actually will do `refresh` with new lockTimeout instead of acquire
