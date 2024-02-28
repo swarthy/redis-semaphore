@@ -5,3 +5,8 @@ tsconfig*
 docker-*
 Dockerfile
 coverage
+.yarn
+.*.json
+.*.js
+.*.yml
+.*.yaml
