@@ -21,6 +21,7 @@ export abstract class Lock {
   protected _acquired = false
   protected _acquiredExternally = false
   protected _onLockLost: LockLostCallback
+  protected _releasing = false
 
   protected abstract _refresh(): Promise<boolean>
   protected abstract _acquire(): Promise<boolean>
@@ -115,6 +116,12 @@ export abstract class Lock {
         `refresh ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
       )
       const refreshed = await this._refresh()
+      if (this._releasing) {
+        debug(
+          `refresh ${this._kind} (key: ${this._key}, identifier: ${this._identifier} failed, but lock was purposefully released`
+        )
+        return
+      }
       if (!refreshed) {
         this._acquired = false
         this.stopRefresh()
@@ -153,6 +160,7 @@ export abstract class Lock {
   }
 
   async release() {
+    this._releasing = true
     debug(
       `release ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
     )
@@ -162,6 +170,7 @@ export abstract class Lock {
     if (this._acquired || this._acquiredExternally) {
       await this._release()
     }
+    this._releasing = false
     this._acquired = false
     this._acquiredExternally = false
   }
