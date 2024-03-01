@@ -109,6 +109,7 @@ export abstract class Lock {
       )
       return
     }
+    this._refreshing = false
     try {
       debug(
         `refresh ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
