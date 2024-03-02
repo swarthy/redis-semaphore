@@ -1,6 +1,5 @@
 import createDebug from 'debug'
 import * as crypto from 'node:crypto'
-
 import LostLockError from './errors/LostLockError'
 import TimeoutError from './errors/TimeoutError'
 import { defaultOnLockLost, defaultTimeoutOptions } from './misc'
@@ -116,6 +115,12 @@ export abstract class Lock {
       )
       const refreshed = await this._refresh()
       if (!refreshed) {
+        if (!this._acquired) {
+          debug(
+            `refresh ${this._kind} (key: ${this._key}, identifier: ${this._identifier} failed, but lock was purposefully released`
+          )
+          return
+        }
         this._acquired = false
         this.stopRefresh()
         const lockLostError = new LostLockError(
