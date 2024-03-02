@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 import sinon from 'sinon'
-
 import LostLockError from '../../src/errors/LostLockError'
 import Semaphore from '../../src/RedisSemaphore'
 import { TimeoutOptions } from '../../src/types'

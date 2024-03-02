@@ -7,6 +7,7 @@
   "scripts": {
     "test": "eslint --ext .js,.ts . && mocha",
     "test-ci-with-coverage": "eslint --ext .js,.ts . && nyc mocha && nyc report --reporter=text-lcov | coveralls",
+    "coverage-html": "nyc mocha && nyc report --reporter=html",
     "converalls": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
     "dev": "mocha -w",
     "check-types": "tsc -b tsconfig.check-types.json",

@@ -1,5 +1,4 @@
 import Redis from 'ioredis'
-
 import createEval from './createEval'
 
 export { createEval }
@@ -11,5 +10,5 @@ export async function delay(ms: number) {
 export function getConnectionName(client: Redis) {
   return client instanceof Redis && client.options.connectionName
     ? `<${client.options.connectionName}>`
-    : '<client>'
+    : '<unknown client>'
 }

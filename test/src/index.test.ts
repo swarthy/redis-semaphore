@@ -1,7 +1,12 @@
 import { expect } from 'chai'
-
 import {
-  MultiSemaphore, Mutex, RedlockMultiSemaphore, RedlockMutex, RedlockSemaphore, Semaphore
+  defaultTimeoutOptions,
+  MultiSemaphore,
+  Mutex,
+  RedlockMultiSemaphore,
+  RedlockMutex,
+  RedlockSemaphore,
+  Semaphore
 } from '../../src/index'
 
 describe('index', () => {
@@ -12,5 +17,6 @@ describe('index', () => {
     expect(RedlockMutex).to.be.ok
     expect(RedlockSemaphore).to.be.ok
     expect(RedlockMultiSemaphore).to.be.ok
+    expect(defaultTimeoutOptions).to.be.ok
   })
 })
