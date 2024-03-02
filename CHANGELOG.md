@@ -1,3 +1,6 @@
+### redis-semaphore@5.5.1
+- Fix race condition for refresh started before release and finished after release
+
 ### redis-semaphore@5.5.0
 
 - Added `identifier` constructor option.
