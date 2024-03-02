@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 import sinon from 'sinon'
-
 import LostLockError from '../../src/errors/LostLockError'
 import Mutex from '../../src/RedisMutex'
 import { TimeoutOptions } from '../../src/types'
@@ -32,6 +31,31 @@ describe('Mutex', () => {
     expect(() => new Mutex(client, '')).to.throw('"key" is required')
     expect(() => new Mutex(client, 1 as unknown as string)).to.throw(
       '"key" must be a string'
+    )
+    expect(() => new Mutex(client, 'key', { identifier: '' })).to.throw(
+      'identifier must be not empty random string'
+    )
+    expect(
+      () => new Mutex(client, 'key', { acquiredExternally: true })
+    ).to.throw('acquiredExternally=true meanless without custom identifier')
+    expect(
+      () =>
+        new Mutex(client, 'key', {
+          externallyAcquiredIdentifier: '123',
+          identifier: '123'
+        })
+    ).to.throw(
+      'Invalid usage. Use custom identifier and acquiredExternally: true'
+    )
+    expect(
+      () =>
+        new Mutex(client, 'key', {
+          externallyAcquiredIdentifier: '123',
+          acquiredExternally: true,
+          identifier: '123'
+        })
+    ).to.throw(
+      'Invalid usage. Use custom identifier and acquiredExternally: true'
     )
   })
   it('should set default options', () => {
