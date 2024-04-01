@@ -37,7 +37,7 @@
     "@types/node": "20.11.21",
     "@types/sinon": "^17.0.3",
     "@types/sinon-chai": "^3.2.12",
-    "@typescript-eslint/eslint-plugin": "7.1.0",
+    "@typescript-eslint/eslint-plugin": "7.4.0",
     "@typescript-eslint/parser": "7.1.0",
     "benchmark": "^2.1.4",
     "chai": "4.4.1",
