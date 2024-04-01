@@ -656,12 +656,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.11.21":
-  version: 20.11.21
-  resolution: "@types/node@npm:20.11.21"
+"@types/node@npm:20.12.2":
+  version: 20.12.2
+  resolution: "@types/node@npm:20.12.2"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/52b1cdfe8b14a67ab98c01b2e9621994b34a2537368e108fb925121a9d5958eb7344a2fb81ff36964932d5e5a093de8897f021bded10cad3536fd31e932b3000
+  checksum: 10c0/bb47d115a8f95aadebdd6403fee16d149d6b5568ad53bacc42df34c2d572561e36ba47b05f7f68bada43752d7369b470a90df65b646af7502dfb799a21b4fca7
   languageName: node
   linkType: hard
 
@@ -3883,7 +3883,7 @@ __metadata:
     "@types/chai-as-promised": "npm:^7.1.8"
     "@types/debug": "npm:^4.1.12"
     "@types/mocha": "npm:^10.0.6"
-    "@types/node": "npm:20.11.21"
+    "@types/node": "npm:20.12.2"
     "@types/sinon": "npm:^17.0.3"
     "@types/sinon-chai": "npm:^3.2.12"
     "@typescript-eslint/eslint-plugin": "npm:7.1.0"
