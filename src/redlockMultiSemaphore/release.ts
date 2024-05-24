@@ -1,12 +1,12 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../types'
 
 import { releaseLua } from '../multiSemaphore/release/lua'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:release')
 
 export async function releaseRedlockMultiSemaphore(
-  clients: Redis[],
+  clients: RedisClient[],
   key: string,
   permits: number,
   identifier: string

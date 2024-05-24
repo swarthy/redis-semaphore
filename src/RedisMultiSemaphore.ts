@@ -1,17 +1,15 @@
-import Redis from 'ioredis'
-
-import { acquireSemaphore } from './multiSemaphore/acquire/index'
-import { refreshSemaphore } from './multiSemaphore/refresh/index'
-import { releaseSemaphore } from './multiSemaphore/release/index'
+import { acquireSemaphore } from './multiSemaphore/acquire'
+import { refreshSemaphore } from './multiSemaphore/refresh'
+import { releaseSemaphore } from './multiSemaphore/release'
 import RedisSemaphore from './RedisSemaphore'
-import { LockOptions } from './types'
+import { LockOptions, RedisClient } from './types'
 
 export default class RedisMultiSemaphore extends RedisSemaphore {
   protected _kind = 'multi-semaphore'
   protected _permits: number
 
   constructor(
-    client: Redis,
+    client: RedisClient,
     key: string,
     limit: number,
     permits: number,

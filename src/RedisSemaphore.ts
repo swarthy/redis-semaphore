@@ -1,17 +1,15 @@
-import Redis from 'ioredis'
-
 import RedisMutex from './RedisMutex'
-import { acquireSemaphore } from './semaphore/acquire/index'
-import { refreshSemaphore } from './semaphore/refresh/index'
+import { acquireSemaphore } from './semaphore/acquire'
+import { refreshSemaphore } from './semaphore/refresh'
 import { releaseSemaphore } from './semaphore/release'
-import { LockOptions } from './types'
+import { LockOptions, RedisClient } from './types'
 
 export default class RedisSemaphore extends RedisMutex {
   protected _kind = 'semaphore'
   protected _limit: number
 
   constructor(
-    client: Redis,
+    client: RedisClient,
     key: string,
     limit: number,
     options?: LockOptions

@@ -1,8 +1,8 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../types'
 
 import { acquireLua } from '../multiSemaphore/acquire/lua'
-import { delay } from '../utils/index'
+import { delay } from '../utils'
 import { getQuorum, smartSum } from '../utils/redlock'
 
 const debug = createDebug('redis-semaphore:redlock-multi-semaphore:acquire')
@@ -16,7 +16,7 @@ export interface Options {
 }
 
 export async function acquireRedlockMultiSemaphore(
-  clients: Redis[],
+  clients: RedisClient[],
   key: string,
   limit: number,
   permits: number,

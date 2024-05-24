@@ -1,17 +1,15 @@
-import Redis from 'ioredis'
-
 import RedlockMutex from './RedlockMutex'
 import { acquireRedlockSemaphore } from './redlockSemaphore/acquire'
 import { refreshRedlockSemaphore } from './redlockSemaphore/refresh'
 import { releaseRedlockSemaphore } from './redlockSemaphore/release'
-import { LockOptions } from './types'
+import { LockOptions, RedisClient } from './types'
 
 export default class RedlockSemaphore extends RedlockMutex {
   protected _kind = 'redlock-semaphore'
   protected _limit: number
 
   constructor(
-    clients: Redis[],
+    clients: RedisClient[],
     key: string,
     limit: number,
     options?: LockOptions

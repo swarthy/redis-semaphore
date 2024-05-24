@@ -1,6 +1,6 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
 import { acquireLua } from '../multiSemaphore/acquire/lua'
+import { RedisClient } from '../types'
 
 import { refreshLua } from '../multiSemaphore/refresh/lua'
 import { releaseLua } from '../multiSemaphore/release/lua'
@@ -14,7 +14,7 @@ interface Options {
 }
 
 export async function refreshRedlockMultiSemaphore(
-  clients: Redis[],
+  clients: RedisClient[],
   key: string,
   limit: number,
   permits: number,

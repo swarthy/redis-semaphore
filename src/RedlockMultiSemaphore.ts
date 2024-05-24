@@ -1,17 +1,15 @@
-import Redis from 'ioredis'
-
 import { acquireRedlockMultiSemaphore } from './redlockMultiSemaphore/acquire'
 import { refreshRedlockMultiSemaphore } from './redlockMultiSemaphore/refresh'
 import { releaseRedlockMultiSemaphore } from './redlockMultiSemaphore/release'
 import RedlockSemaphore from './RedlockSemaphore'
-import { LockOptions } from './types'
+import { LockOptions, RedisClient } from './types'
 
 export default class RedlockMultiSemaphore extends RedlockSemaphore {
   protected _kind = 'redlock-multi-semaphore'
   protected _permits: number
 
   constructor(
-    clients: Redis[],
+    clients: RedisClient[],
     key: string,
     limit: number,
     permits: number,

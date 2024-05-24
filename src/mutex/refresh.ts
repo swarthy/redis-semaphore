@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../types'
 
 import { createEval } from '../utils/index'
 
@@ -24,7 +24,7 @@ export const expireIfEqualLua = createEval<[string, string, number], 0 | 1>(
 )
 
 export async function refreshMutex(
-  client: Redis,
+  client: RedisClient,
   key: string,
   identifier: string,
   lockTimeout: number

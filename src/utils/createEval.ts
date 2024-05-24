@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../types'
 
 import { getConnectionName } from './index'
 
@@ -21,7 +21,7 @@ export default function createEval<Args extends Array<number | string>, Result>(
   const sha1 = createSHA1(script)
   debug('creating script:', script, 'sha1:', sha1)
   return async function optimizedEval(
-    client: Redis,
+    client: RedisClient,
     args: Args
   ): Promise<Result> {
     const connectionName = getConnectionName(client)

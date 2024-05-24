@@ -1,14 +1,14 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
 
 import { expireIfEqualLua } from '../mutex/refresh'
 import { delIfEqualLua } from '../mutex/release'
 import { getQuorum, smartSum } from '../utils/redlock'
+import { RedisClient } from '../types'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:refresh')
 
 export async function refreshRedlockMutex(
-  clients: Redis[],
+  clients: RedisClient[],
   key: string,
   identifier: string,
   lockTimeout: number
@@ -28,7 +28,7 @@ export async function refreshRedlockMutex(
     if (refreshedCount < clients.length) {
       debug(key, identifier, 'try to acquire on failed nodes')
       const promises = results
-        .reduce<Redis[]>((failedClients, result, index) => {
+        .reduce<RedisClient[]>((failedClients, result, index) => {
           if (!result) {
             failedClients.push(clients[index])
           }

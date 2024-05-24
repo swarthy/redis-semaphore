@@ -1,7 +1,7 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../../types'
 
-import { delay } from '../../utils/index'
+import { delay } from '../../utils'
 import { acquireLua } from './lua'
 
 const debug = createDebug('redis-semaphore:multi-semaphore:acquire')
@@ -15,7 +15,7 @@ export interface Options {
 }
 
 export async function acquireSemaphore(
-  client: Redis,
+  client: RedisClient,
   key: string,
   limit: number,
   permits: number,
