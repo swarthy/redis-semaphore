@@ -1,6 +1,16 @@
 import LostLockError from './errors/LostLockError'
 import { Lock } from './Lock'
 
+import type * as ioredis from 'ioredis'
+
+/**
+ * ioredis-like Redis client
+ */
+export type RedisClient = Pick<
+  ioredis.Redis,
+  'script' | 'eval' | 'evalsha' | 'get' | 'set' | 'zrem' | 'options'
+>
+
 export interface LockLostCallback {
   (this: Lock, err: LostLockError): void
 }
