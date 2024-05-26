@@ -9,7 +9,8 @@ import type * as ioredis from 'ioredis'
 export type RedisClient = Pick<
   ioredis.Redis,
   'eval' | 'evalsha' | 'get' | 'set' | 'zrem'
->
+> &
+  Partial<Pick<ioredis.Redis, 'options'>>
 
 export interface LockLostCallback {
   (this: Lock, err: LostLockError): void
