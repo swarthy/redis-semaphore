@@ -1,6 +1,6 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
 import { acquireLua } from '../semaphore/acquire/lua'
+import type { RedisClient } from '../types'
 
 import { refreshLua } from '../semaphore/refresh/lua'
 import { getQuorum, smartSum } from '../utils/redlock'
@@ -13,7 +13,7 @@ interface Options {
 }
 
 export async function refreshRedlockSemaphore(
-  clients: Redis[],
+  clients: RedisClient[],
   key: string,
   limit: number,
   options: Options
@@ -35,7 +35,7 @@ export async function refreshRedlockSemaphore(
     if (refreshedCount < clients.length) {
       debug(key, identifier, 'try to acquire on failed nodes')
       const promises = results
-        .reduce<Redis[]>((failedClients, result, index) => {
+        .reduce<RedisClient[]>((failedClients, result, index) => {
           if (!result) {
             failedClients.push(clients[index])
           }

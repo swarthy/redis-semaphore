@@ -5,7 +5,7 @@ import LostLockError from '../../src/errors/LostLockError'
 import Mutex from '../../src/RedisMutex'
 import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
-import { client1 as client } from '../redisClient'
+import { client1 as client, clientMock1 as clientMock } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
   catchUnhandledRejection,
@@ -24,9 +24,6 @@ describe('Mutex', () => {
   it('should fail on invalid arguments', () => {
     expect(() => new Mutex(null as unknown as Redis, 'key')).to.throw(
       '"client" is required'
-    )
-    expect(() => new Mutex({} as unknown as Redis, 'key')).to.throw(
-      '"client" must be instance of ioredis client'
     )
     expect(() => new Mutex(client, '')).to.throw('"key" is required')
     expect(() => new Mutex(client, 1 as unknown as string)).to.throw(
@@ -320,6 +317,18 @@ describe('Mutex', () => {
       expect(await client.get('mutex:key')).to.be.eql(mutex2.identifier)
 
       await Promise.all([mutex1.release(), mutex2.release()])
+    })
+  })
+  describe('ioredis-mock support', async () => {
+    it('should acquire and release lock', async () => {
+      const mutex = new Mutex(clientMock, 'key')
+      expect(mutex.isAcquired).to.be.false
+      await mutex.acquire()
+      expect(mutex.isAcquired).to.be.true
+      expect(await clientMock.get('mutex:key')).to.be.eql(mutex.identifier)
+      await mutex.release()
+      expect(mutex.isAcquired).to.be.false
+      expect(await clientMock.get('mutex:key')).to.be.eql(null)
     })
   })
 })

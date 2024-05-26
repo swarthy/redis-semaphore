@@ -1,12 +1,17 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 import sinon from 'sinon'
-
 import LostLockError from '../../src/errors/LostLockError'
 import RedlockSemaphore from '../../src/RedlockSemaphore'
 import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
-import { allClients, client1, client2, client3 } from '../redisClient'
+import {
+  allClientMocks,
+  allClients,
+  client1,
+  client2,
+  client3
+} from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
   catchUnhandledRejection,
@@ -55,9 +60,6 @@ describe('RedlockSemaphore', () => {
     expect(
       () => new RedlockSemaphore(null as unknown as Redis[], 'key', 5)
     ).to.throw('"clients" array is required')
-    expect(
-      () => new RedlockSemaphore([{}] as unknown as Redis[], 'key', 5)
-    ).to.throw('"client" must be instance of ioredis client')
     expect(() => new RedlockSemaphore(allClients, '', 5)).to.throw(
       '"key" is required'
     )
@@ -562,6 +564,16 @@ describe('RedlockSemaphore', () => {
       await expect(semaphore2.acquire()).to.be.rejectedWith(
         'Acquire redlock-semaphore semaphore:key timeout'
       )
+    })
+  })
+  describe('ioredis-mock support', () => {
+    it('should acquire and release semaphore', async () => {
+      const semaphore1 = new RedlockSemaphore(allClientMocks, 'key', 2)
+      const semaphore2 = new RedlockSemaphore(allClientMocks, 'key', 2)
+      await semaphore1.acquire()
+      await semaphore2.acquire()
+      await semaphore1.release()
+      await semaphore2.release()
     })
   })
 })

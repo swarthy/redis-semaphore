@@ -1,12 +1,12 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import type { RedisClient } from '../types'
 
 import { delIfEqualLua } from '../mutex/release'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:release')
 
 export async function releaseRedlockMutex(
-  clients: Redis[],
+  clients: RedisClient[],
   key: string,
   identifier: string
 ) {

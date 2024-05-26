@@ -1,7 +1,7 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
 
 import { releaseLua } from './lua'
+import { RedisClient } from '../../types'
 
 const debug = createDebug('redis-semaphore:multi-semaphore:release')
 
@@ -12,7 +12,7 @@ export interface Options {
 }
 
 export async function releaseSemaphore(
-  client: Redis,
+  client: RedisClient,
   key: string,
   permits: number,
   identifier: string

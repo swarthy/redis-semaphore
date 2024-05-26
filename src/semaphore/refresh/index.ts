@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../../types'
 
 import { refreshLua } from './lua'
 
@@ -11,7 +11,7 @@ export interface Options {
 }
 
 export async function refreshSemaphore(
-  client: Redis,
+  client: RedisClient,
   key: string,
   limit: number,
   options: Options

@@ -1,10 +1,10 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../types'
 
 const debug = createDebug('redis-semaphore:semaphore:release')
 
 export async function releaseSemaphore(
-  client: Redis,
+  client: RedisClient,
   key: string,
   identifier: string
 ) {

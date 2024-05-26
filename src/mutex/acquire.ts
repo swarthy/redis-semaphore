@@ -1,7 +1,7 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import { RedisClient } from '../types'
 
-import { delay } from '../utils/index'
+import { delay } from '../utils'
 
 const debug = createDebug('redis-semaphore:mutex:acquire')
 
@@ -14,7 +14,7 @@ export interface Options {
 }
 
 export async function acquireMutex(
-  client: Redis,
+  client: RedisClient,
   key: string,
   options: Options
 ) {

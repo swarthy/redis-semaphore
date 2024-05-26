@@ -1,4 +1,4 @@
-import Redis from 'ioredis'
+import type { RedisClient } from './types'
 
 import { Lock } from './Lock'
 import { acquireMutex } from './mutex/acquire'
@@ -9,15 +9,12 @@ import { LockOptions } from './types'
 export default class RedisMutex extends Lock {
   protected _kind = 'mutex'
   protected _key: string
-  protected _client: Redis
+  protected _client: RedisClient
 
-  constructor(client: Redis, key: string, options?: LockOptions) {
+  constructor(client: RedisClient, key: string, options?: LockOptions) {
     super(options)
     if (!client) {
       throw new Error('"client" is required')
-    }
-    if (!(client instanceof Redis)) {
-      throw new Error('"client" must be instance of ioredis client or cluster')
     }
     if (!key) {
       throw new Error('"key" is required')

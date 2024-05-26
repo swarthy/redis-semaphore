@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import Redis from 'ioredis'
+import type { RedisClient } from '../types'
 
 import { createEval } from '../utils/index'
 
@@ -20,7 +20,7 @@ export const delIfEqualLua = createEval<[string, string], 0 | 1>(
 )
 
 export async function releaseMutex(
-  client: Redis,
+  client: RedisClient,
   key: string,
   identifier: string
 ) {

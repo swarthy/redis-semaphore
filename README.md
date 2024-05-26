@@ -24,6 +24,10 @@ npm install --save redis-semaphore ioredis
 yarn add redis-semaphore ioredis
 ```
 
+ioredis is the officially supported Redis client. This library's test code runs on it.
+
+Users of other Redis clients should ensure ioredis-compatible API (see src/types.ts) when creating lock objects.
+
 ### Mutex
 
 > See [RedisLabs: Locks with timeouts](https://redislabs.com/ebook/part-2-core-concepts/chapter-6-application-components-in-redis/6-2-distributed-locking/6-2-5-locks-with-timeouts/)
@@ -408,6 +412,14 @@ async function doSomething() {
     await semaphore.release()
   }
 }
+```
+
+## Development
+
+```shell
+yarn --immutable
+./setup-redis-servers.sh
+yarn dev
 ```
 
 ## License
