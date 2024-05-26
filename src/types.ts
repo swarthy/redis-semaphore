@@ -8,7 +8,7 @@ import type * as ioredis from 'ioredis'
  */
 export type RedisClient = Pick<
   ioredis.Redis,
-  'script' | 'eval' | 'evalsha' | 'get' | 'set' | 'zrem' | 'options'
+  'eval' | 'evalsha' | 'get' | 'set' | 'zrem'
 >
 
 export interface LockLostCallback {

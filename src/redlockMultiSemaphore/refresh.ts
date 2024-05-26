@@ -37,7 +37,7 @@ export async function refreshRedlockMultiSemaphore(
     if (refreshedCount < clients.length) {
       debug(key, identifier, 'try to acquire on failed nodes')
       const promises = results
-        .reduce<Redis[]>((failedClients, result, index) => {
+        .reduce<RedisClient[]>((failedClients, result, index) => {
           if (!result) {
             failedClients.push(clients[index])
           }
