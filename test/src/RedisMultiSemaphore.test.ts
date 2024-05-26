@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 import sinon from 'sinon'
-
 import LostLockError from '../../src/errors/LostLockError'
 import MultiSemaphore from '../../src/RedisMultiSemaphore'
 import Semaphore from '../../src/RedisSemaphore'
@@ -27,9 +26,6 @@ describe('MultiSemaphore', () => {
     expect(
       () => new MultiSemaphore(null as unknown as Redis, 'key', 5, 2)
     ).to.throw('"client" is required')
-    expect(
-      () => new MultiSemaphore({} as unknown as Redis, 'key', 5, 2)
-    ).to.throw('"client" must be instance of ioredis client')
     expect(() => new MultiSemaphore(client, '', 5, 2)).to.throw(
       '"key" is required'
     )

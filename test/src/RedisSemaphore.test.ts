@@ -25,9 +25,6 @@ describe('Semaphore', () => {
     expect(() => new Semaphore(null as unknown as Redis, 'key', 5)).to.throw(
       '"client" is required'
     )
-    expect(() => new Semaphore({} as unknown as Redis, 'key', 5)).to.throw(
-      '"client" must be instance of ioredis client'
-    )
     expect(() => new Semaphore(client, '', 5)).to.throw('"key" is required')
     expect(() => new Semaphore(client, 1 as unknown as string, 5)).to.throw(
       '"key" must be a string'

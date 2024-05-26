@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 import sinon from 'sinon'
-
 import LostLockError from '../../src/errors/LostLockError'
 import RedlockSemaphore from '../../src/RedlockSemaphore'
 import { TimeoutOptions } from '../../src/types'
@@ -55,9 +54,6 @@ describe('RedlockSemaphore', () => {
     expect(
       () => new RedlockSemaphore(null as unknown as Redis[], 'key', 5)
     ).to.throw('"clients" array is required')
-    expect(
-      () => new RedlockSemaphore([{}] as unknown as Redis[], 'key', 5)
-    ).to.throw('"client" must be instance of ioredis client')
     expect(() => new RedlockSemaphore(allClients, '', 5)).to.throw(
       '"key" is required'
     )

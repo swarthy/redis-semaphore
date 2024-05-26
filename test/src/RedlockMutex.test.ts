@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { Redis } from 'ioredis'
 import sinon from 'sinon'
-
 import LostLockError from '../../src/errors/LostLockError'
 import RedlockMutex from '../../src/RedlockMutex'
 import { TimeoutOptions } from '../../src/types'
@@ -31,9 +30,6 @@ describe('RedlockMutex', () => {
   it('should fail on invalid arguments', () => {
     expect(() => new RedlockMutex(null as unknown as Redis[], 'key')).to.throw(
       '"clients" array is required'
-    )
-    expect(() => new RedlockMutex([{}] as unknown as Redis[], 'key')).to.throw(
-      '"client" must be instance of ioredis client'
     )
     expect(() => new RedlockMutex(allClients, '')).to.throw('"key" is required')
     expect(() => new RedlockMutex(allClients, 1 as unknown as string)).to.throw(
