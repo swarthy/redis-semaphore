@@ -8,11 +8,8 @@ export async function delay(ms: number) {
 }
 
 export function getConnectionName(client: RedisClient) {
-  try {
-    const connName = client.options.connectionName
-    if (typeof connName === 'string') {
-      return `<${connName}>`
-    }
-  } catch (ignored: unknown) {}
-  return '<unknown client>'
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore this path is for ioredis
+  const connectionName = client.options?.connectionName
+  return connectionName ? `<${connectionName}>` : '<unknown client>'
 }
