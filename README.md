@@ -414,6 +414,14 @@ async function doSomething() {
 }
 ```
 
+## Development
+
+```shell
+yarn --immutable
+./setup-redis-servers.sh
+yarn dev
+```
+
 ## License
 
 MIT
