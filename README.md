@@ -314,7 +314,7 @@ const redisClients = [
   new Redis('127.0.0.1:6377'),
   new Redis('127.0.0.1:6378'),
   new Redis('127.0.0.1:6379')
-] // or cluster.nodes('master')
+] // "Those nodes are totally independent, so we don’t use replication or any other implicit coordination system."
 
 async function doSomething() {
   const mutex = new RedlockMutex(redisClients, 'lockingResource')
@@ -354,7 +354,7 @@ const redisClients = [
   new Redis('127.0.0.1:6377'),
   new Redis('127.0.0.1:6378'),
   new Redis('127.0.0.1:6379')
-] // or cluster.nodes('master')
+] // "Those nodes are totally independent, so we don’t use replication or any other implicit coordination system."
 
 async function doSomething() {
   const semaphore = new Semaphore(redisClients, 'lockingResource', 5)
@@ -395,7 +395,7 @@ const redisClients = [
   new Redis('127.0.0.1:6377'),
   new Redis('127.0.0.1:6378'),
   new Redis('127.0.0.1:6379')
-] // or cluster.nodes('master')
+] // "Those nodes are totally independent, so we don’t use replication or any other implicit coordination system."
 
 async function doSomething() {
   const semaphore = new RedlockMultiSemaphore(
