@@ -64,6 +64,11 @@
   "peerDependencies": {
     "ioredis": "^4.1.0 || ^5"
   },
+  "peerDependenciesMeta": {
+    "ioredis": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "debug": "^4.3.4"
   },

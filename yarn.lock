@@ -4103,6 +4103,9 @@ __metadata:
     typescript: "npm:^5.4.5"
   peerDependencies:
     ioredis: ^4.1.0 || ^5
+  peerDependenciesMeta:
+    ioredis:
+      optional: true
   languageName: unknown
   linkType: soft
 
