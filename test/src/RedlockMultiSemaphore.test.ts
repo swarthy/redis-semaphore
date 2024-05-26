@@ -6,7 +6,13 @@ import RedlockMultiSemaphore from '../../src/RedlockMultiSemaphore'
 import RedlockSemaphore from '../../src/RedlockSemaphore'
 import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
-import { allClients, client1, client2, client3 } from '../redisClient'
+import {
+  allClientMocks,
+  allClients,
+  client1,
+  client2,
+  client3
+} from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
   catchUnhandledRejection,
@@ -642,6 +648,24 @@ describe('RedlockMultiSemaphore', () => {
       await expect(semaphore2.acquire()).to.be.rejectedWith(
         'Acquire redlock-multi-semaphore semaphore:key timeout'
       )
+    })
+  })
+  describe('ioredis-mock support', () => {
+    it('should acquire and release semaphore', async () => {
+      const semaphore1 = new RedlockMultiSemaphore(allClientMocks, 'key', 3, 2)
+      const semaphore2 = new RedlockMultiSemaphore(allClientMocks, 'key', 3, 1)
+      expect(semaphore1.isAcquired).to.be.false
+      expect(semaphore2.isAcquired).to.be.false
+
+      await semaphore1.acquire()
+      expect(semaphore1.isAcquired).to.be.true
+      await semaphore2.acquire()
+      expect(semaphore2.isAcquired).to.be.true
+
+      await semaphore1.release()
+      expect(semaphore1.isAcquired).to.be.false
+      await semaphore2.release()
+      expect(semaphore2.isAcquired).to.be.false
     })
   })
 })
