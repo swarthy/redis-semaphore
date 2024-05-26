@@ -1,3 +1,8 @@
+### redis-semaphore@5.6.0
+- Added interface compatible client support (ex. `ioredis-mock`)
+- Removed `instanceof Redis` validation in constructor
+- `ioredis` marked as optional peerDependency, explicit `ioredis` install is required now
+
 ### redis-semaphore@5.5.1
 - Fix race condition for refresh started before release and finished after release
 
