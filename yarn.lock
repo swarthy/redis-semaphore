@@ -4159,7 +4159,7 @@ __metadata:
     nyc: "npm:^15.1.0"
     sinon: "npm:18.0.0"
     sinon-chai: "npm:3.7.0"
-    snyk: "npm:1.1291.0"
+    snyk: "npm:1.1291.1"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.4.5"
   peerDependencies:
@@ -4474,15 +4474,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"snyk@npm:1.1291.0":
-  version: 1.1291.0
-  resolution: "snyk@npm:1.1291.0"
+"snyk@npm:1.1291.1":
+  version: 1.1291.1
+  resolution: "snyk@npm:1.1291.1"
   dependencies:
     "@sentry/node": "npm:^7.36.0"
     global-agent: "npm:^3.0.0"
   bin:
     snyk: bin/snyk
-  checksum: 10c0/ac54977b74cbc8d2697508ddd9ba45425d3d8be4b4d1ad9c5653a03131009bf10197675f66fee01475c9337e90c3c995bc24fce978026aa56e019f4371f3979b
+  checksum: 10c0/df67b6f121567d178daa859218cbd7e95617400dc9b0d6c5ed7fee92b434b7301aacedcd4901d0c92472fa811f23d46f8e31307cb1f27ab67648bb3e529fe8c4
   languageName: node
   linkType: hard
 
