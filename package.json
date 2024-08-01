@@ -31,7 +31,7 @@
   "devDependencies": {
     "@swarthy/wait-for": "^2.1.1",
     "@swc-node/register": "1.9.1",
-    "@swc/core": "1.5.7",
+    "@swc/core": "1.7.4",
     "@types/chai": "^4.3.16",
     "@types/chai-as-promised": "^7.1.8",
     "@types/debug": "^4.1.12",
