@@ -8,6 +8,7 @@ services:
     working_dir: /app
     command: >
       sh -c "
+        corepack enable &&
         yarn wait-for --redis redis://redis1 &&
         yarn wait-for --redis redis://redis2 &&
         yarn wait-for --redis redis://redis3 &&
