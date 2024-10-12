@@ -3,6 +3,7 @@
   "version": "5.6.1",
   "description": "Distributed mutex and semaphore based on Redis",
   "main": "lib/index.js",
+  "module": "es/index.js",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "test": "mocha",
