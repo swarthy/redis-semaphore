@@ -1,3 +1,6 @@
+### redis-semaphore@5.6.1
+- Removed `module` field from `package.json`
+
 ### redis-semaphore@5.6.0
 - Added interface compatible client support (ex. `ioredis-mock`)
 - Removed `instanceof Redis` validation in constructor
