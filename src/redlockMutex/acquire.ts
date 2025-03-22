@@ -1,9 +1,8 @@
 import createDebug from 'debug'
-
 import { delIfEqualLua } from '../mutex/release'
+import { RedisClient } from '../types'
 import { delay } from '../utils'
 import { getQuorum, smartSum } from '../utils/redlock'
-import { RedisClient } from '../types'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:acquire')
 
@@ -19,7 +18,7 @@ export async function acquireRedlockMutex(
   clients: RedisClient[],
   key: string,
   options: Options
-) {
+): Promise<boolean> {
   const {
     identifier,
     lockTimeout,

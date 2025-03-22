@@ -1,4 +1,4 @@
-import LostLockError from '../src/errors/LostLockError'
+import LostLockError from './errors/LostLockError'
 
 export const defaultTimeoutOptions = {
   lockTimeout: 10000,
@@ -7,6 +7,6 @@ export const defaultTimeoutOptions = {
   retryInterval: 10
 }
 
-export function defaultOnLockLost(err: LostLockError) {
+export function defaultOnLockLost(err: LostLockError): never {
   throw err
 }

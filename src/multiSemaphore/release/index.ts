@@ -1,7 +1,6 @@
 import createDebug from 'debug'
-
-import { releaseLua } from './lua'
 import { RedisClient } from '../../types'
+import { releaseLua } from './lua'
 
 const debug = createDebug('redis-semaphore:multi-semaphore:release')
 
@@ -16,7 +15,7 @@ export async function releaseSemaphore(
   key: string,
   permits: number,
   identifier: string
-) {
+): Promise<void> {
   debug(key, identifier, permits)
   const result = await releaseLua(client, [key, permits, identifier])
   debug('result', typeof result, result)

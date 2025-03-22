@@ -1,6 +1,5 @@
 import createDebug from 'debug'
 import { RedisClient } from '../../types'
-
 import { refreshLua } from './lua'
 
 const debug = createDebug('redis-semaphore:semaphore:refresh')
@@ -15,7 +14,7 @@ export async function refreshSemaphore(
   key: string,
   limit: number,
   options: Options
-) {
+): Promise<boolean> {
   const { identifier, lockTimeout } = options
   const now = Date.now()
   debug(key, identifier, now)
