@@ -1,6 +1,5 @@
 import createDebug from 'debug'
 import { RedisClient } from '../../types'
-
 import { delay } from '../../utils'
 import { acquireLua } from './lua'
 
@@ -20,7 +19,7 @@ export async function acquireSemaphore(
   limit: number,
   permits: number,
   options: Options
-) {
+): Promise<boolean> {
   const {
     identifier,
     lockTimeout,

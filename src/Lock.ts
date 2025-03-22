@@ -67,15 +67,14 @@ export abstract class Lock {
       identifier: this._identifier
     }
     this._refreshTimeInterval = refreshInterval
-    this._processRefresh = this._processRefresh.bind(this)
     this._onLockLost = onLockLost
   }
 
-  get identifier() {
+  get identifier(): string {
     return this._identifier
   }
 
-  get isAcquired() {
+  get isAcquired(): boolean {
     return this._acquired
   }
 
@@ -84,7 +83,7 @@ export abstract class Lock {
     return identifierSuffix ? `${uuid}-${identifierSuffix}` : uuid
   }
 
-  private _startRefresh() {
+  private _startRefresh(): void {
     this._refreshInterval = setInterval(
       this._processRefresh,
       this._refreshTimeInterval
@@ -92,7 +91,7 @@ export abstract class Lock {
     this._refreshInterval.unref()
   }
 
-  stopRefresh() {
+  stopRefresh(): void {
     if (this._refreshInterval) {
       debug(
         `clear refresh interval ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
@@ -101,7 +100,7 @@ export abstract class Lock {
     }
   }
 
-  private async _processRefresh() {
+  private _processRefresh = async (): Promise<void> => {
     if (this._refreshing) {
       debug(
         `already refreshing ${this._kind} (key: ${this._key}, identifier: ${this._identifier}) (skip)`
@@ -133,7 +132,7 @@ export abstract class Lock {
     }
   }
 
-  async acquire() {
+  async acquire(): Promise<void> {
     debug(`acquire ${this._kind} (key: ${this._key})`)
     const acquired = await this.tryAcquire()
     if (!acquired) {
@@ -141,7 +140,7 @@ export abstract class Lock {
     }
   }
 
-  async tryAcquire() {
+  async tryAcquire(): Promise<boolean> {
     debug(`tryAcquire ${this._kind} (key: ${this._key})`)
     const acquired = this._acquiredExternally
       ? await this._refresh()
@@ -157,7 +156,7 @@ export abstract class Lock {
     return true
   }
 
-  async release() {
+  async release(): Promise<void> {
     debug(
       `release ${this._kind} (key: ${this._key}, identifier: ${this._identifier})`
     )

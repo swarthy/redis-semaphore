@@ -1,9 +1,8 @@
 import createDebug from 'debug'
-
 import { expireIfEqualLua } from '../mutex/refresh'
 import { delIfEqualLua } from '../mutex/release'
-import { getQuorum, smartSum } from '../utils/redlock'
 import { RedisClient } from '../types'
+import { getQuorum, smartSum } from '../utils/redlock'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:refresh')
 
@@ -12,7 +11,7 @@ export async function refreshRedlockMutex(
   key: string,
   identifier: string,
   lockTimeout: number
-) {
+): Promise<boolean> {
   debug(key, identifier)
   const quorum = getQuorum(clients.length)
   const promises = clients.map(client =>

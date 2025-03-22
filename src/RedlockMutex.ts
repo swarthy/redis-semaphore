@@ -29,7 +29,7 @@ export default class RedlockMutex extends Lock {
     this._key = `mutex:${key}`
   }
 
-  protected async _refresh() {
+  protected async _refresh(): Promise<boolean> {
     return await refreshRedlockMutex(
       this._clients,
       this._key,
@@ -38,7 +38,7 @@ export default class RedlockMutex extends Lock {
     )
   }
 
-  protected async _acquire() {
+  protected async _acquire(): Promise<boolean> {
     return await acquireRedlockMutex(
       this._clients,
       this._key,
@@ -46,7 +46,7 @@ export default class RedlockMutex extends Lock {
     )
   }
 
-  protected async _release() {
+  protected async _release(): Promise<void> {
     await releaseRedlockMutex(this._clients, this._key, this._identifier)
   }
 }

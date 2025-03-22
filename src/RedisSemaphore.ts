@@ -25,7 +25,7 @@ export default class RedisSemaphore extends RedisMutex {
     this._limit = limit
   }
 
-  protected async _refresh() {
+  protected async _refresh(): Promise<boolean> {
     return await refreshSemaphore(
       this._client,
       this._key,
@@ -34,7 +34,7 @@ export default class RedisSemaphore extends RedisMutex {
     )
   }
 
-  protected async _acquire() {
+  protected async _acquire(): Promise<boolean> {
     return await acquireSemaphore(
       this._client,
       this._key,
@@ -43,7 +43,7 @@ export default class RedisSemaphore extends RedisMutex {
     )
   }
 
-  protected async _release() {
+  protected async _release(): Promise<void> {
     await releaseSemaphore(this._client, this._key, this._identifier)
   }
 }

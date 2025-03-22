@@ -1,9 +1,9 @@
 import createDebug from 'debug'
 import { acquireLua } from '../semaphore/acquire/lua'
-import type { RedisClient } from '../types'
-
 import { refreshLua } from '../semaphore/refresh/lua'
 import { getQuorum, smartSum } from '../utils/redlock'
+
+import type { RedisClient } from '../types'
 
 const debug = createDebug('redis-semaphore:redlock-semaphore:refresh')
 
@@ -17,7 +17,7 @@ export async function refreshRedlockSemaphore(
   key: string,
   limit: number,
   options: Options
-) {
+): Promise<boolean> {
   const { identifier, lockTimeout } = options
   const now = Date.now()
   debug(key, identifier, now)

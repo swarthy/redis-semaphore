@@ -25,7 +25,7 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
     this._permits = permits
   }
 
-  protected async _refresh() {
+  protected async _refresh(): Promise<boolean> {
     return await refreshSemaphore(
       this._client,
       this._key,
@@ -35,7 +35,7 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
     )
   }
 
-  protected async _acquire() {
+  protected async _acquire(): Promise<boolean> {
     return await acquireSemaphore(
       this._client,
       this._key,
@@ -45,7 +45,7 @@ export default class RedisMultiSemaphore extends RedisSemaphore {
     )
   }
 
-  protected async _release() {
+  protected async _release(): Promise<void> {
     await releaseSemaphore(
       this._client,
       this._key,

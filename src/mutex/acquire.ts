@@ -1,6 +1,5 @@
 import createDebug from 'debug'
 import { RedisClient } from '../types'
-
 import { delay } from '../utils'
 
 const debug = createDebug('redis-semaphore:mutex:acquire')
@@ -17,7 +16,7 @@ export async function acquireMutex(
   client: RedisClient,
   key: string,
   options: Options
-) {
+): Promise<boolean> {
   const {
     identifier,
     lockTimeout,

@@ -1,6 +1,5 @@
 import createDebug from 'debug'
 import { RedisClient } from '../types'
-
 import { createEval } from '../utils/index'
 
 const debug = createDebug('redis-semaphore:mutex:refresh')
@@ -28,7 +27,7 @@ export async function refreshMutex(
   key: string,
   identifier: string,
   lockTimeout: number
-) {
+): Promise<boolean> {
   debug(key, identifier)
   const result = await expireIfEqualLua(client, [key, identifier, lockTimeout])
   debug('result', typeof result, result)

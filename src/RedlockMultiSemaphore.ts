@@ -25,7 +25,7 @@ export default class RedlockMultiSemaphore extends RedlockSemaphore {
     this._permits = permits
   }
 
-  protected async _refresh() {
+  protected async _refresh(): Promise<boolean> {
     return await refreshRedlockMultiSemaphore(
       this._clients,
       this._key,
@@ -35,7 +35,7 @@ export default class RedlockMultiSemaphore extends RedlockSemaphore {
     )
   }
 
-  protected async _acquire() {
+  protected async _acquire(): Promise<boolean> {
     return await acquireRedlockMultiSemaphore(
       this._clients,
       this._key,
@@ -45,7 +45,7 @@ export default class RedlockMultiSemaphore extends RedlockSemaphore {
     )
   }
 
-  protected async _release() {
+  protected async _release(): Promise<void> {
     await releaseRedlockMultiSemaphore(
       this._clients,
       this._key,

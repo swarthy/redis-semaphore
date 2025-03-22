@@ -1,7 +1,6 @@
 import createDebug from 'debug'
-import { RedisClient } from '../types'
-
 import { acquireLua } from '../multiSemaphore/acquire/lua'
+import { RedisClient } from '../types'
 import { delay } from '../utils'
 import { getQuorum, smartSum } from '../utils/redlock'
 
@@ -21,7 +20,7 @@ export async function acquireRedlockMultiSemaphore(
   limit: number,
   permits: number,
   options: Options
-) {
+): Promise<boolean> {
   const {
     identifier,
     lockTimeout,

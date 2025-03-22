@@ -25,7 +25,7 @@ export default class RedlockSemaphore extends RedlockMutex {
     this._limit = limit
   }
 
-  protected async _refresh() {
+  protected async _refresh(): Promise<boolean> {
     return await refreshRedlockSemaphore(
       this._clients,
       this._key,
@@ -34,7 +34,7 @@ export default class RedlockSemaphore extends RedlockMutex {
     )
   }
 
-  protected async _acquire() {
+  protected async _acquire(): Promise<boolean> {
     return await acquireRedlockSemaphore(
       this._clients,
       this._key,
@@ -43,7 +43,7 @@ export default class RedlockSemaphore extends RedlockMutex {
     )
   }
 
-  protected async _release() {
+  protected async _release(): Promise<void> {
     await releaseRedlockSemaphore(this._clients, this._key, this._identifier)
   }
 }

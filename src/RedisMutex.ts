@@ -26,7 +26,7 @@ export default class RedisMutex extends Lock {
     this._key = `mutex:${key}`
   }
 
-  protected async _refresh() {
+  protected async _refresh(): Promise<boolean> {
     return await refreshMutex(
       this._client,
       this._key,
@@ -35,11 +35,11 @@ export default class RedisMutex extends Lock {
     )
   }
 
-  protected async _acquire() {
+  protected async _acquire(): Promise<boolean> {
     return await acquireMutex(this._client, this._key, this._acquireOptions)
   }
 
-  protected async _release() {
+  protected async _release(): Promise<void> {
     await releaseMutex(this._client, this._key, this._identifier)
   }
 }

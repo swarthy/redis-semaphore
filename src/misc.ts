@@ -7,6 +7,6 @@ export const defaultTimeoutOptions = {
   retryInterval: 10
 }
 
-export function defaultOnLockLost(err: LostLockError) {
+export function defaultOnLockLost(err: LostLockError): never {
   throw err
 }
