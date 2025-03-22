@@ -2058,13 +2058,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-inclusive@npm:1.2.10":
-  version: 1.2.10
-  resolution: "eslint-config-inclusive@npm:1.2.10"
-  checksum: 10c0/76162673f307a5c8a779ccfc7fd934b708fb2edc72b0b5cb377f1cbe083e2baa408c71c96f2ddfe65d9ce738bae0efd6ce71c61d2f3ea70ffcdb3fba315f61cd
-  languageName: node
-  linkType: hard
-
 "eslint-plugin-es@npm:^3.0.0":
   version: 3.0.1
   resolution: "eslint-plugin-es@npm:3.0.1"
@@ -4334,7 +4327,6 @@ __metadata:
     coveralls: "npm:^3.1.1"
     debug: "npm:^4.4.0"
     eslint: "npm:9.23.0"
-    eslint-config-inclusive: "npm:1.2.10"
     eslint-plugin-node: "npm:11.1.0"
     ioredis: "npm:5.6.0"
     ioredis-mock: "npm:8.9.0"
