@@ -28,8 +28,8 @@ export default function createEval<Args extends Array<number | string>, Result>(
     debug(connectionName, sha1, 'attempt, args:', evalSHAArgs)
     try {
       return (await client.evalsha(sha1, keysCount, ...args)) as Promise<Result>
-    } catch (err: any) {
-      if (isNoScriptError(err)) {
+    } catch (err) {
+      if (err instanceof Error && isNoScriptError(err)) {
         const evalArgs = [script, keysCount, ...args]
         debug(connectionName, sha1, 'fallback to eval, args:', evalArgs)
         return (await client.eval(
