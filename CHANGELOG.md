@@ -1,3 +1,7 @@
+### redis-semaphore@5.6.2
+- Fixed implicit import from `src`
+- Removed `src` folder from NPM package
+
 ### redis-semaphore@5.6.1
 - Removed `module` field from `package.json`
 
