@@ -30,7 +30,7 @@
   "devDependencies": {
     "@swarthy/wait-for": "^2.1.1",
     "@swc-node/register": "1.10.10",
-    "@swc/core": "1.11.11",
+    "@swc/core": "1.11.29",
     "@types/chai": "^4.3.20",
     "@types/chai-as-promised": "^7.1.8",
     "@types/debug": "^4.1.12",
