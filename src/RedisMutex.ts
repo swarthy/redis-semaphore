@@ -35,8 +35,8 @@ export default class RedisMutex extends Lock {
     )
   }
 
-  protected async _acquire(): Promise<boolean> {
-    return await acquireMutex(this._client, this._key, this._acquireOptions)
+  protected async _acquire(abortSignal?: AbortSignal): Promise<boolean> {
+    return await acquireMutex(this._client, this._key, this._acquireOptions, abortSignal)
   }
 
   protected async _release(): Promise<void> {

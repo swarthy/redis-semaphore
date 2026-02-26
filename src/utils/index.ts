@@ -3,8 +3,28 @@ import createEval from './createEval'
 
 export { createEval }
 
-export async function delay(ms: number): Promise<void> {
-  return await new Promise(resolve => setTimeout(resolve, ms))
+export function delay(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, ms);
+
+    const onAbort = (): void => {
+      cleanup();
+      reject(signal!.reason as Error);
+    };
+
+    const cleanup = (): void => {
+      clearTimeout(timeoutId);
+      signal?.removeEventListener('abort', onAbort);
+    };
+
+    if (signal?.aborted) {
+      onAbort()
+    }
+    signal?.addEventListener('abort', onAbort);
+  })
 }
 
 export function getConnectionName(client: RedisClient): string {

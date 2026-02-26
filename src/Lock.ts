@@ -22,7 +22,7 @@ export abstract class Lock {
   protected _onLockLost: LockLostCallback
 
   protected abstract _refresh(): Promise<boolean>
-  protected abstract _acquire(): Promise<boolean>
+  protected abstract _acquire(abortSignal?: AbortSignal): Promise<boolean>
   protected abstract _release(): Promise<void>
 
   constructor({
@@ -132,19 +132,19 @@ export abstract class Lock {
     }
   }
 
-  async acquire(): Promise<void> {
+  async acquire(abortSignal?: AbortSignal): Promise<void> {
     debug(`acquire ${this._kind} (key: ${this._key})`)
-    const acquired = await this.tryAcquire()
+    const acquired = await this.tryAcquire(abortSignal)
     if (!acquired) {
       throw new TimeoutError(`Acquire ${this._kind} ${this._key} timeout`)
     }
   }
 
-  async tryAcquire(): Promise<boolean> {
+  async tryAcquire(abortSignal?: AbortSignal): Promise<boolean> {
     debug(`tryAcquire ${this._kind} (key: ${this._key})`)
     const acquired = this._acquiredExternally
       ? await this._refresh()
-      : await this._acquire()
+      : await this._acquire(abortSignal)
     if (!acquired) {
       return false
     }

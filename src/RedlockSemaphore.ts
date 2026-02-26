@@ -34,12 +34,13 @@ export default class RedlockSemaphore extends RedlockMutex {
     )
   }
 
-  protected async _acquire(): Promise<boolean> {
+  protected async _acquire(abortSignal?: AbortSignal): Promise<boolean> {
     return await acquireRedlockSemaphore(
       this._clients,
       this._key,
       this._limit,
-      this._acquireOptions
+      this._acquireOptions,
+      abortSignal
     )
   }
 
