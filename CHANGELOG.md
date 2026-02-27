@@ -1,16 +1,24 @@
+### redis-semaphore@5.7.0
+
+- Added `AbortSignal` to acquire
+
 ### redis-semaphore@5.6.2
+
 - Fixed implicit import from `src`
 - Removed `src` folder from NPM package
 
 ### redis-semaphore@5.6.1
+
 - Removed `module` field from `package.json`
 
 ### redis-semaphore@5.6.0
+
 - Added interface compatible client support (ex. `ioredis-mock`)
 - Removed `instanceof Redis` validation in constructor
 - `ioredis` marked as optional peerDependency, explicit `ioredis` install is required now
 
 ### redis-semaphore@5.5.1
+
 - Fix race condition for refresh started before release and finished after release
 
 ### redis-semaphore@5.5.0
