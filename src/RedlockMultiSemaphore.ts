@@ -35,13 +35,14 @@ export default class RedlockMultiSemaphore extends RedlockSemaphore {
     )
   }
 
-  protected async _acquire(): Promise<boolean> {
+  protected async _acquire(abortSignal?: AbortSignal): Promise<boolean> {
     return await acquireRedlockMultiSemaphore(
       this._clients,
       this._key,
       this._limit,
       this._permits,
-      this._acquireOptions
+      this._acquireOptions,
+      abortSignal
     )
   }
 

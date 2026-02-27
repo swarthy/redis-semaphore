@@ -96,6 +96,16 @@ describe('Mutex', () => {
     await mutex1.release()
     expect(await client.get('mutex:key')).to.be.eql(null)
   })
+  it('should abort when the given signal is aborted', async () => {
+    const mutex1 = new Mutex(client, 'key', timeoutOptions)
+    const mutex2 = new Mutex(client, 'key', timeoutOptions)
+    await mutex1.acquire()
+    await expect(mutex2.acquire(AbortSignal.timeout(10))).to.be.rejectedWith(
+      'The operation was aborted due to timeout'
+    )
+    await mutex1.release()
+    expect(await client.get('mutex:key')).to.be.eql(null)
+  })
   it('should return false for tryAcquire after timeout', async () => {
     const mutex1 = new Mutex(client, 'key', timeoutOptions)
     const mutex2 = new Mutex(client, 'key', timeoutOptions)

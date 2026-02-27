@@ -17,7 +17,8 @@ export async function acquireSemaphore(
   client: RedisClient,
   key: string,
   limit: number,
-  options: Options
+  options: Options,
+  abortSignal?: AbortSignal
 ): Promise<boolean> {
   const {
     identifier,
@@ -30,6 +31,7 @@ export async function acquireSemaphore(
   const end = Date.now() + acquireTimeout
   let now
   while ((now = Date.now()) < end && ++attempt <= acquireAttemptsLimit) {
+    abortSignal?.throwIfAborted()
     debug(key, identifier, limit, lockTimeout, 'attempt', attempt)
     const result = await acquireLua(client, [
       key,
@@ -44,7 +46,7 @@ export async function acquireSemaphore(
       debug(key, identifier, 'acquired')
       return true
     } else {
-      await delay(retryInterval)
+      await delay(retryInterval, abortSignal)
     }
   }
   debug(key, identifier, limit, lockTimeout, 'timeout or reach limit')

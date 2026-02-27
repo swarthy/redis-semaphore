@@ -18,7 +18,8 @@ export async function acquireRedlockSemaphore(
   clients: RedisClient[],
   key: string,
   limit: number,
-  options: Options
+  options: Options,
+  abortSignal?: AbortSignal
 ): Promise<boolean> {
   const {
     identifier,
@@ -32,6 +33,7 @@ export async function acquireRedlockSemaphore(
   const quorum = getQuorum(clients.length)
   let now: number
   while ((now = Date.now()) < end && ++attempt <= acquireAttemptsLimit) {
+    abortSignal?.throwIfAborted()
     debug(key, identifier, 'attempt', attempt)
     const promises = clients.map(client =>
       acquireLua(client, [key, limit, identifier, lockTimeout, now])
@@ -47,7 +49,7 @@ export async function acquireRedlockSemaphore(
         client.zrem(key, identifier).catch(() => 0)
       )
       await Promise.all(promises)
-      await delay(retryInterval)
+      await delay(retryInterval, abortSignal)
     }
   }
   debug(key, identifier, 'timeout or reach limit')

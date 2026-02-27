@@ -17,7 +17,8 @@ export interface Options {
 export async function acquireRedlockMutex(
   clients: RedisClient[],
   key: string,
-  options: Options
+  options: Options,
+  abortSignal?: AbortSignal
 ): Promise<boolean> {
   const {
     identifier,
@@ -30,6 +31,7 @@ export async function acquireRedlockMutex(
   const end = Date.now() + acquireTimeout
   const quorum = getQuorum(clients.length)
   while (Date.now() < end && ++attempt <= acquireAttemptsLimit) {
+    abortSignal?.throwIfAborted()
     debug(key, identifier, 'attempt', attempt)
     const promises = clients.map(client =>
       client
@@ -46,7 +48,7 @@ export async function acquireRedlockMutex(
         delIfEqualLua(client, [key, identifier]).catch(() => 0)
       )
       await Promise.all(promises)
-      await delay(retryInterval)
+      await delay(retryInterval, abortSignal)
     }
   }
   debug(key, identifier, 'timeout or reach limit')

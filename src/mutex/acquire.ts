@@ -15,7 +15,8 @@ export interface Options {
 export async function acquireMutex(
   client: RedisClient,
   key: string,
-  options: Options
+  options: Options,
+  abortSignal?: AbortSignal
 ): Promise<boolean> {
   const {
     identifier,
@@ -27,6 +28,7 @@ export async function acquireMutex(
   let attempt = 0
   const end = Date.now() + acquireTimeout
   while (Date.now() < end && ++attempt <= acquireAttemptsLimit) {
+    abortSignal?.throwIfAborted()
     debug(key, identifier, 'attempt', attempt)
     const result = await client.set(key, identifier, 'PX', lockTimeout, 'NX')
     debug('result', typeof result, result)
@@ -34,7 +36,7 @@ export async function acquireMutex(
       debug(key, identifier, 'acquired')
       return true
     } else {
-      await delay(retryInterval)
+      await delay(retryInterval, abortSignal)
     }
   }
   debug(key, identifier, 'timeout or reach limit')

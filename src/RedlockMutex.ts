@@ -38,11 +38,12 @@ export default class RedlockMutex extends Lock {
     )
   }
 
-  protected async _acquire(): Promise<boolean> {
+  protected async _acquire(abortSignal?: AbortSignal): Promise<boolean> {
     return await acquireRedlockMutex(
       this._clients,
       this._key,
-      this._acquireOptions
+      this._acquireOptions,
+      abortSignal
     )
   }
 

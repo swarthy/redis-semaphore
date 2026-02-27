@@ -137,6 +137,28 @@ describe('RedlockMultiSemaphore', () => {
     await semaphore1.release()
     await expectZCardAllEql('semaphore:key', 0)
   })
+  it('should abort when the given signal is aborted', async () => {
+    const semaphore1 = new RedlockMultiSemaphore(
+      allClients,
+      'key',
+      3,
+      3,
+      timeoutOptions
+    )
+    const semaphore2 = new RedlockMultiSemaphore(
+      allClients,
+      'key',
+      3,
+      1,
+      timeoutOptions
+    )
+    await semaphore1.acquire()
+    await expect(semaphore2.acquire(AbortSignal.timeout(10))).to.be.rejectedWith(
+      'The operation was aborted due to timeout'
+    )
+    await semaphore1.release()
+    await expectZCardAllEql('semaphore:key', 0)
+  })
   it('should refresh lock every refreshInterval ms until release', async () => {
     const semaphore1 = new RedlockMultiSemaphore(
       allClients,

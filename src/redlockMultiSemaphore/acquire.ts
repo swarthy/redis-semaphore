@@ -19,7 +19,8 @@ export async function acquireRedlockMultiSemaphore(
   key: string,
   limit: number,
   permits: number,
-  options: Options
+  options: Options,
+  abortSignal?: AbortSignal
 ): Promise<boolean> {
   const {
     identifier,
@@ -33,6 +34,7 @@ export async function acquireRedlockMultiSemaphore(
   const quorum = getQuorum(clients.length)
   let now: number
   while ((now = Date.now()) < end && ++attempt <= acquireAttemptsLimit) {
+    abortSignal?.throwIfAborted()
     debug(key, identifier, 'attempt', attempt)
     const promises = clients.map(client =>
       acquireLua(client, [key, limit, permits, identifier, lockTimeout, now])
@@ -48,7 +50,7 @@ export async function acquireRedlockMultiSemaphore(
         client.zrem(key, identifier).catch(() => 0)
       )
       await Promise.all(promises)
-      await delay(retryInterval)
+      await delay(retryInterval, abortSignal)
     }
   }
   debug(key, identifier, 'timeout or reach limit')

@@ -68,6 +68,16 @@ describe('RedlockMutex', () => {
     await mutex1.release()
     await expectGetAll('mutex:key', null)
   })
+  it('The operation was aborted due to timeout', async () => {
+    const mutex1 = new RedlockMutex(allClients, 'key', timeoutOptions)
+    const mutex2 = new RedlockMutex(allClients, 'key', timeoutOptions)
+    await mutex1.acquire()
+    await expect(mutex2.acquire(AbortSignal.timeout(10))).to.be.rejectedWith(
+      'The operation was aborted due to timeout'
+    )
+    await mutex1.release()
+    await expectGetAll('mutex:key', null)
+  })
   it('should refresh lock every refreshInterval ms until release', async () => {
     const mutex = new RedlockMutex(allClients, 'key', timeoutOptions)
     await mutex.acquire()
