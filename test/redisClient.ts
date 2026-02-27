@@ -1,6 +1,6 @@
 import Redis from 'ioredis'
 import RedisMock from 'ioredis-mock'
-import { once } from 'stream'
+import { once } from 'node:events'
 
 function createClient(num: number) {
   const serverURL =
