@@ -1,3 +1,8 @@
+### redis-semaphore@5.8.0
+
+- Added `ioredis` v6 to the supported peer dependency range (`^4.1.0 || ^5 || ^6`)
+- Test suite now runs against `ioredis` 6, which uses RESP3 by default
+
 ### redis-semaphore@5.7.0
 
 - Added `AbortSignal` to acquire

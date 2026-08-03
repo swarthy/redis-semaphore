@@ -26,6 +26,8 @@ yarn add redis-semaphore ioredis
 
 ioredis is the officially supported Redis client. This library's test code runs on it.
 
+ioredis 4, 5 and 6 are all supported. The test suite runs against ioredis 6, which speaks RESP3 by default.
+
 Users of other Redis clients should ensure ioredis-compatible API (see src/types.ts) when creating lock objects.
 
 ### Mutex
