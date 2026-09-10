@@ -2,6 +2,8 @@ import Redis from 'ioredis'
 import RedisMock from 'ioredis-mock'
 import { once } from 'node:events'
 
+import './ioredisMockCompat'
+
 function createClient(num: number) {
   const serverURL =
     process.env[`REDIS_URI${num}`] || `redis://127.0.0.1:${6000 + num}`
