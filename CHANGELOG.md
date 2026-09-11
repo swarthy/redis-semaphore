@@ -5,6 +5,10 @@
 - Updated all dependencies and devDependencies to their latest versions
 - Raised TypeScript build target to `ES2022`
 - Migrated the test suite from Mocha/nyc to Vitest
+- Replaced ESLint/typescript-eslint with [oxlint](https://oxc.rs/) (including type-aware linting via `oxlint-tsgolint`) for faster linting; no change for library consumers
+- Raised the development-only TypeScript version to 7.x, required by oxlint's type-aware linting
+- Removed `chai`, `chai-as-promised`, `sinon` and `sinon-chai` from the test suite in favor of Vitest's built-in `expect`/`vi` APIs; no change for library consumers
+- Fixed two incorrect internal type assertions found by oxlint's type-aware linting (no runtime behavior change)
 
 ### redis-semaphore@5.8.0
 
