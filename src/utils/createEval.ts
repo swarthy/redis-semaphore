@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import createDebug from 'debug'
-import { RedisClient } from '../types'
-import { getConnectionName } from './index'
+import { RedisClient } from '../types.js'
+import { getConnectionName } from './index.js'
 
 const debug = createDebug('redis-semaphore:eval')
 

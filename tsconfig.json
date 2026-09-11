@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES6"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "declaration": true,
     "esModuleInterop": true,
     "moduleResolution": "Node",
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "types": ["node", "vitest/globals"]
   }
 }

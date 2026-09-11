@@ -295,8 +295,7 @@ describe('Semaphore', () => {
       throwUnhandledRejection()
       await upRedisServer(1)
     })
-    it('should lost lock when node become alive', async function () {
-      this.timeout(60000)
+    it('should lost lock when node become alive', async () => {
       const onLockLostCallbacks = [1, 2, 3].map(() =>
         sinon.spy(function (this: Semaphore) {
           expect(this.isAcquired).to.be.false
@@ -346,7 +345,7 @@ describe('Semaphore', () => {
         ...semaphores1.map(s => s.release()),
         semaphore2.release()
       ])
-    })
+    }, 60000)
   })
   describe('ioredis-mock support', async () => {
     it('should acquire and release semaphore', async () => {

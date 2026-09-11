@@ -394,8 +394,7 @@ describe('RedlockSemaphore', () => {
     afterEach(async () => {
       await Promise.all([upRedisServer(1), upRedisServer(2), upRedisServer(3)])
     })
-    it('should handle server shutdown if quorum is alive', async function () {
-      this.timeout(60000)
+    it('should handle server shutdown if quorum is alive', async () => {
       const semaphore11 = new RedlockSemaphore(
         allClients,
         'key',
@@ -524,9 +523,8 @@ describe('RedlockSemaphore', () => {
         semaphore12.release(),
         semaphore13.release()
       ])
-    })
-    it('should fail and release when quorum become dead', async function () {
-      this.timeout(60000)
+    }, 60000)
+    it('should fail and release when quorum become dead', async () => {
       const onLockLostCallbacks = [1, 2, 3].map(() =>
         sinon.spy(function (this: RedlockSemaphore) {
           expect(this.isAcquired).to.be.false
@@ -584,7 +582,7 @@ describe('RedlockSemaphore', () => {
       await expect(semaphore2.acquire()).to.be.rejectedWith(
         'Acquire redlock-semaphore semaphore:key timeout'
       )
-    })
+    }, 60000)
   })
   describe('ioredis-mock support', () => {
     it('should acquire and release semaphore', async () => {

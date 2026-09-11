@@ -1,3 +1,11 @@
+### redis-semaphore@6.0.0
+
+- **Breaking change:** Minimum supported Node.js version raised to `>= 22.12.0`
+- **Breaking change:** `lib/` now ships pure ESM instead of CommonJS (`"type": "module"`). `main`/`exports` still point at `lib/index.js`, so plain `require('redis-semaphore')` / `import ... from 'redis-semaphore'` keep working unchanged on Node.js >= 22.12, which supports requiring synchronous ESM graphs unflagged. Only code relying on CommonJS-specific behavior of a deep `require()` into individual files under `lib/` (e.g. mutating `module.exports`) could be affected
+- Updated all dependencies and devDependencies to their latest versions
+- Raised TypeScript build target to `ES2022`
+- Migrated the test suite from Mocha/nyc to Vitest
+
 ### redis-semaphore@5.8.0
 
 - Added `ioredis` v6 to the supported peer dependency range (`^4.1.0 || ^5 || ^6`)

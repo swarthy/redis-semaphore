@@ -1,5 +1,5 @@
-import { RedisClient } from '../types'
-import createEval from './createEval'
+import { RedisClient } from '../types.js'
+import createEval from './createEval.js'
 
 export { createEval }
 

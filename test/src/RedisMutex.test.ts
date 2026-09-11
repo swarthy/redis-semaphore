@@ -251,8 +251,7 @@ describe('Mutex', () => {
         .be.true
     })
   })
-  it('should be reusable', async function () {
-    this.timeout(10000)
+  it('should be reusable', async () => {
     const mutex = new Mutex(client, 'key', timeoutOptions)
 
     /* Lifecycle 1 */
@@ -285,7 +284,7 @@ describe('Mutex', () => {
     expect(await client.get('mutex:key')).to.be.eql(null)
     await delay(300)
     expect(await client.get('mutex:key')).to.be.eql(null)
-  })
+  }, 10000)
   describe('[Node shutdown]', () => {
     beforeEach(() => {
       catchUnhandledRejection()
@@ -294,8 +293,7 @@ describe('Mutex', () => {
       throwUnhandledRejection()
       await upRedisServer(1)
     })
-    it('should lost lock when node become alive', async function () {
-      this.timeout(60000)
+    it('should lost lock when node become alive', async () => {
       const onLockLostCallback = sinon.spy(function (this: Mutex) {
         expect(this.isAcquired).to.be.false
       })
@@ -327,7 +325,7 @@ describe('Mutex', () => {
       expect(await client.get('mutex:key')).to.be.eql(mutex2.identifier)
 
       await Promise.all([mutex1.release(), mutex2.release()])
-    })
+    }, 60000)
   })
   describe('ioredis-mock support', async () => {
     it('should acquire and release lock', async () => {

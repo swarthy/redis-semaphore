@@ -237,8 +237,7 @@ describe('MultiSemaphore', () => {
     })
   })
   describe('reusable', () => {
-    it('autorefresh enabled', async function () {
-      this.timeout(10000)
+    it('autorefresh enabled', async () => {
       const semaphore1 = new MultiSemaphore(client, 'key', 4, 2, timeoutOptions)
       const semaphore2 = new MultiSemaphore(client, 'key', 4, 2, timeoutOptions)
 
@@ -263,7 +262,7 @@ describe('MultiSemaphore', () => {
       await delay(300)
       await semaphore1.release()
       await semaphore2.release()
-    })
+    }, 10000)
 
     it('autorefresh disabled', async () => {
       const noRefreshOptions = {
@@ -366,8 +365,7 @@ describe('MultiSemaphore', () => {
       throwUnhandledRejection()
       await upRedisServer(1)
     })
-    it('should lost lock when node become alive', async function () {
-      this.timeout(60000)
+    it('should lost lock when node become alive', async () => {
       const onLockLostCallback = sinon.spy(function (this: Semaphore) {
         expect(this.isAcquired).to.be.false
       })
@@ -403,7 +401,7 @@ describe('MultiSemaphore', () => {
       expect(data2).to.include(semaphore2.identifier + '_1')
 
       await Promise.all([semaphore1.release(), semaphore2.release()])
-    })
+    }, 60000)
   })
   describe('ioredis-mock support', () => {
     it('should acquire and release semaphore', async () => {

@@ -207,8 +207,7 @@ describe('RedlockMutex', () => {
     afterEach(async () => {
       await Promise.all([upRedisServer(1), upRedisServer(2), upRedisServer(3)])
     })
-    it('should handle server shutdown if quorum is alive', async function () {
-      this.timeout(60000)
+    it('should handle server shutdown if quorum is alive', async () => {
       const mutex1 = new RedlockMutex(allClients, 'key', timeoutOptions)
       await mutex1.acquire()
 
@@ -285,9 +284,8 @@ describe('RedlockMutex', () => {
       // </Server3Failure>
 
       await mutex1.release()
-    })
-    it('should fail and release when quorum is become dead', async function () {
-      this.timeout(60000)
+    }, 60000)
+    it('should fail and release when quorum is become dead', async () => {
       const onLockLostCallback = sinon.spy(function (this: RedlockMutex) {
         expect(this.isAcquired).to.be.false
       })
@@ -318,7 +316,7 @@ describe('RedlockMutex', () => {
       await expect(mutex2.acquire()).to.be.rejectedWith(
         'Acquire redlock-mutex mutex:key timeout'
       )
-    })
+    }, 60000)
   })
   describe('ioredis-mock support', () => {
     it('should acquire and release lock', async () => {

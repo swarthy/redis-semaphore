@@ -1,10 +1,9 @@
 import typescript from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
-import nodePlugin from 'eslint-plugin-node'
 
 export default [
   {
-    ignores: ['lib/**', 'es/**', 'coverage/**', '.nyc_output/**']
+    ignores: ['lib/**', 'coverage/**']
   },
   {
     files: ['**/*.ts'],
@@ -51,11 +50,10 @@ export default [
       globals: {
         describe: true,
         it: true,
-        before: true,
-        after: true,
+        beforeAll: true,
+        afterAll: true,
         beforeEach: true,
-        afterEach: true,
-        mocha: true
+        afterEach: true
       }
     },
     rules: {

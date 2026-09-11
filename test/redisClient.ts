@@ -56,7 +56,7 @@ export const clientMock3 = createClientMock(3)
 
 export const allClientMocks = [clientMock1, clientMock2, clientMock3]
 
-before(async () => {
+beforeAll(async () => {
   await Promise.all(allClients.map(c => c.connect()))
   await Promise.all(allClientMocks.map(c => c.connect()))
 })
@@ -77,7 +77,7 @@ beforeEach(async () => {
   await Promise.all(allClientMocks.map(c => c.flushdb()))
 })
 
-after(async () => {
+afterAll(async () => {
   await Promise.all(allClients.map(c => c.quit()))
   await Promise.all(allClientMocks.map(c => c.quit()))
   // allClients.forEach(c => c.disconnect())

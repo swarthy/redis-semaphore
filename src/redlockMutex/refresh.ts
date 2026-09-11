@@ -1,8 +1,8 @@
 import createDebug from 'debug'
-import { expireIfEqualLua } from '../mutex/refresh'
-import { delIfEqualLua } from '../mutex/release'
-import { RedisClient } from '../types'
-import { getQuorum, smartSum } from '../utils/redlock'
+import { expireIfEqualLua } from '../mutex/refresh.js'
+import { delIfEqualLua } from '../mutex/release.js'
+import { RedisClient } from '../types.js'
+import { getQuorum, smartSum } from '../utils/redlock.js'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:refresh')
 
