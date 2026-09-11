@@ -10,7 +10,8 @@ import {
   allClients,
   client1,
   client2,
-  client3
+  client3,
+  ioredisMockAvailable
 } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
@@ -669,7 +670,7 @@ describe('RedlockMultiSemaphore', () => {
       )
     }, 60000)
   })
-  describe('ioredis-mock support', () => {
+  describe.skipIf(!ioredisMockAvailable)('ioredis-mock support', () => {
     it('should acquire and release semaphore', async () => {
       const semaphore1 = new RedlockMultiSemaphore(allClientMocks, 'key', 3, 2)
       const semaphore2 = new RedlockMultiSemaphore(allClientMocks, 'key', 3, 1)

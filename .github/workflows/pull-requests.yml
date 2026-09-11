@@ -33,3 +33,33 @@ jobs:
       - run: yarn build
       - run: yarn lint
       - run: yarn test
+
+  ioredis-compat:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        ioredis-version: ['^4.1.0', '^5', '^6']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'yarn'
+
+      - run: yarn install --immutable
+      # ioredis is a peer dependency (`^4.1.0 || ^5 || ^6`); swap in each supported major
+      # to make sure nothing broke for consumers on an older version. `yarn build`/`yarn
+      # lint` are intentionally skipped here — ioredis@4 never shipped its own TS types,
+      # so type-checking against it fails for reasons unrelated to runtime compatibility.
+      - run: yarn up ioredis@${{ matrix.ioredis-version }}
+
+      - run: docker compose up -d redis1 redis2 redis3
+      - run: docker compose run waiter
+
+      - run: yarn test

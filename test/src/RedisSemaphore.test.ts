@@ -4,7 +4,11 @@ import Semaphore from '../../src/RedisSemaphore'
 import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
 import { expectMembers } from '../assertions'
-import { client1 as client, clientMock1 as clientMock } from '../redisClient'
+import {
+  client1 as client,
+  clientMock1 as clientMock,
+  ioredisMockAvailable
+} from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
   catchUnhandledRejection,
@@ -346,10 +350,10 @@ describe('Semaphore', () => {
       ])
     }, 60000)
   })
-  describe('ioredis-mock support', async () => {
+  describe.skipIf(!ioredisMockAvailable)('ioredis-mock support', async () => {
     it('should acquire and release semaphore', async () => {
-      const semaphore1 = new Semaphore(clientMock, 'key', 2)
-      const semaphore2 = new Semaphore(clientMock, 'key', 2)
+      const semaphore1 = new Semaphore(clientMock!, 'key', 2)
+      const semaphore2 = new Semaphore(clientMock!, 'key', 2)
       expect(semaphore1.isAcquired).toBe(false)
       expect(semaphore2.isAcquired).toBe(false)
 
@@ -357,19 +361,19 @@ describe('Semaphore', () => {
       expect(semaphore1.isAcquired).toBe(true)
       await semaphore2.acquire()
       expect(semaphore2.isAcquired).toBe(true)
-      expectMembers(await clientMock.zrange('semaphore:key', 0, -1), [
+      expectMembers(await clientMock!.zrange('semaphore:key', 0, -1), [
         semaphore1.identifier,
         semaphore2.identifier
       ])
 
       await semaphore1.release()
       expect(semaphore1.isAcquired).toBe(false)
-      expect(await clientMock.zrange('semaphore:key', 0, -1)).toEqual([
+      expect(await clientMock!.zrange('semaphore:key', 0, -1)).toEqual([
         semaphore2.identifier
       ])
       await semaphore2.release()
       expect(semaphore2.isAcquired).toBe(false)
-      expect(await clientMock.zcard('semaphore:key')).toEqual(0)
+      expect(await clientMock!.zcard('semaphore:key')).toEqual(0)
     })
   })
 })

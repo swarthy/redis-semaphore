@@ -8,7 +8,8 @@ import {
   allClients,
   client1,
   client2,
-  client3
+  client3,
+  ioredisMockAvailable
 } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
@@ -318,7 +319,7 @@ describe('RedlockMutex', () => {
       )
     }, 60000)
   })
-  describe('ioredis-mock support', () => {
+  describe.skipIf(!ioredisMockAvailable)('ioredis-mock support', () => {
     it('should acquire and release lock', async () => {
       const mutex = new RedlockMutex(allClientMocks, 'key')
       expect(mutex.isAcquired).toBe(false)
