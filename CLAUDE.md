@@ -17,6 +17,8 @@ Run a single test file or test case with vitest directly, e.g. `yarn vitest run 
 
 Tests run against real Redis (via `test/redisClient.ts`, which connects `client1`/`client2`/`client3` to `redis://127.0.0.1:600{1,2,3}` or `$REDIS_URI{1,2,3}`) and against `ioredis-mock`. Test files run one at a time (`fileParallelism: false` in `vitest.config.ts`) because several suites intentionally stop/start the shared docker-compose redis nodes (quorum failover tests) and share global clients.
 
+`ioredis` is a peer dependency supporting `^4.1.0 || ^5 || ^6`; CI runs `yarn test` against all three majors (`yarn up ioredis@^4.1.0` / `^5` / `^6`, no `resolutions` pin locking it), on top of the normal build+lint+test job which runs against whatever is pinned in `devDependencies`. To reproduce locally: `yarn up ioredis@^4.1.0 && yarn test`, then `yarn up ioredis@6.0.0` (or your package manager's equivalent) to restore. Don't run `yarn build`/`yarn lint` against `ioredis@4` — it never shipped its own TS types, so type-checking fails there for reasons unrelated to actual compatibility.
+
 `yarn preversion` runs `lint && test && build` — this is the full gate a release must pass.
 
 ## Architecture
@@ -28,6 +30,8 @@ Tests run against real Redis (via `test/redisClient.ts`, which connects `client1
 **Redlock variants** (`RedlockMutex`, `RedlockSemaphore`, `RedlockMultiSemaphore`) run the same acquire/refresh/release logic against an array of independent Redis clients and require a quorum (`src/utils/redlock.ts`'s `getQuorum`), per the [Redlock algorithm](https://redis.io/topics/distlock#the-redlock-algorithm).
 
 **Semaphore vs MultiSemaphore.** Both are backed by a Redis sorted set keyed `semaphore:<key>` and share that keyspace — `MultiSemaphore` just acquires/releases multiple permits at once instead of one.
+
+**`ioredis-mock` guard.** `ioredis-mock` deep-imports `ioredis`'s internals (e.g. `ioredis/built/Command`), which only exist in the ioredis 5/6 package layout — under `ioredis@4` that `require` throws. `test/redisClient.ts` imports it dynamically inside a try/catch and exports `ioredisMockAvailable`; the six `describe('ioredis-mock support', ...)` blocks (in the `Redis*`/`Redlock*` top-level test files) are wrapped in `describe.skipIf(!ioredisMockAvailable)` so they're skipped under `ioredis@4` instead of crashing every test file that imports the shared client module.
 
 ## Code style
 

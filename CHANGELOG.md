@@ -9,6 +9,7 @@
 - Raised the development-only TypeScript version to 7.x, required by oxlint's type-aware linting
 - Removed `chai`, `chai-as-promised`, `sinon` and `sinon-chai` from the test suite in favor of Vitest's built-in `expect`/`vi` APIs; no change for library consumers
 - Fixed two incorrect internal type assertions found by oxlint's type-aware linting (no runtime behavior change)
+- CI now runs the test suite against `ioredis` `^4.1.0`, `^5` and `^6` (the full supported peer dependency range) in addition to the default version, to catch regressions for consumers on an older `ioredis` major
 
 ### redis-semaphore@5.8.0
 
