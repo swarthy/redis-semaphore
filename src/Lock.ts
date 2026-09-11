@@ -1,9 +1,9 @@
 import createDebug from 'debug'
 import * as crypto from 'node:crypto'
-import LostLockError from './errors/LostLockError'
-import TimeoutError from './errors/TimeoutError'
-import { defaultOnLockLost, defaultTimeoutOptions } from './misc'
-import { AcquireOptions, LockLostCallback, LockOptions } from './types'
+import LostLockError from './errors/LostLockError.js'
+import TimeoutError from './errors/TimeoutError.js'
+import { defaultOnLockLost, defaultTimeoutOptions } from './misc.js'
+import { AcquireOptions, LockLostCallback, LockOptions } from './types.js'
 
 const REFRESH_INTERVAL_COEF = 0.8
 

@@ -1,6 +1,4 @@
-import { expect } from 'chai'
 import { Redis } from 'ioredis'
-import sinon from 'sinon'
 import LostLockError from '../../src/errors/LostLockError'
 import RedlockMutex from '../../src/RedlockMutex'
 import { TimeoutOptions } from '../../src/types'
@@ -10,7 +8,8 @@ import {
   allClients,
   client1,
   client2,
-  client3
+  client3,
+  ioredisMockAvailable
 } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
@@ -33,36 +32,36 @@ async function expectGetAll(
 ) {
   await expect(
     Promise.all([clients[0].get(key), clients[1].get(key), clients[2].get(key)])
-  ).to.become([value, value, value])
+  ).resolves.toEqual([value, value, value])
 }
 
 describe('RedlockMutex', () => {
   it('should fail on invalid arguments', () => {
-    expect(() => new RedlockMutex(null as unknown as Redis[], 'key')).to.throw(
+    expect(() => new RedlockMutex(null as unknown as Redis[], 'key')).toThrow(
       '"clients" array is required'
     )
-    expect(() => new RedlockMutex(allClients, '')).to.throw('"key" is required')
-    expect(() => new RedlockMutex(allClients, 1 as unknown as string)).to.throw(
+    expect(() => new RedlockMutex(allClients, '')).toThrow('"key" is required')
+    expect(() => new RedlockMutex(allClients, 1 as unknown as string)).toThrow(
       '"key" must be a string'
     )
   })
   it('should acquire and release lock', async () => {
     const mutex = new RedlockMutex(allClients, 'key')
-    expect(mutex.isAcquired).to.be.false
+    expect(mutex.isAcquired).toBe(false)
 
     await mutex.acquire()
-    expect(mutex.isAcquired).to.be.true
+    expect(mutex.isAcquired).toBe(true)
     await expectGetAll('mutex:key', mutex.identifier)
 
     await mutex.release()
-    expect(mutex.isAcquired).to.be.false
+    expect(mutex.isAcquired).toBe(false)
     await expectGetAll('mutex:key', null)
   })
   it('should reject after timeout', async () => {
     const mutex1 = new RedlockMutex(allClients, 'key', timeoutOptions)
     const mutex2 = new RedlockMutex(allClients, 'key', timeoutOptions)
     await mutex1.acquire()
-    await expect(mutex2.acquire()).to.be.rejectedWith(
+    await expect(mutex2.acquire()).rejects.toThrow(
       'Acquire redlock-mutex mutex:key timeout'
     )
     await mutex1.release()
@@ -72,7 +71,7 @@ describe('RedlockMutex', () => {
     const mutex1 = new RedlockMutex(allClients, 'key', timeoutOptions)
     const mutex2 = new RedlockMutex(allClients, 'key', timeoutOptions)
     await mutex1.acquire()
-    await expect(mutex2.acquire(AbortSignal.timeout(10))).to.be.rejectedWith(
+    await expect(mutex2.acquire(AbortSignal.timeout(10))).rejects.toThrow(
       'The operation was aborted due to timeout'
     )
     await mutex1.release()
@@ -142,31 +141,32 @@ describe('RedlockMutex', () => {
         client3.set('mutex:key', '222') // another instance
       ])
       await delay(200)
-      expect(unhandledRejectionSpy).to.be.called
-      expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
-        .to.be.true
+      expect(unhandledRejectionSpy).toHaveBeenCalled()
+      expect(unhandledRejectionSpy.mock.calls[0][0] instanceof LostLockError)
+        .toBe(true)
     })
     it('should call onLockLost callback if provided', async () => {
-      const onLockLostCallback = sinon.spy(function (this: RedlockMutex) {
-        expect(this.isAcquired).to.be.false
+      const onLockLostCallback = vi.fn<(this: RedlockMutex, err: LostLockError) => void>(function (this: RedlockMutex) {
+        expect(this.isAcquired).toBe(false)
       })
       const mutex = new RedlockMutex(allClients, 'key', {
         ...timeoutOptions,
         onLockLost: onLockLostCallback
       })
       await mutex.acquire()
-      expect(mutex.isAcquired).to.be.true
+      expect(mutex.isAcquired).toBe(true)
       await Promise.all([
         client1.set('mutex:key', '222'), // another instance
         client2.set('mutex:key', '222'), // another instance
         client3.set('mutex:key', '222') // another instance
       ])
       await delay(200)
-      expect(mutex.isAcquired).to.be.false
-      expect(unhandledRejectionSpy).to.not.called
-      expect(onLockLostCallback).to.be.called
-      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
-        .be.true
+      expect(mutex.isAcquired).toBe(false)
+      expect(unhandledRejectionSpy).not.toHaveBeenCalled()
+      expect(onLockLostCallback).toHaveBeenCalled()
+      expect(
+        onLockLostCallback.mock.calls[0][0] instanceof LostLockError
+      ).toBe(true)
     })
   })
   it('should be reusable', async () => {
@@ -207,8 +207,7 @@ describe('RedlockMutex', () => {
     afterEach(async () => {
       await Promise.all([upRedisServer(1), upRedisServer(2), upRedisServer(3)])
     })
-    it('should handle server shutdown if quorum is alive', async function () {
-      this.timeout(60000)
+    it('should handle server shutdown if quorum is alive', async () => {
       const mutex1 = new RedlockMutex(allClients, 'key', timeoutOptions)
       await mutex1.acquire()
 
@@ -222,7 +221,7 @@ describe('RedlockMutex', () => {
       // mutex2 will NOT be able to acquire the lock
 
       const mutex2 = new RedlockMutex(allClients, 'key', timeoutOptions)
-      await expect(mutex2.acquire()).to.be.rejectedWith(
+      await expect(mutex2.acquire()).rejects.toThrow(
         'Acquire redlock-mutex mutex:key timeout'
       )
 
@@ -233,7 +232,7 @@ describe('RedlockMutex', () => {
 
       // let mutex1 to refresh lock on server1
       await delay(1000)
-      expect(await client1.get('mutex:key')).to.be.eql(mutex1.identifier)
+      expect(await client1.get('mutex:key')).toEqual(mutex1.identifier)
       // </Server1Failure>
 
       // <Server2Failure>
@@ -246,7 +245,7 @@ describe('RedlockMutex', () => {
       // mutex3 will NOT be able to acquire the lock
 
       const mutex3 = new RedlockMutex(allClients, 'key', timeoutOptions)
-      await expect(mutex3.acquire()).to.be.rejectedWith(
+      await expect(mutex3.acquire()).rejects.toThrow(
         'Acquire redlock-mutex mutex:key timeout'
       )
 
@@ -257,7 +256,7 @@ describe('RedlockMutex', () => {
 
       // let mutex1 to refresh lock on server2
       await delay(1000)
-      expect(await client2.get('mutex:key')).to.be.eql(mutex1.identifier)
+      expect(await client2.get('mutex:key')).toEqual(mutex1.identifier)
       // </Server2Failure>
 
       // <Server3Failure>
@@ -270,7 +269,7 @@ describe('RedlockMutex', () => {
       // mutex4 will NOT be able to acquire the lock
 
       const mutex4 = new RedlockMutex(allClients, 'key', timeoutOptions)
-      await expect(mutex4.acquire()).to.be.rejectedWith(
+      await expect(mutex4.acquire()).rejects.toThrow(
         'Acquire redlock-mutex mutex:key timeout'
       )
 
@@ -281,15 +280,14 @@ describe('RedlockMutex', () => {
 
       // let mutex1 to refresh lock on server3
       await delay(1000)
-      expect(await client3.get('mutex:key')).to.be.eql(mutex1.identifier)
+      expect(await client3.get('mutex:key')).toEqual(mutex1.identifier)
       // </Server3Failure>
 
       await mutex1.release()
-    })
-    it('should fail and release when quorum is become dead', async function () {
-      this.timeout(60000)
-      const onLockLostCallback = sinon.spy(function (this: RedlockMutex) {
-        expect(this.isAcquired).to.be.false
+    }, 60000)
+    it('should fail and release when quorum is become dead', async () => {
+      const onLockLostCallback = vi.fn<(this: RedlockMutex, err: LostLockError) => void>(function (this: RedlockMutex) {
+        expect(this.isAcquired).toBe(false)
       })
       const mutex1 = new RedlockMutex(allClients, 'key', {
         ...timeoutOptions,
@@ -305,33 +303,34 @@ describe('RedlockMutex', () => {
 
       await delay(1000)
 
-      expect(onLockLostCallback).to.be.called
-      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
-        .be.true
+      expect(onLockLostCallback).toHaveBeenCalled()
+      expect(
+        onLockLostCallback.mock.calls[0][0] instanceof LostLockError
+      ).toBe(true)
 
       // released lock on server3
-      expect(await client3.get('mutex:key')).to.be.eql(null)
+      expect(await client3.get('mutex:key')).toEqual(null)
 
       // mutex2 will NOT be able to acquire the lock cause quorum is dead
 
       const mutex2 = new RedlockMutex(allClients, 'key', timeoutOptions)
-      await expect(mutex2.acquire()).to.be.rejectedWith(
+      await expect(mutex2.acquire()).rejects.toThrow(
         'Acquire redlock-mutex mutex:key timeout'
       )
-    })
+    }, 60000)
   })
-  describe('ioredis-mock support', () => {
+  describe.skipIf(!ioredisMockAvailable)('ioredis-mock support', () => {
     it('should acquire and release lock', async () => {
       const mutex = new RedlockMutex(allClientMocks, 'key')
-      expect(mutex.isAcquired).to.be.false
+      expect(mutex.isAcquired).toBe(false)
 
       await mutex.acquire()
       console.log('acquired!')
-      expect(mutex.isAcquired).to.be.true
+      expect(mutex.isAcquired).toBe(true)
       await expectGetAll('mutex:key', mutex.identifier, allClientMocks)
 
       await mutex.release()
-      expect(mutex.isAcquired).to.be.false
+      expect(mutex.isAcquired).toBe(false)
       await expectGetAll('mutex:key', null, allClientMocks)
     })
   })

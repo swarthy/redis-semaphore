@@ -1,6 +1,6 @@
 import createDebug from 'debug'
-import { releaseLua } from '../multiSemaphore/release/lua'
-import { RedisClient } from '../types'
+import { releaseLua } from '../multiSemaphore/release/lua.js'
+import { RedisClient } from '../types.js'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:release')
 

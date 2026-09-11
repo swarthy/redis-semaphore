@@ -1,6 +1,0 @@
-extension: ts
-recursive: true
-timeout: 5s
-require:
-  - '@swc-node/register'
-  - test/setup.ts

@@ -1,9 +1,9 @@
 import { init, removeAllListeners } from './unhandledRejection'
 
-before(() => {
+beforeAll(() => {
   init()
 })
 
-after(() => {
+afterAll(() => {
   removeAllListeners()
 })

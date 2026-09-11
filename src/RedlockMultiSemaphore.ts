@@ -1,8 +1,8 @@
-import { acquireRedlockMultiSemaphore } from './redlockMultiSemaphore/acquire'
-import { refreshRedlockMultiSemaphore } from './redlockMultiSemaphore/refresh'
-import { releaseRedlockMultiSemaphore } from './redlockMultiSemaphore/release'
-import RedlockSemaphore from './RedlockSemaphore'
-import { LockOptions, RedisClient } from './types'
+import { acquireRedlockMultiSemaphore } from './redlockMultiSemaphore/acquire.js'
+import { refreshRedlockMultiSemaphore } from './redlockMultiSemaphore/refresh.js'
+import { releaseRedlockMultiSemaphore } from './redlockMultiSemaphore/release.js'
+import RedlockSemaphore from './RedlockSemaphore.js'
+import { LockOptions, RedisClient } from './types.js'
 
 export default class RedlockMultiSemaphore extends RedlockSemaphore {
   protected _kind = 'redlock-multi-semaphore'
