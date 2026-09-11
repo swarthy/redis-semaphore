@@ -12,7 +12,7 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
 
     const onAbort = (): void => {
       cleanup();
-      reject(signal!.reason as Error);
+      reject(signal!.reason);
     };
 
     const cleanup = (): void => {
