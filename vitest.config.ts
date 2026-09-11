@@ -9,7 +9,7 @@ export default defineConfig({
     fileParallelism: false,
     globals: true,
     environment: 'node',
-    setupFiles: ['./test/setup.ts', './test/init.ts'],
+    setupFiles: ['./test/init.ts'],
     testTimeout: 5000,
     coverage: {
       provider: 'v8',

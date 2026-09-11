@@ -1,4 +1,3 @@
-import { expect } from 'chai'
 import {
   defaultTimeoutOptions,
   MultiSemaphore,
@@ -11,12 +10,12 @@ import {
 
 describe('index', () => {
   it('should export public API', () => {
-    expect(Mutex).to.be.ok
-    expect(Semaphore).to.be.ok
-    expect(MultiSemaphore).to.be.ok
-    expect(RedlockMutex).to.be.ok
-    expect(RedlockSemaphore).to.be.ok
-    expect(RedlockMultiSemaphore).to.be.ok
-    expect(defaultTimeoutOptions).to.be.ok
+    expect(Mutex).toBeTruthy()
+    expect(Semaphore).toBeTruthy()
+    expect(MultiSemaphore).toBeTruthy()
+    expect(RedlockMutex).toBeTruthy()
+    expect(RedlockSemaphore).toBeTruthy()
+    expect(RedlockMultiSemaphore).toBeTruthy()
+    expect(defaultTimeoutOptions).toBeTruthy()
   })
 })

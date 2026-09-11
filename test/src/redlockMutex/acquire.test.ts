@@ -1,5 +1,3 @@
-import { expect } from 'chai'
-
 import {
   acquireRedlockMutex as acquire,
   Options
@@ -18,13 +16,13 @@ const opts = (id: string, overrides?: Partial<Options>): Options => ({
 describe('redlockMutex acquire', () => {
   it('should return true for success lock', async () => {
     const result = await acquire(allClients, 'key', opts('111'))
-    expect(result).to.be.true
+    expect(result).toBe(true)
   })
   it('should return false when timeout', async () => {
     const result1 = await acquire(allClients, 'key', opts('111'))
     const result2 = await acquire(allClients, 'key', opts('222'))
-    expect(result1).to.be.true
-    expect(result2).to.be.false
+    expect(result1).toBe(true)
+    expect(result2).toBe(false)
   })
   it('should return false after acquireAttemptsLimit', async () => {
     const result1 = await acquire(allClients, 'key', opts('111'))
@@ -36,15 +34,15 @@ describe('redlockMutex acquire', () => {
         acquireTimeout: Number.POSITIVE_INFINITY
       })
     )
-    expect(result1).to.be.true
-    expect(result2).to.be.false
+    expect(result1).toBe(true)
+    expect(result2).toBe(false)
   })
   it('should set identifier for key', async () => {
     await acquire(allClients, 'key1', opts('111'))
     const values = await Promise.all(
       allClients.map(client => client.get('key1'))
     )
-    expect(values).to.be.eql(['111', '111', '111'])
+    expect(values).toEqual(['111', '111', '111'])
   })
   it('should set TTL for key', async () => {
     await acquire(allClients, 'key2', opts('111'))
@@ -55,8 +53,8 @@ describe('redlockMutex acquire', () => {
       if (ttl === -2) {
         continue
       }
-      expect(ttl).to.be.gte(90)
-      expect(ttl).to.be.lte(100)
+      expect(ttl).toBeGreaterThanOrEqual(90)
+      expect(ttl).toBeLessThanOrEqual(100)
     }
   })
   it('should wait for auto-release', async () => {
@@ -65,10 +63,10 @@ describe('redlockMutex acquire', () => {
     const start2 = Date.now()
     await acquire(allClients, 'key', opts('222'))
     const now = Date.now()
-    expect(start2 - start1).to.be.gte(0)
-    expect(start2 - start1).to.be.lt(10)
-    expect(now - start1).to.be.gte(50)
-    expect(now - start2).to.be.gte(50)
+    expect(start2 - start1).toBeGreaterThanOrEqual(0)
+    expect(start2 - start1).toBeLessThan(10)
+    expect(now - start1).toBeGreaterThanOrEqual(50)
+    expect(now - start2).toBeGreaterThanOrEqual(50)
   })
   it('should wait per key', async () => {
     const start1 = Date.now()
@@ -82,9 +80,9 @@ describe('redlockMutex acquire', () => {
       acquire(allClients, 'key2', opts('b2'))
     ])
     const now = Date.now()
-    expect(start2 - start1).to.be.gte(0)
-    expect(start2 - start1).to.be.lt(10)
-    expect(now - start1).to.be.gte(50)
-    expect(now - start2).to.be.gte(50)
+    expect(start2 - start1).toBeGreaterThanOrEqual(0)
+    expect(start2 - start1).toBeLessThan(10)
+    expect(now - start1).toBeGreaterThanOrEqual(50)
+    expect(now - start2).toBeGreaterThanOrEqual(50)
   })
 })

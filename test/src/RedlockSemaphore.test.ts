@@ -1,10 +1,9 @@
-import { expect } from 'chai'
 import { Redis } from 'ioredis'
-import sinon from 'sinon'
 import LostLockError from '../../src/errors/LostLockError'
 import RedlockSemaphore from '../../src/RedlockSemaphore'
 import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
+import { expectMembers } from '../assertions'
 import {
   allClientMocks,
   allClients,
@@ -32,7 +31,7 @@ async function expectZRangeAllEql(key: string, values: string[]) {
     client2.zrange(key, 0, -1),
     client3.zrange(key, 0, -1)
   ])
-  expect(results).to.be.eql([values, values, values])
+  expect(results).toEqual([values, values, values])
 }
 
 async function expectZRangeAllHaveMembers(key: string, values: string[]) {
@@ -42,7 +41,7 @@ async function expectZRangeAllHaveMembers(key: string, values: string[]) {
     client3.zrange(key, 0, -1)
   ])
   for (const result of results) {
-    expect(result).to.have.members(values)
+    expectMembers(result, values)
   }
 }
 
@@ -52,26 +51,26 @@ async function expectZCardAllEql(key: string, count: number) {
     client2.zcard(key),
     client3.zcard(key)
   ])
-  expect(results).to.be.eql([count, count, count])
+  expect(results).toEqual([count, count, count])
 }
 
 describe('RedlockSemaphore', () => {
   it('should fail on invalid arguments', () => {
     expect(
       () => new RedlockSemaphore(null as unknown as Redis[], 'key', 5)
-    ).to.throw('"clients" array is required')
-    expect(() => new RedlockSemaphore(allClients, '', 5)).to.throw(
+    ).toThrow('"clients" array is required')
+    expect(() => new RedlockSemaphore(allClients, '', 5)).toThrow(
       '"key" is required'
     )
     expect(
       () => new RedlockSemaphore(allClients, 1 as unknown as string, 5)
-    ).to.throw('"key" must be a string')
-    expect(() => new RedlockSemaphore(allClients, 'key', 0)).to.throw(
+    ).toThrow('"key" must be a string')
+    expect(() => new RedlockSemaphore(allClients, 'key', 0)).toThrow(
       '"limit" is required'
     )
     expect(
       () => new RedlockSemaphore(allClients, 'key', '10' as unknown as number)
-    ).to.throw('"limit" must be a number')
+    ).toThrow('"limit" must be a number')
   })
   it('should acquire and release semaphore', async () => {
     const semaphore1 = new RedlockSemaphore(allClients, 'key', 2)
@@ -101,7 +100,7 @@ describe('RedlockSemaphore', () => {
       timeoutOptions
     )
     await semaphore1.acquire()
-    await expect(semaphore2.acquire()).to.be.rejectedWith(
+    await expect(semaphore2.acquire()).rejects.toThrow(
       'Acquire redlock-semaphore semaphore:key timeout'
     )
     await semaphore1.release()
@@ -121,7 +120,7 @@ describe('RedlockSemaphore', () => {
       timeoutOptions
     )
     await semaphore1.acquire()
-    await expect(semaphore2.acquire(AbortSignal.timeout(10))).to.be.rejectedWith(
+    await expect(semaphore2.acquire(AbortSignal.timeout(10))).rejects.toThrow(
       'The operation was aborted due to timeout'
     )
     await semaphore1.release()
@@ -265,20 +264,20 @@ describe('RedlockSemaphore', () => {
         )
       )
       await delay(200)
-      expect(unhandledRejectionSpy).to.be.called
-      expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
-        .to.be.true
+      expect(unhandledRejectionSpy).toHaveBeenCalled()
+      expect(unhandledRejectionSpy.mock.calls[0][0] instanceof LostLockError)
+        .toBe(true)
     })
     it('should call onLockLost callback if provided', async () => {
-      const onLockLostCallback = sinon.spy(function (this: RedlockSemaphore) {
-        expect(this.isAcquired).to.be.false
+      const onLockLostCallback = vi.fn<(this: RedlockSemaphore, err: LostLockError) => void>(function (this: RedlockSemaphore) {
+        expect(this.isAcquired).toBe(false)
       })
       const semaphore = new RedlockSemaphore(allClients, 'key', 3, {
         ...timeoutOptions,
         onLockLost: onLockLostCallback
       })
       await semaphore.acquire()
-      expect(semaphore.isAcquired).to.be.true
+      expect(semaphore.isAcquired).toBe(true)
       await Promise.all(allClients.map(client => client.del('semaphore:key')))
       await Promise.all(
         allClients.map(client =>
@@ -294,11 +293,12 @@ describe('RedlockSemaphore', () => {
         )
       )
       await delay(200)
-      expect(semaphore.isAcquired).to.be.false
-      expect(unhandledRejectionSpy).to.not.called
-      expect(onLockLostCallback).to.be.called
-      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
-        .be.true
+      expect(semaphore.isAcquired).toBe(false)
+      expect(unhandledRejectionSpy).not.toHaveBeenCalled()
+      expect(onLockLostCallback).toHaveBeenCalled()
+      expect(
+        onLockLostCallback.mock.calls[0][0] instanceof LostLockError
+      ).toBe(true)
     })
   })
   describe('reusable', () => {
@@ -378,7 +378,7 @@ describe('RedlockSemaphore', () => {
       await delay(80)
       await semaphore2.acquire()
       // [2/2]
-      await expect(semaphore3.acquire()).to.be.rejectedWith(
+      await expect(semaphore3.acquire()).rejects.toThrow(
         'Acquire redlock-semaphore semaphore:key timeout'
       ) // rejectes after 10ms
 
@@ -434,7 +434,7 @@ describe('RedlockSemaphore', () => {
         3,
         timeoutOptions
       )
-      await expect(semaphore2.acquire()).to.be.rejectedWith(
+      await expect(semaphore2.acquire()).rejects.toThrow(
         'Acquire redlock-semaphore semaphore:key timeout'
       )
 
@@ -445,7 +445,7 @@ describe('RedlockSemaphore', () => {
 
       // let semaphore1[1-3] to refresh lock on server1
       await delay(1000)
-      expect(await client1.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client1.zrange('semaphore:key', 0, -1), [
         semaphore11.identifier,
         semaphore12.identifier,
         semaphore13.identifier
@@ -467,7 +467,7 @@ describe('RedlockSemaphore', () => {
         3,
         timeoutOptions
       )
-      await expect(semaphore3.acquire()).to.be.rejectedWith(
+      await expect(semaphore3.acquire()).rejects.toThrow(
         'Acquire redlock-semaphore semaphore:key timeout'
       )
 
@@ -478,7 +478,7 @@ describe('RedlockSemaphore', () => {
 
       // let semaphore1[1-3] to refresh lock on server1
       await delay(1000)
-      expect(await client2.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client2.zrange('semaphore:key', 0, -1), [
         semaphore11.identifier,
         semaphore12.identifier,
         semaphore13.identifier
@@ -500,7 +500,7 @@ describe('RedlockSemaphore', () => {
         3,
         timeoutOptions
       )
-      await expect(semaphore4.acquire()).to.be.rejectedWith(
+      await expect(semaphore4.acquire()).rejects.toThrow(
         'Acquire redlock-semaphore semaphore:key timeout'
       )
 
@@ -511,7 +511,7 @@ describe('RedlockSemaphore', () => {
 
       // let semaphore1[1-3] to refresh lock on server1
       await delay(1000)
-      expect(await client3.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client3.zrange('semaphore:key', 0, -1), [
         semaphore11.identifier,
         semaphore12.identifier,
         semaphore13.identifier
@@ -526,8 +526,8 @@ describe('RedlockSemaphore', () => {
     }, 60000)
     it('should fail and release when quorum become dead', async () => {
       const onLockLostCallbacks = [1, 2, 3].map(() =>
-        sinon.spy(function (this: RedlockSemaphore) {
-          expect(this.isAcquired).to.be.false
+        vi.fn<(this: RedlockSemaphore, err: LostLockError) => void>(function (this: RedlockSemaphore) {
+          expect(this.isAcquired).toBe(false)
         })
       )
       const semaphores1 = [1, 2, 3].map(
@@ -539,17 +539,17 @@ describe('RedlockSemaphore', () => {
       )
       await Promise.all(semaphores1.map(s => s.acquire()))
 
-      expect(await client1.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client1.zrange('semaphore:key', 0, -1), [
         semaphores1[0].identifier,
         semaphores1[1].identifier,
         semaphores1[2].identifier
       ])
-      expect(await client2.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client2.zrange('semaphore:key', 0, -1), [
         semaphores1[0].identifier,
         semaphores1[1].identifier,
         semaphores1[2].identifier
       ])
-      expect(await client3.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client3.zrange('semaphore:key', 0, -1), [
         semaphores1[0].identifier,
         semaphores1[1].identifier,
         semaphores1[2].identifier
@@ -564,12 +564,14 @@ describe('RedlockSemaphore', () => {
       await delay(1000)
 
       for (const lostCb of onLockLostCallbacks) {
-        expect(lostCb).to.be.called
-        expect(lostCb.firstCall.firstArg instanceof LostLockError).to.be.true
+        expect(lostCb).toHaveBeenCalled()
+        expect(
+          lostCb.mock.calls[0][0] instanceof LostLockError
+        ).toBe(true)
       }
 
       // released lock on server3
-      expect(await client3.zrange('semaphore:key', 0, -1)).to.be.eql([])
+      expect(await client3.zrange('semaphore:key', 0, -1)).toEqual([])
 
       // semaphore2 will NOT be able to acquire the lock
 
@@ -579,7 +581,7 @@ describe('RedlockSemaphore', () => {
         3,
         timeoutOptions
       )
-      await expect(semaphore2.acquire()).to.be.rejectedWith(
+      await expect(semaphore2.acquire()).rejects.toThrow(
         'Acquire redlock-semaphore semaphore:key timeout'
       )
     }, 60000)

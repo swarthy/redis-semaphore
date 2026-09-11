@@ -1,11 +1,10 @@
-import { expect } from 'chai'
 import { Redis } from 'ioredis'
-import sinon from 'sinon'
 import LostLockError from '../../src/errors/LostLockError'
 import MultiSemaphore from '../../src/RedisMultiSemaphore'
 import Semaphore from '../../src/RedisSemaphore'
 import { TimeoutOptions } from '../../src/types'
 import { delay } from '../../src/utils/index'
+import { expectMembers } from '../assertions'
 import { client1 as client, clientMock1 as clientMock } from '../redisClient'
 import { downRedisServer, upRedisServer } from '../shell'
 import {
@@ -25,70 +24,70 @@ describe('MultiSemaphore', () => {
   it('should fail on invalid arguments', () => {
     expect(
       () => new MultiSemaphore(null as unknown as Redis, 'key', 5, 2)
-    ).to.throw('"client" is required')
-    expect(() => new MultiSemaphore(client, '', 5, 2)).to.throw(
+    ).toThrow('"client" is required')
+    expect(() => new MultiSemaphore(client, '', 5, 2)).toThrow(
       '"key" is required'
     )
     expect(
       () => new MultiSemaphore(client, 1 as unknown as string, 5, 2)
-    ).to.throw('"key" must be a string')
-    expect(() => new MultiSemaphore(client, 'key', 0, 2)).to.throw(
+    ).toThrow('"key" must be a string')
+    expect(() => new MultiSemaphore(client, 'key', 0, 2)).toThrow(
       '"limit" is required'
     )
     expect(
       () => new MultiSemaphore(client, 'key', '10' as unknown as number, 2)
-    ).to.throw('"limit" must be a number')
-    expect(() => new MultiSemaphore(client, 'key', 5, 0)).to.throw(
+    ).toThrow('"limit" must be a number')
+    expect(() => new MultiSemaphore(client, 'key', 5, 0)).toThrow(
       '"permits" is required'
     )
     expect(
       () => new MultiSemaphore(client, 'key', 5, '2' as unknown as number)
-    ).to.throw('"permits" must be a number')
+    ).toThrow('"permits" must be a number')
   })
   it('should acquire and release semaphore', async () => {
     const semaphore1 = new MultiSemaphore(client, 'key', 3, 2)
     const semaphore2 = new MultiSemaphore(client, 'key', 3, 1)
-    expect(semaphore1.isAcquired).to.be.false
-    expect(semaphore2.isAcquired).to.be.false
+    expect(semaphore1.isAcquired).toBe(false)
+    expect(semaphore2.isAcquired).toBe(false)
 
     await semaphore1.acquire()
-    expect(semaphore1.isAcquired).to.be.true
+    expect(semaphore1.isAcquired).toBe(true)
     await semaphore2.acquire()
-    expect(semaphore2.isAcquired).to.be.true
-    expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
+    expect(semaphore2.isAcquired).toBe(true)
+    expectMembers(await client.zrange('semaphore:key', 0, -1), [
       semaphore1.identifier + '_0',
       semaphore1.identifier + '_1',
       semaphore2.identifier + '_0'
     ])
 
     await semaphore1.release()
-    expect(semaphore1.isAcquired).to.be.false
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+    expect(semaphore1.isAcquired).toBe(false)
+    expect(await client.zrange('semaphore:key', 0, -1)).toEqual([
       semaphore2.identifier + '_0'
     ])
     await semaphore2.release()
-    expect(semaphore2.isAcquired).to.be.false
-    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+    expect(semaphore2.isAcquired).toBe(false)
+    expect(await client.zcard('semaphore:key')).toEqual(0)
   })
   it('should reject after timeout', async () => {
     const semaphore1 = new MultiSemaphore(client, 'key', 3, 3, timeoutOptions)
     const semaphore2 = new MultiSemaphore(client, 'key', 3, 1, timeoutOptions)
     await semaphore1.acquire()
-    await expect(semaphore2.acquire()).to.be.rejectedWith(
+    await expect(semaphore2.acquire()).rejects.toThrow(
       'Acquire multi-semaphore semaphore:key timeout'
     )
     await semaphore1.release()
-    expect(await client.get('semaphore:key')).to.be.eql(null)
+    expect(await client.get('semaphore:key')).toEqual(null)
   })
   it('should abort when the given signal is aborted', async () => {
     const semaphore1 = new MultiSemaphore(client, 'key', 3, 3, timeoutOptions)
     const semaphore2 = new MultiSemaphore(client, 'key', 3, 1, timeoutOptions)
     await semaphore1.acquire()
-    await expect(semaphore2.acquire(AbortSignal.timeout(10))).to.be.rejectedWith(
+    await expect(semaphore2.acquire(AbortSignal.timeout(10))).rejects.toThrow(
       'The operation was aborted due to timeout'
     )
     await semaphore1.release()
-    expect(await client.get('semaphore:key')).to.be.eql(null)
+    expect(await client.get('semaphore:key')).toEqual(null)
   })
   it('should refresh lock every refreshInterval ms until release', async () => {
     const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
@@ -96,17 +95,17 @@ describe('MultiSemaphore', () => {
     await semaphore1.acquire()
     await semaphore2.acquire()
     await delay(400)
-    expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
+    expectMembers(await client.zrange('semaphore:key', 0, -1), [
       semaphore1.identifier + '_0',
       semaphore1.identifier + '_1',
       semaphore2.identifier + '_0'
     ])
     await semaphore1.release()
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+    expect(await client.zrange('semaphore:key', 0, -1)).toEqual([
       semaphore2.identifier + '_0'
     ])
     await semaphore2.release()
-    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+    expect(await client.zcard('semaphore:key')).toEqual(0)
   })
   it('should stop refreshing lock if stopped', async () => {
     const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
@@ -115,12 +114,12 @@ describe('MultiSemaphore', () => {
     await semaphore2.acquire()
     await semaphore1.stopRefresh()
     await delay(400)
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+    expect(await client.zrange('semaphore:key', 0, -1)).toEqual([
       semaphore2.identifier + '_0'
     ])
     await semaphore2.stopRefresh()
     await delay(400)
-    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+    expect(await client.zcard('semaphore:key')).toEqual(0)
   })
   it('should acquire maximum LIMIT semaphores', async () => {
     const s = () =>
@@ -135,14 +134,13 @@ describe('MultiSemaphore', () => {
     const pr2 = Promise.all([s().acquire(), s().acquire(), s().acquire()])
     await pr1
     const ids1 = await client.zrange('semaphore:key', 0, -1)
-    expect(ids1.length).to.be.eql(3)
+    expect(ids1.length).toEqual(3)
     await pr2
     const ids2 = await client.zrange('semaphore:key', 0, -1)
-    expect(ids2.length).to.be.eql(3)
-    expect(ids2)
-      .to.not.include(ids1[0])
-      .and.not.include(ids1[1])
-      .and.not.include(ids1[2])
+    expect(ids2.length).toEqual(3)
+    expect(ids2).not.toContain(ids1[0])
+    expect(ids2).not.toContain(ids1[1])
+    expect(ids2).not.toContain(ids1[2])
   })
   it('should support externally acquired semaphore (deprecated interface)', async () => {
     const externalSemaphore = new MultiSemaphore(client, 'key', 3, 2, {
@@ -156,12 +154,12 @@ describe('MultiSemaphore', () => {
     await externalSemaphore.acquire()
     await localSemaphore.acquire()
     await delay(400)
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+    expect(await client.zrange('semaphore:key', 0, -1)).toEqual([
       localSemaphore.identifier + '_0',
       localSemaphore.identifier + '_1'
     ])
     await localSemaphore.release()
-    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+    expect(await client.zcard('semaphore:key')).toEqual(0)
   })
   it('should support externally acquired semaphore', async () => {
     const externalSemaphore = new MultiSemaphore(client, 'key', 3, 2, {
@@ -176,12 +174,12 @@ describe('MultiSemaphore', () => {
     await externalSemaphore.acquire()
     await localSemaphore.acquire()
     await delay(400)
-    expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+    expect(await client.zrange('semaphore:key', 0, -1)).toEqual([
       localSemaphore.identifier + '_0',
       localSemaphore.identifier + '_1'
     ])
     await localSemaphore.release()
-    expect(await client.zcard('semaphore:key')).to.be.eql(0)
+    expect(await client.zcard('semaphore:key')).toEqual(0)
   })
   describe('lost lock case', () => {
     beforeEach(() => {
@@ -204,20 +202,20 @@ describe('MultiSemaphore', () => {
         'ccc'
       )
       await delay(200)
-      expect(unhandledRejectionSpy).to.be.called
-      expect(unhandledRejectionSpy.firstCall.firstArg instanceof LostLockError)
-        .to.be.true
+      expect(unhandledRejectionSpy).toHaveBeenCalled()
+      expect(unhandledRejectionSpy.mock.calls[0][0] instanceof LostLockError)
+        .toBe(true)
     })
     it('should call onLockLost callback if provided', async () => {
-      const onLockLostCallback = sinon.spy(function (this: MultiSemaphore) {
-        expect(this.isAcquired).to.be.false
+      const onLockLostCallback = vi.fn<(this: MultiSemaphore, err: LostLockError) => void>(function (this: MultiSemaphore) {
+        expect(this.isAcquired).toBe(false)
       })
       const semaphore = new MultiSemaphore(client, 'key', 3, 2, {
         ...timeoutOptions,
         onLockLost: onLockLostCallback
       })
       await semaphore.acquire()
-      expect(semaphore.isAcquired).to.be.true
+      expect(semaphore.isAcquired).toBe(true)
       await client.del('semaphore:key')
       await client.zadd(
         'semaphore:key',
@@ -229,11 +227,12 @@ describe('MultiSemaphore', () => {
         'ccc'
       )
       await delay(200)
-      expect(semaphore.isAcquired).to.be.false
-      expect(unhandledRejectionSpy).to.not.called
-      expect(onLockLostCallback).to.be.called
-      expect(onLockLostCallback.firstCall.firstArg instanceof LostLockError).to
-        .be.true
+      expect(semaphore.isAcquired).toBe(false)
+      expect(unhandledRejectionSpy).not.toHaveBeenCalled()
+      expect(onLockLostCallback).toHaveBeenCalled()
+      expect(
+        onLockLostCallback.mock.calls[0][0] instanceof LostLockError
+      ).toBe(true)
     })
   })
   describe('reusable', () => {
@@ -306,7 +305,7 @@ describe('MultiSemaphore', () => {
       await delay(80)
       await semaphore2.acquire()
       // [2/2]
-      await expect(semaphore3.acquire()).to.be.rejectedWith(
+      await expect(semaphore3.acquire()).rejects.toThrow(
         'Acquire multi-semaphore semaphore:key timeout'
       ) // rejectes after 10ms
 
@@ -338,23 +337,23 @@ describe('MultiSemaphore', () => {
       const semaphore2 = new Semaphore(client, 'key', 3, timeoutOptions)
       await multiSemaphore1.acquire()
       await semaphore1.acquire()
-      expect(await client.zrange('semaphore:key', 0, -1)).to.have.members([
+      expectMembers(await client.zrange('semaphore:key', 0, -1), [
         multiSemaphore1.identifier + '_0',
         multiSemaphore1.identifier + '_1',
         semaphore1.identifier
       ])
-      await expect(multiSemaphore2.acquire()).to.be.rejectedWith(
+      await expect(multiSemaphore2.acquire()).rejects.toThrow(
         'Acquire multi-semaphore semaphore:key timeout'
       )
-      await expect(semaphore2.acquire()).to.be.rejectedWith(
+      await expect(semaphore2.acquire()).rejects.toThrow(
         'Acquire semaphore semaphore:key timeout'
       )
       await multiSemaphore1.release()
-      expect(await client.zrange('semaphore:key', 0, -1)).to.be.eql([
+      expect(await client.zrange('semaphore:key', 0, -1)).toEqual([
         semaphore1.identifier
       ])
       await semaphore1.release()
-      expect(await client.zcard('semaphore:key')).to.be.eql(0)
+      expect(await client.zcard('semaphore:key')).toEqual(0)
     })
   })
   describe('[Node shutdown]', () => {
@@ -366,8 +365,8 @@ describe('MultiSemaphore', () => {
       await upRedisServer(1)
     })
     it('should lost lock when node become alive', async () => {
-      const onLockLostCallback = sinon.spy(function (this: Semaphore) {
-        expect(this.isAcquired).to.be.false
+      const onLockLostCallback = vi.fn<(this: Semaphore, err: LostLockError) => void>(function (this: Semaphore) {
+        expect(this.isAcquired).toBe(false)
       })
       const semaphore1 = new MultiSemaphore(client, 'key', 3, 2, {
         ...timeoutOptions,
@@ -390,15 +389,15 @@ describe('MultiSemaphore', () => {
 
       const data1 = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
       // console.log(data)
-      expect(data1).to.be.eql([])
+      expect(data1).toEqual([])
 
       // lock was not refreshed by semaphore1, so semaphore2 can acquire the lock
 
       const semaphore2 = new MultiSemaphore(client, 'key', 3, 2, timeoutOptions)
       await semaphore2.acquire()
       const data2 = await client.zrange('semaphore:key', 0, -1, 'WITHSCORES')
-      expect(data2).to.include(semaphore2.identifier + '_0')
-      expect(data2).to.include(semaphore2.identifier + '_1')
+      expect(data2).toContain(semaphore2.identifier + '_0')
+      expect(data2).toContain(semaphore2.identifier + '_1')
 
       await Promise.all([semaphore1.release(), semaphore2.release()])
     }, 60000)
@@ -407,27 +406,27 @@ describe('MultiSemaphore', () => {
     it('should acquire and release semaphore', async () => {
       const semaphore1 = new MultiSemaphore(clientMock, 'key', 3, 2)
       const semaphore2 = new MultiSemaphore(clientMock, 'key', 3, 1)
-      expect(semaphore1.isAcquired).to.be.false
-      expect(semaphore2.isAcquired).to.be.false
+      expect(semaphore1.isAcquired).toBe(false)
+      expect(semaphore2.isAcquired).toBe(false)
 
       await semaphore1.acquire()
-      expect(semaphore1.isAcquired).to.be.true
+      expect(semaphore1.isAcquired).toBe(true)
       await semaphore2.acquire()
-      expect(semaphore2.isAcquired).to.be.true
-      expect(await clientMock.zrange('semaphore:key', 0, -1)).to.have.members([
+      expect(semaphore2.isAcquired).toBe(true)
+      expectMembers(await clientMock.zrange('semaphore:key', 0, -1), [
         semaphore1.identifier + '_0',
         semaphore1.identifier + '_1',
         semaphore2.identifier + '_0'
       ])
 
       await semaphore1.release()
-      expect(semaphore1.isAcquired).to.be.false
-      expect(await clientMock.zrange('semaphore:key', 0, -1)).to.be.eql([
+      expect(semaphore1.isAcquired).toBe(false)
+      expect(await clientMock.zrange('semaphore:key', 0, -1)).toEqual([
         semaphore2.identifier + '_0'
       ])
       await semaphore2.release()
-      expect(semaphore2.isAcquired).to.be.false
-      expect(await clientMock.zcard('semaphore:key')).to.be.eql(0)
+      expect(semaphore2.isAcquired).toBe(false)
+      expect(await clientMock.zcard('semaphore:key')).toEqual(0)
     })
   })
 })
