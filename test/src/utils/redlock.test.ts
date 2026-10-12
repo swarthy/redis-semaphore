@@ -1,20 +1,18 @@
-import { expect } from 'chai'
-
 import { getQuorum } from '../../../src/utils/redlock'
 
 describe('redlockMutex utils', () => {
   describe('getQuorum', () => {
     function makeTest(count: number, expectedResult: number) {
       it(`should return valid majority for ${count} nodes`, () => {
-        expect(getQuorum(count)).to.be.eql(expectedResult)
-        expect(getQuorum(2)).to.be.eql(2)
-        expect(getQuorum(3)).to.be.eql(2)
-        expect(getQuorum(4)).to.be.eql(3)
-        expect(getQuorum(5)).to.be.eql(3)
-        expect(getQuorum(6)).to.be.eql(4)
-        expect(getQuorum(7)).to.be.eql(4)
-        expect(getQuorum(8)).to.be.eql(5)
-        expect(getQuorum(9)).to.be.eql(5)
+        expect(getQuorum(count)).toEqual(expectedResult)
+        expect(getQuorum(2)).toEqual(2)
+        expect(getQuorum(3)).toEqual(2)
+        expect(getQuorum(4)).toEqual(3)
+        expect(getQuorum(5)).toEqual(3)
+        expect(getQuorum(6)).toEqual(4)
+        expect(getQuorum(7)).toEqual(4)
+        expect(getQuorum(8)).toEqual(5)
+        expect(getQuorum(9)).toEqual(5)
       })
     }
     // makeTest(0, 1)

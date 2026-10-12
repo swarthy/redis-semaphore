@@ -1,4 +1,4 @@
-import { createEval } from '../../utils/index'
+import { createEval } from '../../utils/index.js'
 
 export const refreshLua = createEval<
   [string, number, string, number, number],

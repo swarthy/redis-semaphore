@@ -1,5 +1,5 @@
-import LostLockError from './errors/LostLockError'
-import { Lock } from './Lock'
+import LostLockError from './errors/LostLockError.js'
+import { Lock } from './Lock.js'
 
 import type * as ioredis from 'ioredis'
 

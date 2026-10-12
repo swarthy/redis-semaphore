@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import createDebug from 'debug'
-import { RedisClient } from '../types'
-import { getConnectionName } from './index'
+import { RedisClient } from '../types.js'
+import { getConnectionName } from './index.js'
 
 const debug = createDebug('redis-semaphore:eval')
 
@@ -27,16 +27,18 @@ export default function createEval<Args extends Array<number | string>, Result>(
     const evalSHAArgs = [sha1, keysCount, ...args]
     debug(connectionName, sha1, 'attempt, args:', evalSHAArgs)
     try {
-      return (await client.evalsha(sha1, keysCount, ...args)) as Promise<Result>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Result is caller-supplied and unrelated to the untyped eval return
+      return (await client.evalsha(sha1, keysCount, ...args)) as Result
     } catch (err) {
       if (err instanceof Error && isNoScriptError(err)) {
         const evalArgs = [script, keysCount, ...args]
         debug(connectionName, sha1, 'fallback to eval, args:', evalArgs)
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Result is caller-supplied and unrelated to the untyped eval return
         return (await client.eval(
           script,
           keysCount,
           ...args
-        )) as Promise<Result>
+        )) as Result
       } else {
         throw err
       }

@@ -1,18 +1,25 @@
 {
   "name": "redis-semaphore",
-  "version": "5.8.0",
+  "version": "6.0.0",
   "description": "Distributed mutex and semaphore based on Redis",
+  "type": "module",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
   "scripts": {
-    "lint": "eslint --ext .js,.ts .",
-    "test": "mocha",
-    "test-ci-with-coverage": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
-    "coverage-html": "nyc mocha && nyc report --reporter=html",
-    "converalls": "nyc mocha && nyc report --reporter=text-lcov | coveralls",
-    "dev": "mocha -w",
-    "build": "yarn build-commonjs",
-    "build-commonjs": "rm -rf lib && yarn tsc -b tsconfig.build-commonjs.json",
-    "build-es": "rm -rf es && yarn tsc -b tsconfig.build-es.json",
+    "lint": "oxlint --type-aware .",
+    "test": "vitest run",
+    "test-ci-with-coverage": "vitest run --coverage && cat coverage/lcov.info | coveralls",
+    "coverage-html": "vitest run --coverage",
+    "converalls": "vitest run --coverage && cat coverage/lcov.info | coveralls",
+    "dev": "vitest",
+    "build": "rm -rf lib && yarn tsc -b tsconfig.build.json",
     "preversion": "yarn lint && yarn test && yarn build"
   },
   "repository": {
@@ -29,37 +36,23 @@
   "license": "MIT",
   "devDependencies": {
     "@swarthy/wait-for": "^2.1.1",
-    "@swc-node/register": "1.10.10",
-    "@swc/core": "1.11.11",
-    "@types/chai": "^4.3.20",
-    "@types/chai-as-promised": "^7.1.8",
-    "@types/debug": "^4.1.12",
-    "@types/ioredis-mock": "^8.2.5",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "22.13.11",
-    "@types/sinon": "^17.0.4",
-    "@types/sinon-chai": "^3.2.12",
-    "@typescript-eslint/eslint-plugin": "8.27.0",
-    "@typescript-eslint/parser": "8.27.0",
+    "@types/debug": "^4.1.13",
+    "@types/ioredis-mock": "^8.2.8",
+    "@types/node": "22.20.2",
+    "@vitest/coverage-v8": "5.0.0",
     "benchmark": "^2.1.4",
-    "chai": "4.5.0",
-    "chai-as-promised": "7.1.2",
     "coveralls": "^3.1.1",
-    "eslint": "9.23.0",
-    "eslint-plugin-node": "11.1.0",
     "ioredis": "6.0.0",
-    "ioredis-mock": "8.9.0",
-    "mocha": "11.1.0",
-    "mocha-lcov-reporter": "^1.3.0",
-    "nyc": "^17.1.0",
-    "sinon": "19.0.4",
-    "sinon-chai": "3.7.0",
-    "snyk": "1.1296.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "ioredis-mock": "8.13.1",
+    "oxlint": "1.82.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "snyk": "1.1307.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.0",
+    "vitest": "5.0.0"
   },
   "engines": {
-    "node": ">= 14.17.0"
+    "node": ">=22.12.0"
   },
   "peerDependencies": {
     "ioredis": "^4.1.0 || ^5 || ^6"
@@ -70,10 +63,7 @@
     }
   },
   "dependencies": {
-    "debug": "^4.4.0"
-  },
-  "resolutions": {
-    "ioredis": "6.0.0"
+    "debug": "^4.4.3"
   },
   "packageManager": "yarn@4.1.0+sha256.81a00df816059803e6b5148acf03ce313cad36b7f6e5af6efa040a15981a6ffb",
   "files": [

@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": ["lib", "coverage"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "typescript/explicit-function-return-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-misused-promises": "off",
+    "typescript/require-await": "off",
+    "no-unused-expressions": "off",
+    "no-underscore-dangle": "off",
+    "no-shadow": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "vitest/expect-expect": "off",
+    "typescript/no-unnecessary-type-conversion": "off",
+    "typescript/no-unnecessary-type-parameters": "off"
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.ts"],
+      "rules": {
+        "typescript/no-explicit-any": "off",
+        "typescript/explicit-function-return-type": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/await-thenable": "off"
+      }
+    }
+  ]
+}

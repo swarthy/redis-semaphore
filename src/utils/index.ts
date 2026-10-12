@@ -1,5 +1,5 @@
-import { RedisClient } from '../types'
-import createEval from './createEval'
+import { RedisClient } from '../types.js'
+import createEval from './createEval.js'
 
 export { createEval }
 
@@ -12,7 +12,7 @@ export function delay(ms: number, signal?: AbortSignal): Promise<void> {
 
     const onAbort = (): void => {
       cleanup();
-      reject(signal!.reason as Error);
+      reject(signal!.reason);
     };
 
     const cleanup = (): void => {

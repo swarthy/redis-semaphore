@@ -1,9 +1,9 @@
 import createDebug from 'debug'
-import { acquireLua } from '../multiSemaphore/acquire/lua'
-import { refreshLua } from '../multiSemaphore/refresh/lua'
-import { releaseLua } from '../multiSemaphore/release/lua'
-import { RedisClient } from '../types'
-import { getQuorum, smartSum } from '../utils/redlock'
+import { acquireLua } from '../multiSemaphore/acquire/lua.js'
+import { refreshLua } from '../multiSemaphore/refresh/lua.js'
+import { releaseLua } from '../multiSemaphore/release/lua.js'
+import { RedisClient } from '../types.js'
+import { getQuorum, smartSum } from '../utils/redlock.js'
 
 const debug = createDebug('redis-semaphore:redlock-semaphore:refresh')
 

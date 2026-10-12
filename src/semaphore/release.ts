@@ -1,5 +1,5 @@
 import createDebug from 'debug'
-import { RedisClient } from '../types'
+import { RedisClient } from '../types.js'
 
 const debug = createDebug('redis-semaphore:semaphore:release')
 

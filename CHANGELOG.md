@@ -1,3 +1,16 @@
+### redis-semaphore@6.0.0
+
+- **Breaking change:** Minimum supported Node.js version raised to `>= 22.12.0`
+- **Breaking change:** `lib/` now ships pure ESM instead of CommonJS (`"type": "module"`). `main`/`exports` still point at `lib/index.js`, so plain `require('redis-semaphore')` / `import ... from 'redis-semaphore'` keep working unchanged on Node.js >= 22.12, which supports requiring synchronous ESM graphs unflagged. Only code relying on CommonJS-specific behavior of a deep `require()` into individual files under `lib/` (e.g. mutating `module.exports`) could be affected
+- Updated all dependencies and devDependencies to their latest versions
+- Raised TypeScript build target to `ES2022`
+- Migrated the test suite from Mocha/nyc to Vitest
+- Replaced ESLint/typescript-eslint with [oxlint](https://oxc.rs/) (including type-aware linting via `oxlint-tsgolint`) for faster linting; no change for library consumers
+- Raised the development-only TypeScript version to 7.x, required by oxlint's type-aware linting
+- Removed `chai`, `chai-as-promised`, `sinon` and `sinon-chai` from the test suite in favor of Vitest's built-in `expect`/`vi` APIs; no change for library consumers
+- Fixed two incorrect internal type assertions found by oxlint's type-aware linting (no runtime behavior change)
+- CI now runs the test suite against `ioredis` `^4.1.0`, `^5` and `^6` (the full supported peer dependency range) in addition to the default version, to catch regressions for consumers on an older `ioredis` major
+
 ### redis-semaphore@5.8.0
 
 - Added `ioredis` v6 to the supported peer dependency range (`^4.1.0 || ^5 || ^6`)

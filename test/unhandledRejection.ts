@@ -1,14 +1,12 @@
-import sinon from 'sinon'
-
 function throwReason(reason: any) {
   console.log('unhandled rejection:', reason)
   throw reason
 }
 
-export const unhandledRejectionSpy = sinon.spy()
+export const unhandledRejectionSpy = vi.fn()
 
 export function catchUnhandledRejection() {
-  unhandledRejectionSpy.resetHistory()
+  unhandledRejectionSpy.mockClear()
   process.removeListener('unhandledRejection', throwReason)
   process.on('unhandledRejection', unhandledRejectionSpy)
 }

@@ -1,5 +1,3 @@
-import { expect } from 'chai'
-
 import {
   acquireSemaphore as acquire,
   Options
@@ -18,16 +16,16 @@ const opts = (id: string, overrides?: Partial<Options>): Options => ({
 describe('semaphore acquire', () => {
   it('should return true for success acquire', async () => {
     const result = await acquire(client, 'key', 1, opts('111'))
-    expect(result).to.be.true
+    expect(result).toBe(true)
   })
   it('should return false when timeout', async () => {
     const result1 = await acquire(client, 'key', 2, opts('111')) // expire after 100ms
     const result2 = await acquire(client, 'key', 2, opts('112')) // expire after 100ms
     const result3 = await acquire(client, 'key', 2, opts('113')) // timeout after 50ms
 
-    expect(result1).to.be.true
-    expect(result2).to.be.true
-    expect(result3).to.be.false
+    expect(result1).toBe(true)
+    expect(result2).toBe(true)
+    expect(result3).toBe(false)
   })
   it('should return false after acquireAttemptsLimit', async () => {
     const result1 = await acquire(client, 'key', 2, opts('111')) // expire after 100ms
@@ -42,8 +40,8 @@ describe('semaphore acquire', () => {
       })
     ) // no timeout, acquire limit = 1
 
-    expect(result1).to.be.true
-    expect(result2).to.be.true
-    expect(result3).to.be.false
+    expect(result1).toBe(true)
+    expect(result2).toBe(true)
+    expect(result3).toBe(false)
   })
 })

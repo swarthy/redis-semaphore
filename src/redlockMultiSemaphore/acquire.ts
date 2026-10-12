@@ -1,8 +1,8 @@
 import createDebug from 'debug'
-import { acquireLua } from '../multiSemaphore/acquire/lua'
-import { RedisClient } from '../types'
-import { delay } from '../utils'
-import { getQuorum, smartSum } from '../utils/redlock'
+import { acquireLua } from '../multiSemaphore/acquire/lua.js'
+import { RedisClient } from '../types.js'
+import { delay } from '../utils/index.js'
+import { getQuorum, smartSum } from '../utils/redlock.js'
 
 const debug = createDebug('redis-semaphore:redlock-multi-semaphore:acquire')
 

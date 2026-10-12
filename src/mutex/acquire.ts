@@ -1,6 +1,6 @@
 import createDebug from 'debug'
-import { RedisClient } from '../types'
-import { delay } from '../utils'
+import { RedisClient } from '../types.js'
+import { delay } from '../utils/index.js'
 
 const debug = createDebug('redis-semaphore:mutex:acquire')
 

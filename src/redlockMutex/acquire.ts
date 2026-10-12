@@ -1,8 +1,8 @@
 import createDebug from 'debug'
-import { delIfEqualLua } from '../mutex/release'
-import { RedisClient } from '../types'
-import { delay } from '../utils'
-import { getQuorum, smartSum } from '../utils/redlock'
+import { delIfEqualLua } from '../mutex/release.js'
+import { RedisClient } from '../types.js'
+import { delay } from '../utils/index.js'
+import { getQuorum, smartSum } from '../utils/redlock.js'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:acquire')
 

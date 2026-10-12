@@ -24,6 +24,8 @@ npm install --save redis-semaphore ioredis
 yarn add redis-semaphore ioredis
 ```
 
+Requires Node.js >= 22.12. The package ships as pure ESM (`import`); CommonJS projects can still `require()` it as-is, relying on Node's native [support for requiring synchronous ESM graphs](https://nodejs.org/api/modules.html#loading-ecmascript-modules-using-require) (unflagged since Node 22.12).
+
 ioredis is the officially supported Redis client. This library's test code runs on it.
 
 ioredis 4, 5 and 6 are all supported. The test suite runs against ioredis 6, which speaks RESP3 by default.

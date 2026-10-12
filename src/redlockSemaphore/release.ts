@@ -1,6 +1,6 @@
 import createDebug from 'debug'
 
-import type { RedisClient } from '../types'
+import type { RedisClient } from '../types.js'
 
 const debug = createDebug('redis-semaphore:redlock-mutex:release')
 
